@@ -1,16 +1,4 @@
-# =============================================================
-# SmartHealth AI - Vercel Serverless Entry Point
-# Author:      Enock Queenson Eduafo
-# Student ID:  11014444
-# Institution: University of Ghana (2026)
-# =============================================================
-
-from app import create_app
-
-# Vercel's Python runtime searches for a variable named 'app'
-# This is our production-ready WSGI application
-app = create_app()
-
-# This is NOT called by Vercel's serverless runtime
-if __name__ == '__main__':
-    app.run(debug=True)
+import sys, os
+d = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if d not in sys.path: sys.path.insert(0, d)
+from app.app import app

@@ -11,7 +11,7 @@ def run_git():
         for cmd in commands:
             f.write(f"Executing: {' '.join(cmd)}\n")
             try:
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+                result = subprocess.run(cmd, capture_output=True, text=True)
                 f.write(f"STDOUT:\n{result.stdout}\n")
                 f.write(f"STDERR:\n{result.stderr}\n")
                 f.write(f"RETURN CODE: {result.returncode}\n\n")
