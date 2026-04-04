@@ -42,14 +42,15 @@
         <svg class="logo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 5v14M5 12h14"></path>
         </svg>
-        <span>SmartHealth AI</span>
+        <span class="logo-text">SmartHealth AI</span>
       </a>
       
-      <div class="hamburger" id="hamburger">
+      <!-- Hamburger button - only visible on mobile -->
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
         <span></span>
         <span></span>
         <span></span>
-      </div>
+      </button>
 
       <ul class="nav-links" id="navLinks">
         <li><a href="/" class="{% if request.endpoint == 'index' %}active{% endif %}">Home</a></li>
@@ -72,12 +73,12 @@
           <svg class="logo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 5v14M5 12h14"></path>
           </svg>
-          <span>SmartHealth AI</span>
+          <span class="logo-text">SmartHealth AI</span>
         </a>
       </div>
       <p class="footer-disclaimer">Academic prototype. Not a substitute for clinical diagnosis. Always consult a qualified healthcare professional.</p>
       <div class="footer-bottom">
-        <p>&copy; 2026 Enock Queenson Eduafo — SmartHealth AI. Final Year Project, University of Ghana.</p>
+        <p class="footer-copy">&copy; 2026 Enock Queenson Eduafo (11014444) — SmartHealth AI. Final Year Project, University of Ghana. Supervisor: Professor Solomon Mensah</p>
       </div>
     </div>
   </footer>
@@ -91,8 +92,9 @@
       prog.style.width = pct + '%';
     });
 
-    // Floating background particles
-    for (let i = 0; i < 18; i++) {
+    // Floating background particles - Fewer on mobile
+    const particleCount = window.innerWidth < 768 ? 6 : 18;
+    for (let i = 0; i < particleCount; i++) {
       const p = document.createElement('div');
       p.className = 'particle';
       const size = Math.random() * 5 + 2;

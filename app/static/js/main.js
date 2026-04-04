@@ -1,24 +1,44 @@
 /**
  * SmartHealth AI - Main JavaScript
- * Author: Enock Queenson Eduafo
+ * Author: Enock Queenson Eduafo (11014444)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Mobile Hamburger Toggle
-    const hamburger = document.getElementById('hamburger');
-    const navLinks = document.getElementById('navLinks');
+    // 1. Mobile Hamburger Toggle - Fixed and Enhanced
+    const navToggle = document.getElementById('navToggle');
+    const navLinks  = document.getElementById('navLinks');
 
-    if (hamburger && navLinks) {
-        hamburger.addEventListener('click', () => {
+    if (navToggle && navLinks) {
+        navToggle.addEventListener('click', () => {
             navLinks.classList.toggle('open');
-            hamburger.classList.toggle('active');
+            navToggle.classList.toggle('open');
+            document.body.style.overflow = 
+                navLinks.classList.contains('open') ? 'hidden' : '';
+        });
+
+        // Close menu when clicking links
+        navLinks.querySelectorAll('a, .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('open');
+                navToggle.classList.remove('open');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                navLinks.classList.remove('open');
+                navToggle.classList.remove('open');
+                document.body.style.overflow = '';
+            }
         });
     }
 
     // 2. Navbar Scroll Effect (Blur & Border)
     const navbar = document.querySelector('.navbar');
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 80) {
+        if (window.scrollY > 50) {
             navbar.classList.add('scrolled');
         } else {
             navbar.classList.remove('scrolled');
@@ -26,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 3. IntersectionObserver for Bar Animations
-    // Targets: perf-fill, pbar-fill, bar-chart-fill, bc-fill, cv-bar-fill, cv-bf, mini-fill, mbar-f
     const barObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -34,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const width = bar.style.getPropertyValue('--w') || '0%';
                 bar.style.width = width;
                 
-                // Add overshoot animation if requested for specific elements
                 if (bar.classList.contains('bar-chart-fill')) {
                     bar.style.animation = 'barOvershoot 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
                 }
@@ -44,11 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, { threshold: 0.1 });
 
-    const bars = document.querySelectorAll('.perf-fill, .pbar-fill, .bar-chart-fill, .bc-fill, .cv-bar-fill, .cv-bf, .mini-fill, .mbar-f');
+    const bars = document.querySelectorAll('.perf-fill, .pbar-fill, .bar-chart-fill, .bc-fill, .cv-bar-fill, .cv-bf, .mini-fill, .mbar-f, .prob-bar-fill');
     bars.forEach(bar => barObserver.observe(bar));
 
     // 4. IntersectionObserver for Card Fade-in with Stagger
-    // Targets: disease-card, dis-card, step-card, step, metric-card, m-card
     const cardObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -58,16 +75,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, { threshold: 0.1 });
 
-    const cards = document.querySelectorAll('.disease-card, .dis-card, .step-card, .step, .metric-card, .m-card, .arch-card, .meth-card, .cv-card, .cm-card');
+    const cards = document.querySelectorAll('.disease-card, .dis-card, .step-card, .step, .metric-card, .m-card, .arch-card, .meth-card, .cv-card, .cm-card, .lim-card, .ethics-item');
     cards.forEach((card, i) => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(30px)';
-        card.style.transition = `all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) ${ (i % 3) * 0.15 }s`;
+        card.style.transition = `all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) ${ (i % 3) * 0.1 }s`;
         cardObserver.observe(card);
     });
 
-    // Handle "reveal" class for cards
-    document.querySelectorAll('.disease-card, .dis-card, .step-card, .step, .metric-card, .m-card, .arch-card, .meth-card, .cv-card, .cm-card').forEach(card => {
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
         const obs = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -77,11 +93,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-        obs.observe(card);
+        obs.observe(el);
     });
 
+    // Handle reveals
+    setInterval(() => {
+        document.querySelectorAll('.reveal').forEach(el => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        });
+    }, 100);
+
     // 5. IntersectionObserver for Count-up
-    // Targets: stat-number, stat-n, cv-score, cv-sc
     const countObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -95,16 +118,19 @@ document.addEventListener('DOMContentLoaded', () => {
     numbers.forEach(num => countObserver.observe(num));
 
     function animateCountUp(el) {
-        const target = parseFloat(el.getAttribute('data-target'));
+        const targetAttr = el.getAttribute('data-target');
+        if (!targetAttr) return;
+        
+        const target = parseFloat(targetAttr);
         const suffix = el.getAttribute('data-suffix') || '';
         const duration = 1500;
         const startTime = performance.now();
-        const isDecimal = el.getAttribute('data-target').includes('.');
+        const isDecimal = targetAttr.includes('.');
 
         function update(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            const easeProgress = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
             const currentVal = (easeProgress * target);
 
             el.innerHTML = (isDecimal ? currentVal.toFixed(1) : Math.floor(currentVal)) + suffix;
@@ -118,12 +144,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Custom Bar CSS Keyframe (injected)
-const style = document.createElement('style');
-style.textContent = `
+const styleNode = document.createElement('style');
+styleNode.textContent = `
     @keyframes barOvershoot {
         0% { width: 0; }
         70% { width: calc(var(--w) + 5%); }
         100% { width: var(--w); }
     }
 `;
-document.head.appendChild(style);
+document.head.appendChild(styleNode);

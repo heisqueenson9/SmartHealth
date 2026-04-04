@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="predict-header">
+<section class="predict-header pg-hdr">
   <div class="container header-content">
     <span class="tag">DIAGNOSIS ENGINE</span>
     <h1>Patient Biomarker Input</h1>
-    <p>Please enter the patient's biological markers obtained from recent clinical blood screenings. For the most accurate prediction, ensure all fields are correctly populated.</p>
+    <p>Please enter the patient's biological markers obtained from recent clinical blood screenings. Ensuring accuracy in all 24 fields is essential for reliable diagnostic predictions with SmartHealth AI.</p>
   </div>
 </section>
 
-<section class="predict-main">
-  <div class="container predict-grid">
+<section class="predict-main predict-body">
+  <div class="container predict-layout pred-layout">
     <!-- Form Panel -->
     <div class="form-panel">
       <!-- Section 1 - Select Classifier -->
       <section class="form-section">
-        <label class="section-label">Section 1 — Select Classifier</label>
-        <div class="model-selector">
+        <label class="section-label fsec-title">Section 1 — Select Classifier</label>
+        <div class="model-selector model-sel">
           <div class="mcard active" data-model="random_forest">
             <span class="best-badge">Best</span>
             <div class="mcard-icon">
@@ -59,186 +59,189 @@
 
       <!-- Section 2 - Quick Fill -->
       <section class="form-section">
-        <label class="section-label">Section 2 — Quick Fill</label>
-        <div class="preset-row">
+        <label class="section-label fsec-title">Section 2 — Quick Fill Presets</label>
+        <div class="preset-buttons preset-row">
           <button class="btn btn-ghost pbtn" data-preset="healthy">Healthy</button>
           <button class="btn btn-ghost pbtn" data-preset="diabetes">Diabetes</button>
           <button class="btn btn-ghost pbtn" data-preset="anemia">Anemia</button>
-          <button class="btn btn-ghost pbtn" data-preset="heart">Heart Disease</button>
-          <button class="btn btn-ghost pbtn" data-preset="thalassemia">Thalassemia</button>
+          <button class="btn btn-ghost pbtn" data-preset="heart">Cardiovascular</button>
+          <button class="btn btn-ghost pbtn" data-preset="thalassemia">Genetic</button>
         </div>
       </section>
 
       <!-- Section 3 - Biomarker Values -->
       <section class="form-section">
-        <label class="section-label">Section 3 — Biomarker Values <span class="sub-label">(Normalised 0.00 to 1.00)</span></label>
+        <label class="section-label fsec-title">Section 3 — Clinical Markers <span class="sub-label">(Scale: 0.00 – 1.00)</span></label>
         
         <div class="input-group">
-          <h4 class="group-title">Metabolic</h4>
-          <div class="input-grid">
-            <div class="input-field">
-              <label>Glucose</label>
-              <input type="number" class="biomarker-input" data-feature="Glucose" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+          <h4 class="group-title">Metabolic Indices</h4>
+          <div class="biomarker-group input-grid">
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Glucose</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Glucose" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>Insulin</label>
-              <input type="number" class="biomarker-input" data-feature="Insulin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Insulin</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Insulin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>BMI</label>
-              <input type="number" class="biomarker-input" data-feature="BMI" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">BMI</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="BMI" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>HbA1c</label>
-              <input type="number" class="biomarker-input" data-feature="HbA1c" step="0.0001" min="0" max="1" placeholder="0.0000"/>
-            </div>
-          </div>
-        </div>
-
-        <div class="input-group">
-          <h4 class="group-title">Cardiovascular</h4>
-          <div class="input-grid">
-            <div class="input-field">
-              <label>Cholesterol</label>
-              <input type="number" class="biomarker-input" data-feature="Cholesterol" step="0.0001" min="0" max="1" placeholder="0.0000"/>
-            </div>
-            <div class="input-field">
-              <label>LDL Cholesterol</label>
-              <input type="number" class="biomarker-input" data-feature="LDL Cholesterol" step="0.0001" min="0" max="1" placeholder="0.0000"/>
-            </div>
-            <div class="input-field">
-              <label>HDL Cholesterol</label>
-              <input type="number" class="biomarker-input" data-feature="HDL Cholesterol" step="0.0001" min="0" max="1" placeholder="0.0000"/>
-            </div>
-            <div class="input-field">
-              <label>Triglycerides</label>
-              <input type="number" class="biomarker-input" data-feature="Triglycerides" step="0.0001" min="0" max="1" placeholder="0.0000"/>
-            </div>
-            <div class="input-field">
-              <label>Systolic BP</label>
-              <input type="number" class="biomarker-input" data-feature="Systolic Blood Pressure" step="0.0001" min="0" max="1" placeholder="0.0000"/>
-            </div>
-            <div class="input-field">
-              <label>Diastolic BP</label>
-              <input type="number" class="biomarker-input" data-feature="Diastolic Blood Pressure" step="0.0001" min="0" max="1" placeholder="0.0000"/>
-            </div>
-            <div class="input-field">
-              <label>Heart Rate</label>
-              <input type="number" class="biomarker-input" data-feature="Heart Rate" step="0.0001" min="0" max="1" placeholder="0.0000"/>
-            </div>
-            <div class="input-field">
-              <label>Troponin</label>
-              <input type="number" class="biomarker-input" data-feature="Troponin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">HbA1c</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="HbA1c" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
           </div>
         </div>
 
         <div class="input-group">
-          <h4 class="group-title">Blood Panel</h4>
-          <div class="input-grid">
-            <div class="input-field">
-              <label>Hemoglobin</label>
-              <input type="number" class="biomarker-input" data-feature="Hemoglobin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+          <h4 class="group-title">Cardiovascular Metrics</h4>
+          <div class="biomarker-group input-grid">
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Total Cholesterol</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Cholesterol" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>Platelets</label>
-              <input type="number" class="biomarker-input" data-feature="Platelets" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">LDL Cholesterol</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="LDL Cholesterol" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>White Blood Cells</label>
-              <input type="number" class="biomarker-input" data-feature="White Blood Cells" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">HDL Cholesterol</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="HDL Cholesterol" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>Red Blood Cells</label>
-              <input type="number" class="biomarker-input" data-feature="Red Blood Cells" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Triglycerides</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Triglycerides" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>Hematocrit</label>
-              <input type="number" class="biomarker-input" data-feature="Hematocrit" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Systolic BP</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Systolic Blood Pressure" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>MCV</label>
-              <input type="number" class="biomarker-input" data-feature="Mean Corpuscular Volume" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Diastolic BP</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Diastolic Blood Pressure" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>MCH</label>
-              <input type="number" class="biomarker-input" data-feature="Mean Corpuscular Hemoglobin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Heart Rate</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Heart Rate" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>MCHC</label>
-              <input type="number" class="biomarker-input" data-feature="Mean Corpuscular Hemoglobin Concentration" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Cardiac Troponin</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Troponin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
           </div>
         </div>
 
         <div class="input-group">
-          <h4 class="group-title">Hepatic and Renal</h4>
-          <div class="input-grid">
-            <div class="input-field">
-              <label>ALT</label>
-              <input type="number" class="biomarker-input" data-feature="ALT" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+          <h4 class="group-title">Hematology Panel</h4>
+          <div class="biomarker-group input-grid">
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Hemoglobin</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Hemoglobin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>AST</label>
-              <input type="number" class="biomarker-input" data-feature="AST" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Platelet Count</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Platelets" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>Creatinine</label>
-              <input type="number" class="biomarker-input" data-feature="Creatinine" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">WBC Count</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="White Blood Cells" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
-            <div class="input-field">
-              <label>C-reactive Protein</label>
-              <input type="number" class="biomarker-input" data-feature="C-reactive Protein" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Red Blood Cells</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Red Blood Cells" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Hematocrit (%)</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Hematocrit" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">MCV</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Mean Corpuscular Volume" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">MCH</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Mean Corpuscular Hemoglobin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">MCHC</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Mean Corpuscular Hemoglobin Concentration" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <h4 class="group-title">Liver & Kidney Assessment</h4>
+          <div class="biomarker-group input-grid">
+            <div class="bm-row">
+              <label class="input-label bm-lbl">ALT Enzyme</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="ALT" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">AST Enzyme</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="AST" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">Creatinine</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="Creatinine" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="bm-row">
+              <label class="input-label bm-lbl">C-Reactive Protein</label>
+              <input type="number" class="biomarker-input bm-input" data-feature="C-reactive Protein" step="0.0001" min="0" max="1" placeholder="0.0000"/>
             </div>
           </div>
         </div>
       </section>
 
-      <button id="predictBtn" class="btn btn-primary full-width">Run Diagnosis Engine</button>
+      <button id="predictBtn" class="btn btn-primary full-width btn-predict btn-pred">Run Clinical Diagnosis Engine</button>
     </div>
 
     <!-- Result Panel -->
-    <div class="result-panel">
-      <div id="resultEmpty" class="panel-state">
+    <div class="result-panel res-panel">
+      <!-- Empty State -->
+      <div id="resultEmpty" class="panel-state result-empty res-empty">
         <div class="panel-icon">
           <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         </div>
-        <h3>Ready to Analyse</h3>
-        <p>Complete the patient data form on the left and click "Run Diagnosis" to receive medical insights.</p>
+        <h3>Analysis Pending</h3>
+        <p>Complete the patient data form and click the button to start the predictive inference engine.</p>
       </div>
 
+      <!-- Loading State -->
       <div id="resultLoading" class="panel-state" style="display:none">
         <div class="spinner"></div>
         <h3>Analysing Markers...</h3>
-        <p>Running multi-class classifier on biomarker data.</p>
+        <p>Identifying diagnostic patterns in clinical biomarkers.</p>
       </div>
 
-      <div id="resultContent" style="display:none">
+      <!-- Content State -->
+      <div id="resultContent" class="result-content res-content" style="display:none">
         <div class="result-top">
           <div id="resultDot" class="status-indicator"></div>
           <div class="res-meta">
-            <span class="res-tag">PREDICTION RESULT</span>
-            <div id="confidenceBadge" class="confidence-val">0.0%</div>
+            <span class="res-tag">SMARTHEALTH AI PREDICTION</span>
+            <div id="confidenceBadge" class="confidence-badge conf-badge">0.0% Confidence</div>
           </div>
         </div>
 
         <div id="resultDiseaseCard" class="disease-res-card">
           <div id="rdiseaseIcon" class="res-icon"></div>
-          <h2 id="rdiseaseName">Result</h2>
-          <p id="rdiseaseDesc">Description here...</p>
+          <h2 id="rdiseaseName" class="rdisease-name rdis-name">Result</h2>
+          <p id="rdiseaseDesc" class="rdisease-desc rdis-desc">Clinical description will appear here.</p>
         </div>
 
         <div class="res-section">
-          <label class="section-label">Probability Distribution</label>
+          <label class="section-label">Prediction Probabilities</label>
           <div id="probBars" class="prob-bars-container"></div>
         </div>
 
         <div class="res-section">
-          <label class="section-label">Clinical Recommendations</label>
+          <label class="section-label">Care Recommendations</label>
           <ul id="recoList" class="reco-list"></ul>
         </div>
 
-        <button id="resetBtn" class="btn btn-ghost full-width">New Diagnosis</button>
+        <button id="resetBtn" class="btn btn-ghost full-width">Perform New Diagnosis</button>
       </div>
     </div>
   </div>
