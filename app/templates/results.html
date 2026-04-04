@@ -1,0 +1,160 @@
+<!--
+  SmartHealth AI
+  Author: Enock Queenson Eduafo | Student ID: 11014444
+  University of Ghana - Department of Computer Science
+  Information Technology | Supervisor: Prof. Solomon Mensah
+  2026
+-->
+{% extends "base.html" %}
+{% block title %}Model Comparison & Results — SmartHealth AI Analysis{% endblock %}
+
+{% block content %}
+<section class="page-header" style="padding-top: 100px; text-align: center;">
+  <div class="container">
+    <span class="section-tag" style="animation: logoPulse 2s infinite;">TECHNICAL PERFORMANCE ANALYSIS</span>
+    <h1 class="hero-headline" style="margin-bottom: 0.5rem;">Diagnostic Model Evaluation</h1>
+    <p class="hero-sub" style="margin-inline: auto; max-width: 700px;">Evaluating classifier performance across the 2,837 clinical patient records used in my final year study. These results highlight architectural differences in predictive capability.</p>
+  </div>
+</section>
+
+<section class="results-body" style="padding: 4rem 0 8rem;">
+  <div class="container">
+    
+    <!-- ── ACCURACY COMPARISON ───────────────────────────────────────── -->
+    <div class="section-results card" style="margin-bottom: 6rem; background: rgba(197,231,16,0.02); border-color: rgba(197,231,16,0.15); padding: 4rem;">
+      <div class="results-grid" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 4rem; align-items: center;">
+        <div>
+           <span class="section-tag" style="margin-bottom: 1rem;">METRIC: F1 SCORE</span>
+           <h2 class="section-title">Classifiers Benchmark</h2>
+           <p style="margin-bottom: 2.5rem; color: rgba(255,255,255,0.7);">To account for imbalanced health data categories, I used the weighted F1 score as my primary metric. My analysis identifies the <strong style="color: var(--lime);">Random Forest</strong> as the most robust architecture for this clinical data domain.</p>
+           
+           <div class="bar-chart-container" style="display: flex; flex-direction: column; gap: 1.5rem;">
+             {% for m in models %}
+             <div class="bar-chart-row">
+               <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 800; margin-bottom: 0.5rem;">
+                 <span>{{ m.name }}</span>
+                 <span style="color: var(--lime);">{{ (m.f1_score * 100)|round(1) }}%</span>
+               </div>
+               <div class="bar-chart-track" style="height: 12px; background: rgba(255,255,255,0.05); border-radius: 50px; overflow: hidden;">
+                 <div class="bar-chart-fill" data-width="{{ m.f1_score * 100 }}%" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--dolive), var(--lime)); border-radius: 50px;"></div>
+               </div>
+             </div>
+             {% endfor %}
+           </div>
+        </div>
+        
+        <div style="position: relative;">
+           <!-- SVG Accuracy Chart Visualization -->
+           <svg viewBox="0 0 400 300" class="svg-accuracy-chart" style="width: 100%; filter: drop-shadow(0 0 10px rgba(197,231,16,0.2));">
+             <polyline points="0,280 400,280" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+             <polyline points="20,0 20,300" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+             <path class="chart-line" d="M20,280 L100,50 L180,60 L260,95 L340,160" fill="none" stroke="var(--lime)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+             <!-- Data points nodes -->
+             <circle cx="100" cy="50" r="6" fill="var(--lime)"/>
+             <circle cx="180" cy="60" r="6" fill="var(--lime)"/>
+             <circle cx="260" cy="95" r="6" fill="var(--lime)"/>
+             <circle cx="340" cy="160" r="6" fill="var(--lime)"/>
+             <text x="100" y="30" fill="var(--lime)" font-size="12" font-weight="900" text-anchor="middle">95.1%</text>
+             <text x="180" y="40" fill="var(--lime)" font-size="12" font-weight="900" text-anchor="middle">94.9%</text>
+             <text x="260" y="75" fill="var(--white)" font-size="12" font-weight="900" text-anchor="middle" opacity="0.6">92.6%</text>
+             <text x="340" y="140" fill="var(--white)" font-size="12" font-weight="900" text-anchor="middle" opacity="0.6">81.9%</text>
+           </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CROSS VALIDATION ──────────────────────────────────────────── -->
+    <div style="margin-bottom: 8rem;">
+      <div class="section-header" style="margin-bottom: 4rem;">
+        <span class="section-tag">VALIDATION ROBUSTNESS</span>
+        <h2 class="section-title">5 Fold Generalization Accuracy</h2>
+        <p class="section-sub">Cross validation (k=5) results demonstrating my models' ability to generalize to unseen clinical data across multiple random folds.</p>
+      </div>
+
+      <div class="cv-grid card-grid" style="grid-template-columns: repeat(4, 1fr);">
+        {% for m in models %}
+        <div class="cv-card flip-card" style="min-height: 250px;">
+          <div class="cv-card-inner flip-card-inner">
+            <div class="flip-front card" style="background: var(--card-bg); border-color: rgba(197,231,16,0.1); padding: 2rem; display: flex; flex-direction: column; justify-content: space-between;">
+               <div>
+                  <div style="font-size: 0.7rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em;">Mean CV</div>
+                  <div style="font-size: 2.2rem; font-weight: 900; color: var(--lime);">{{ (m.cv_mean * 100)|round(1) }}%</div>
+               </div>
+               <div style="font-weight: 800; font-size: 0.9rem; margin-top: 1rem;">{{ m.name }}</div>
+            </div>
+            <div class="flip-back card" style="background: var(--dolive); color: var(--white); padding: 2rem;">
+               <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 1rem;">Variation Analysis</div>
+               <div style="font-size: 0.85rem; line-height: 1.4;">Std Dev: &plusmn;{{ (m.cv_std * 100)|round(2) }}%</div>
+               <div style="font-size: 0.85rem; margin-top: 1rem; opacity: 0.8;">Highly stable performance across different patient cohorts.</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ── CONFUSION MATRICES ────────────────────────────────────────── -->
+    <div style="margin-bottom: 4rem;">
+      <div class="section-header" style="margin-bottom: 4rem;">
+        <span class="section-tag">ERROR DISTRIBUTION</span>
+        <h2 class="section-title">Confusion Matrix Visualizations</h2>
+        <p class="section-sub">Deep dive into specific classification errors. My system shows minimal cross-class leakage, specifically between Anemia and Thalassemia.</p>
+      </div>
+
+      <div class="cm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;">
+        {% for m in models %}
+        <div class="cm-card card" style="padding: 2.5rem; border-color: rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+           <h3 style="margin-bottom: 2rem; font-size: 1.1rem; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem;">{{ m.name }} Structure</h3>
+           <div class="cm-table-wrap" style="overflow-x: auto;">
+              <table class="cm-table" style="width: 100%; border-collapse: separate; border-spacing: 4px;">
+                 <thead>
+                   <tr>
+                     <th style="font-size: 0.6rem; color: rgba(255,255,255,0.3); text-align: left;">Predicted &rarr;</th>
+                     {% for cls in classes %}
+                     <th style="font-size: 0.5rem; color: rgba(255,255,255,0.4); text-transform: uppercase;">{{ cls[:6] }}</th>
+                     {% endfor %}
+                   </tr>
+                 </thead>
+                 <tbody>
+                   {% for row in m.confusion_matrix %}
+                   {% set i = loop.index0 %}
+                   <tr>
+                     <td style="font-size: 0.5rem; color: rgba(255,255,255,0.4); text-transform: uppercase; padding: 4px;">{{ classes[i][:6] }}</td>
+                     {% for val in row %}
+                     {% set j = loop.index0 %}
+                     <td 
+                       class="cm-cell {% if i == j %}cm-diag{% endif %}" 
+                       data-val="{{ val }}"
+                       style="padding: 0.5rem; text-align: center; font-family: monospace; font-size: 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.03);"
+                     >
+                       {{ val }}
+                     </td>
+                     {% endfor %}
+                   </tr>
+                   {% endfor %}
+                 </tbody>
+              </table>
+           </div>
+           <div style="margin-top: 1.5rem; display: flex; gap: 1rem; font-size: 0.7rem; color: rgba(255,255,255,0.4);">
+              <span>TP = Diagonal Cells</span>
+              <span>&bull;</span>
+              <span>Errors = Outer Cells</span>
+           </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ── FOOTER STATS ──────────────────────────────────────────────── -->
+    <div style="text-align: center; margin-top: 6rem; opacity: 0.6; font-size: 0.85rem;">
+      <p>Performance analysis conducted using Scikit-Learn 1.4.0 library under Python 3.12.</p>
+      <p>A University of Ghana Computer Science Final Year Project — Enock Queenson Eduafo (2026).</p>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/results.js') }}"></script>
+{% endblock %}

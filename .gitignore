@@ -1,0 +1,36 @@
+# SmartHealth AI - Enock Queenson Eduafo - 11014444
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# Virtual environment
+venv/
+env/
+
+# Environment variables
+.env
+.env.local
+
+# Trained model files (regenerate with src/train_models.py)
+models/*.pkl
+models/results_summary.json
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archives
+*.zip
+*.tar.gz
+
+# IDE files
+.vscode/settings.json
+.idea/

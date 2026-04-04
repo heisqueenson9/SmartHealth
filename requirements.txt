@@ -1,0 +1,11 @@
+# SmartHealth AI - Production Dependencies
+# Enock Queenson Eduafo | Student ID: 11014444
+# University of Ghana - Department of Computer Science
+# 2026
+
+flask>=3.0.0
+scikit-learn>=1.4.0
+pandas>=2.0.0
+numpy>=1.26.0
+joblib>=1.3.0
+gunicorn>=21.0.0

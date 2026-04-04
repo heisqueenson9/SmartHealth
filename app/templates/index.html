@@ -1,0 +1,189 @@
+<!--
+  SmartHealth AI
+  Author: Enock Queenson Eduafo | Student ID: 11014444
+  University of Ghana - Department of Computer Science
+  Information Technology | Supervisor: Prof. Solomon Mensah
+  2026
+-->
+{% extends "base.html" %}
+{% block title %}SmartHealth AI — Intelligent Disease Diagnosis Prototype{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO SECTION ─────────────────────────────────────────────────── -->
+<section class="hero">
+  <!-- Particle container for JS -->
+  <div class="hero-particles"></div>
+
+  <div class="container" style="display: contents;">
+    <div class="hero-left">
+      <div class="hero-badge">Machine Learning &bull; Healthcare System Prototype</div>
+      <h1 class="hero-headline">
+        INTELLIGENT<br>
+        <span class="hero-highlight glitch">HEALTH</span><br>
+        DIAGNOSIS
+      </h1>
+      <p class="hero-sub">
+        A clinical decision-support prototype built to identify patterns in clinical biomarkers across
+        six disease conditions — using modernized machine learning algorithms trained for educational accuracy.
+      </p>
+      
+      <div class="hero-actions">
+        <a href="/predict" class="btn-primary">Run a Diagnosis</a>
+        <a href="/results" class="btn-ghost">View Model Results</a>
+      </div>
+      
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-number">95.1%</span>
+          <span class="stat-label">Model Accuracy</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">4</span>
+          <span class="stat-label">ML Classifiers</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">6</span>
+          <span class="stat-label">Diagnoses</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">24</span>
+          <span class="stat-label">Biomarkers</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="hero-right">
+      <div class="hero-visual">
+        <!-- Rotating ring behind the drawing -->
+        <div class="gradient-ring"></div>
+        
+        <svg viewBox="0 0 420 480" fill="none" class="hero-svg">
+          <!-- Background glow circles -->
+          <circle cx="210" cy="240" r="190" fill="#C5E710" opacity="0.08"/>
+          <circle cx="210" cy="240" r="140" fill="#C5E710" opacity="0.06"/>
+
+          <!-- Heartbeat line path - to be animated by JS/CSS -->
+          <path id="heartbeat" d="M40 240 L100 240 L120 180 L145 300 L170 200 L195 260 L220 240 L380 240"
+                stroke="#C5E710" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+
+          <!-- Brain drawing segments -->
+          <path d="M160 150 C140 130 115 130 105 150 C90 150 75 165 80 185
+                   C65 195 65 215 80 225 C75 245 90 260 110 258
+                   C115 275 130 285 150 280 C160 295 180 295 190 280
+                   C210 290 230 280 235 265 C255 270 270 255 265 238
+                   C282 228 282 205 265 197 C272 177 258 160 240 162
+                   C232 145 210 138 200 150 C190 138 168 140 160 150Z"
+                stroke="#C5E710" stroke-width="2" fill="none" opacity="0.7"/>
+
+          <!-- DNA structure drawn with paths -->
+          <path d="M330 80 C310 95 350 115 330 130 C310 145 350 165 330 180 C310 195 350 215 330 230 C310 245 350 265 330 280"
+                stroke="#8E9630" stroke-width="2" fill="none" opacity="0.8"/>
+          <path d="M360 80 C380 95 340 115 360 130 C380 145 340 165 360 180 C380 195 340 215 360 230 C380 245 340 265 360 280"
+                stroke="#C5E710" stroke-width="2" fill="none" opacity="0.8"/>
+        </svg>
+
+        <!-- Floating individual metric nodes -->
+        <div class="metric-card" style="top:5%;left:-10%;">
+          <div class="metric-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div>
+            <div class="metric-val">95.1%</div>
+            <div class="metric-lbl">Accuracy</div>
+          </div>
+        </div>
+        <div class="metric-card" style="bottom:15%;right:-10%;">
+          <div class="metric-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div>
+            <div class="metric-val">Fast</div>
+            <div class="metric-lbl">Inference</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STEPS SECTION ────────────────────────────────────────────────── -->
+<section class="section section-how">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">PROCEDURE</span>
+      <h2 class="section-title">Diagnostic Process</h2>
+      <p class="section-sub">A streamlined three-step workflow to reach prediction results from raw patient health data.</p>
+    </div>
+    
+    <div class="steps-grid card-grid">
+      <div class="card step-card">
+        <div class="step-num">01</div>
+        <h3 style="margin-bottom: 0.5rem;">Input Statistics</h3>
+        <p>A user enters up to 24 critical clinical biomarkers into the secure web interface.</p>
+      </div>
+      <div class="card step-card">
+        <div class="step-num">02</div>
+        <h3 style="margin-bottom: 0.5rem;">Neural Processing</h3>
+        <p>The system runs the data through my trained machine learning model files stored in the backend.</p>
+      </div>
+      <div class="card step-card">
+        <div class="step-num">03</div>
+        <h3 style="margin-bottom: 0.5rem;">Clinical Results</h3>
+        <p>Receive an instant prediction label, confidence scores, and structured recommendations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DISEASES SECTION ─────────────────────────────────────────────── -->
+<section class="section section-diseases" style="background: #010A00;">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">CLASSIFICATION</span>
+      <h2 class="section-title">Scope of Detection</h2>
+      <p class="section-sub">My system was designed and trained to recognize these six distinct health conditions.</p>
+    </div>
+    
+    <div class="disease-grid card-grid">
+      <!-- These cards animate in using staggered reveal logic in main.js -->
+      <div class="card disease-card" style="opacity: 0;">
+        <h4 style="color: var(--lime); margin-bottom: 0.5rem;">Healthy</h4>
+        <p>Baseline reference class for records with no pathological indicators.</p>
+      </div>
+      <div class="card disease-card" style="opacity: 0;">
+        <h4 style="color: var(--yellow); margin-bottom: 0.5rem;">Diabetes</h4>
+        <p>Detection of clinical metabolic markers related to glucose regulation.</p>
+      </div>
+      <div class="card disease-card" style="opacity: 0;">
+        <h4 style="color: var(--olive); margin-bottom: 0.5rem;">Anemia</h4>
+        <p>Identification of patterns in hemoglobin and red blood cell counts.</p>
+      </div>
+      <div class="card disease-card" style="opacity: 0;">
+        <h4 style="color: #e74c3c; margin-bottom: 0.5rem;">Heart Disease</h4>
+        <p>Analysis of troponin and structural cardiovascular risk biomarkers.</p>
+      </div>
+      <div class="card disease-card" style="opacity: 0;">
+        <h4 style="color: #9b59b6; margin-bottom: 0.5rem;">Thalassemia</h4>
+        <p>Clinical markers indicative of hereditary hemoglobin structure issues.</p>
+      </div>
+      <div class="card disease-card" style="opacity: 0;">
+        <h4 style="color: #e67e22; margin-bottom: 0.5rem;">Thrombocytopenia</h4>
+        <p>Identification of dangerously low platelet counts from digital health records.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA SECTION ──────────────────────────────────────────────────── -->
+<section class="section">
+  <div class="container">
+    <div class="cta-inner card" style="text-align: center; border-color: rgba(197,231,16,0.3); background: rgba(197,231,16,0.02);">
+       <h2 class="section-title" style="margin-bottom: 1rem;">Ready for Clinical Testing?</h2>
+       <p style="margin-bottom: 2rem; max-width: 600px; margin-inline: auto;">Run the diagnostic engine yourself by entering sample data from the laboratory.</p>
+       <a href="/predict" class="btn-primary large">Start the Prediction Engine</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

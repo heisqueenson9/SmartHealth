@@ -1,0 +1,165 @@
+<!--
+  SmartHealth AI
+  Author: Enock Queenson Eduafo | Student ID: 11014444
+  University of Ghana - Department of Computer Science
+  Information Technology | Supervisor: Prof. Solomon Mensah
+  2026
+-->
+{% extends "base.html" %}
+{% block title %}About the Project — SmartHealth AI Student Report{% endblock %}
+
+{% block content %}
+<section class="page-header" style="padding-top: 120px; text-align: center;">
+  <div class="container">
+    <span class="section-tag">PROJECT STATEMENT &amp; REPORT</span>
+    <h1 class="hero-headline" style="margin-bottom: 0.5rem;">Academic Context</h1>
+    <p class="hero-sub" style="margin-inline: auto; max-width: 800px;">
+      This system represents my final year capstone research for my degree in Information Technology within the Department of Computer Science at the University of Ghana.
+    </p>
+  </div>
+</section>
+
+<section class="about-body" style="padding: 6rem 0;">
+  <div class="container">
+    
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 6rem; align-items: start;">
+       <!-- ── TEXT CONTENT ─────────────────────────────────── -->
+       <div style="display: flex; flex-direction: column; gap: 4rem;">
+          
+          <div class="reveal">
+             <h2 style="font-size: 2.2rem; margin-bottom: 1.5rem; letter-spacing: -0.02em;">Project Purpose</h2>
+             <p style="font-size: 1.1rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
+                The objective of my study was to explore how modern information technology can augment clinical decision making in Ghana. With medical facilities facing high patient volumes, I wanted to build a prototype that uses machine learning to identify disease patterns before they become critical.
+             </p>
+             <p style="font-size: 1.1rem; color: rgba(255,255,255,0.7);">
+                My system analyzes clinical biomarker data &mdash; which includes things like hematocrit and troponin levels &mdash; to provide instant diagnostic labels. I believe that such tools could one day support practitioners in rural areas where specialist access is limited.
+             </p>
+          </div>
+
+          <div class="reveal">
+             <h2 style="font-size: 2.2rem; margin-bottom: 1.5rem; letter-spacing: -0.02em;">Technical Methodology</h2>
+             <div class="method-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                <div class="flip-card" style="height: 220px;">
+                   <div class="flip-card-inner">
+                      <div class="flip-front card" style="background: rgba(255,255,255,0.02); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                         <div style="font-weight: 800; font-size: 0.9rem; color: var(--lime); text-transform: uppercase; margin-bottom: 0.5rem;">Phase 1</div>
+                         <div style="font-weight: 900; font-size: 1.1rem;">Data Engineering</div>
+                      </div>
+                      <div class="flip-back card" style="background: var(--dolive); color: var(--white); padding: 1.5rem; text-align: center; font-size: 0.9rem;">
+                         Processing 2,837 clinical records through stratified splits and feature scaling for optimal model training.
+                      </div>
+                   </div>
+                </div>
+                <div class="flip-card" style="height: 220px;">
+                   <div class="flip-card-inner">
+                      <div class="flip-front card" style="background: rgba(255,255,255,0.02); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                         <div style="font-weight: 800; font-size: 0.9rem; color: var(--lime); text-transform: uppercase; margin-bottom: 0.5rem;">Phase 2</div>
+                         <div style="font-weight: 900; font-size: 1.1rem;">Model Selection</div>
+                      </div>
+                      <div class="flip-back card" style="background: var(--dolive); color: var(--white); padding: 1.5rem; text-align: center; font-size: 0.9rem;">
+                         Comparing Support Vector Machines and Random Forest architectures to maximize weighted F1 performance scores.
+                      </div>
+                   </div>
+                </div>
+                <div class="flip-card" style="height: 220px;">
+                   <div class="flip-card-inner">
+                      <div class="flip-front card" style="background: rgba(255,255,255,0.02); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                         <div style="font-weight: 800; font-size: 0.9rem; color: var(--lime); text-transform: uppercase; margin-bottom: 0.5rem;">Phase 3</div>
+                         <div style="font-weight: 900; font-size: 1.1rem;">Inference Engine</div>
+                      </div>
+                      <div class="flip-back card" style="background: var(--dolive); color: var(--white); padding: 1.5rem; text-align: center; font-size: 0.9rem;">
+                         Developing a Flask based web interface to serve model predictions in a real time clinical simulation environment.
+                      </div>
+                   </div>
+                </div>
+                <div class="flip-card" style="height: 220px;">
+                   <div class="flip-card-inner">
+                      <div class="flip-front card" style="background: rgba(255,255,255,0.02); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                         <div style="font-weight: 800; font-size: 0.9rem; color: var(--lime); text-transform: uppercase; margin-bottom: 0.5rem;">Phase 4</div>
+                         <div style="font-weight: 900; font-size: 1.1rem;">Optimization</div>
+                      </div>
+                      <div class="flip-back card" style="background: var(--dolive); color: var(--white); padding: 1.5rem; text-align: center; font-size: 0.9rem;">
+                         Fine tuning class weight balances to improve detection of minority conditions like heart disease.
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          <div class="reveal">
+             <h2 style="font-size: 2.2rem; margin-bottom: 1.5rem; letter-spacing: -0.02em;">Technical Challenges</h2>
+             <ul style="list-style: none; display: flex; flex-direction: column; gap: 1.5rem;">
+                <li style="display: flex; gap: 1.5rem;">
+                   <span style="font-weight: 900; color: var(--lime); font-size: 1.2rem;">01</span>
+                   <p style="color: rgba(255,255,255,0.7);">Handling data imbalance was my primary hurdle &mdash; specifically for heart disease data points which were significantly fewer than diabetes records.</p>
+                </li>
+                <li style="display: flex; gap: 1.5rem;">
+                   <span style="font-weight: 900; color: var(--lime); font-size: 1.2rem;">02</span>
+                   <p style="color: rgba(255,255,255,0.7);">Establishing a robust cross validation strategy ensured that accuracy scores were not inflated by overfitting to the training samples.</p>
+                </li>
+                <li style="display: flex; gap: 1.5rem;">
+                   <span style="font-weight: 900; color: var(--lime); font-size: 1.2rem;">03</span>
+                   <p style="color: rgba(255,255,255,0.7);">Managing the integration between the machine learning backend and a modern web interface while ensuring low inference latency.</p>
+                </li>
+             </ul>
+          </div>
+          
+       </div>
+
+       <!-- ── SIDEBAR STATS & TIMELINE ────────────────────── -->
+       <div style="position: sticky; top: 120px;">
+          <div class="card" style="padding: 3rem; background: rgba(197,231,16,0.02); border-color: rgba(197,231,16,0.15);">
+             <h3 style="font-size: 0.8rem; font-weight: 800; color: var(--lime); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2rem;">Student Information</h3>
+             
+             <div style="margin-bottom: 2.5rem;">
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 0.25rem;">Researcher Name</div>
+                <div style="font-size: 1.2rem; font-weight: 900;">Enock Queenson Eduafo</div>
+             </div>
+
+             <div style="margin-bottom: 2.5rem;">
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 0.25rem;">Student ID Number</div>
+                <div style="font-size: 1.2rem; font-weight: 900; color: var(--lime);">11014444</div>
+             </div>
+
+             <div style="margin-bottom: 2.5rem;">
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 0.25rem;">Department</div>
+                <div style="font-size: 1rem; font-weight: 800;">Computer Science</div>
+             </div>
+
+             <div style="margin-bottom: 2.5rem;">
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 0.25rem;">Supervisory Office</div>
+                <div style="font-size: 1rem; font-weight: 800;">Professor Solomon Mensah</div>
+             </div>
+
+             <div style="margin-bottom: 2.5rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 2rem;">
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 1.25rem;">Project Timeline</div>
+                <div style="position: relative; padding-left: 3rem;">
+                   <div class="timeline-line"></div>
+                   <div class="timeline-fill" style="height: 100%;"></div>
+                   
+                   <div style="position: relative; margin-bottom: 2rem;">
+                      <div style="position: absolute; left: -32px; width: 14px; height: 14px; background: var(--lime); border-radius: 50%; top: 4px;"></div>
+                      <div style="font-weight: 900; font-size: 0.85rem;">Literature Review</div>
+                      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Completed Jan 2026</div>
+                   </div>
+                   <div style="position: relative; margin-bottom: 2rem;">
+                      <div style="position: absolute; left: -32px; width: 14px; height: 14px; background: var(--lime); border-radius: 50%; top: 4px;"></div>
+                      <div style="font-weight: 900; font-size: 0.85rem;">Model Development</div>
+                      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Completed Feb 2026</div>
+                   </div>
+                   <div style="position: relative;">
+                      <div style="position: absolute; left: -32px; width: 14px; height: 14px; background: var(--lime); border-radius: 50%; top: 4px;"></div>
+                      <div style="font-weight: 900; font-size: 0.85rem;">Thesis Defense</div>
+                      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Projected April 2026</div>
+                   </div>
+                </div>
+             </div>
+          </div>
+       </div>
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
