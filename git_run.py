@@ -2,9 +2,10 @@ import subprocess
 
 def run_git():
     commands = [
+        ['git', 'remote', 'add', 'origin', 'https://github.com/heisqueenson9/SmartHealth.git'],
         ['git', 'add', '.'],
         ['git', 'commit', '-m', 'feat: implement Vercel serverless Flask integration'],
-        ['git', 'push', 'origin', 'main']
+        ['git', 'push', '-u', 'origin', 'main']
     ]
     with open('git_log.txt', 'w') as f:
         for cmd in commands:
