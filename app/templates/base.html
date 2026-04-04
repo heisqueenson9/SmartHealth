@@ -1,79 +1,111 @@
-<!--
-  SmartHealth AI
-  Author: Enock Queenson Eduafo | Student ID: 11014444
-  University of Ghana - Department of Computer Science
-  Information Technology | Supervisor: Prof. Solomon Mensah
-  2026
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}SmartHealth AI{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartHealth AI - Intelligent Healthcare Diagnosis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <style>
+    #scroll-progress {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: #C5E710; width: 0%; z-index: 9999;
+      transition: width 0.1s linear;
+    }
+    .particle {
+      position: fixed; border-radius: 50%;
+      background: rgba(197,231,16,0.4); pointer-events: none;
+      animation: float-particle linear infinite;
+    }
+    @keyframes float-particle {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 0.5; }
+      100% { transform: translateY(-100px) scale(1); opacity: 0; }
+    }
+    @keyframes navSlideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+    .navbar, .nav { animation: navSlideDown 0.5s ease forwards; }
+  </style>
+  {% block head %}{% endblock %}
 </head>
 <body>
+  <div id="scroll-progress"></div>
 
-  <!-- Subtle gradient noise texture -->
-  <div class="noise-overlay"></div>
-
-  <!-- ── NAVBAR ──────────────────────────────────────────────── -->
-  <nav class="navbar" id="navbar">
-    <div class="nav-inner">
-      <a href="/" class="nav-logo">
-        <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="10" fill="#C5E710"/>
-          <path d="M20 8 L20 32 M8 20 L32 20" stroke="#010A00" stroke-width="4" stroke-linecap="round"/>
-          <circle cx="20" cy="20" r="5" fill="#010A00"/>
+  <nav class="navbar">
+    <div class="container nav-content">
+      <a href="/" class="logo">
+        <svg class="logo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12h14"></path>
         </svg>
-        <span class="logo-text">SmartHealth<span class="logo-accent">AI</span></span>
+        <span>SmartHealth AI</span>
       </a>
       
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-        <span></span><span></span><span></span>
-      </button>
+      <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
 
       <ul class="nav-links" id="navLinks">
-        <li><a href="/" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">Home</a></li>
-        <li><a href="/predict" class="nav-link {% if request.endpoint == 'predict_page' %}active{% endif %}">Diagnose</a></li>
-        <li><a href="/results" class="nav-link {% if request.endpoint == 'results_page' %}active{% endif %}">Model Results</a></li>
-        <li><a href="/about" class="nav-link {% if request.endpoint == 'about_page' %}active{% endif %}">About</a></li>
+        <li><a href="/" class="{% if request.endpoint == 'index' %}active{% endif %}">Home</a></li>
+        <li><a href="/predict" class="{% if request.endpoint == 'predict_page' %}active{% endif %}">Diagnose</a></li>
+        <li><a href="/results" class="{% if request.endpoint == 'results_page' %}active{% endif %}">Model Results</a></li>
+        <li><a href="/about" class="{% if request.endpoint == 'about_page' %}active{% endif %}">About</a></li>
+        <li class="nav-cta-item"><a href="/predict" class="btn btn-primary nav-cta">Run Diagnosis</a></li>
       </ul>
-      
-      <a href="/predict" class="nav-cta">Run Diagnosis</a>
     </div>
   </nav>
 
-  <!-- ── PAGE CONTENT ────────────────────────────────────────── -->
-  <main class="page-main">
+  <main>
     {% block content %}{% endblock %}
   </main>
 
-  <!-- ── FOOTER ──────────────────────────────────────────────── -->
   <footer class="footer">
-    <div class="container footer-inner">
+    <div class="container footer-content">
       <div class="footer-brand">
-        <svg class="logo-icon sm" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="10" fill="#C5E710"/>
-          <path d="M20 8 L20 32 M8 20 L32 20" stroke="#010A00" stroke-width="4" stroke-linecap="round"/>
-          <circle cx="20" cy="20" r="5" fill="#010A00"/>
-        </svg>
-        <span class="logo-text">SmartHealth<span class="logo-accent">AI</span></span>
+        <a href="/" class="logo">
+          <svg class="logo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>
+          <span>SmartHealth AI</span>
+        </a>
       </div>
-      
-      <div class="footer-disclaimer">
-        <p>This system was developed as a final year academic prototype focused on Information Technology at the University of Ghana.</p>
-        <p><em>Always consult a qualified medical professional for health concerns.</em></p>
+      <p class="footer-disclaimer">Academic prototype. Not a substitute for clinical diagnosis. Always consult a qualified healthcare professional.</p>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Enock Queenson Eduafo — SmartHealth AI. Final Year Project, University of Ghana.</p>
       </div>
-
-      <p class="footer-copy">© 2026 Enock Queenson Eduafo — SmartHealth AI. Final Year Project, University of Ghana.</p>
     </div>
   </footer>
 
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script>
+    // Scroll progress bar
+    const prog = document.getElementById('scroll-progress');
+    window.addEventListener('scroll', () => {
+      const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+      prog.style.width = pct + '%';
+    });
+
+    // Floating background particles
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = Math.random() * 5 + 2;
+      p.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${Math.random()*100}vw;
+        animation-duration:${Math.random()*15+8}s;
+        animation-delay:${Math.random()*10}s;
+        opacity:${Math.random()*0.4+0.1};
+      `;
+      document.body.appendChild(p);
+    }
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -1,275 +1,129 @@
-// SmartHealth AI - Main JavaScript
-// Author: Enock Queenson Eduafo | Student ID: 11014444
-// University of Ghana - Department of Computer Science
-// Information Technology | 2026
+/**
+ * SmartHealth AI - Main JavaScript
+ * Author: Enock Queenson Eduafo
+ */
 
 document.addEventListener('DOMContentLoaded', () => {
-    initApp();
-});
+    // 1. Mobile Hamburger Toggle
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
 
-function initApp() {
-    setupCustomCursor();
-    setupScrollProgress();
-    setupNavbar();
-    setupParticles();
-    setupEntranceAnimations();
-    setupScrollAnimations();
-    setupCounters();
-    setupRipples();
-    
-    // Page Transitions: Fade in
-    document.body.style.opacity = '0';
-    document.body.style.transition = 'opacity 0.4s ease';
-    requestAnimationFrame(() => {
-        document.body.style.opacity = '1';
-    });
-}
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+            hamburger.classList.toggle('active');
+        });
+    }
 
-// ── CUSTOM CURSOR ───────────────────────────────────────────
-function setupCustomCursor() {
-    const cursor = document.createElement('div');
-    cursor.className = 'custom-cursor';
-    document.body.appendChild(cursor);
-
-    document.addEventListener('mousemove', (e) => {
-        // Lag effect (simplified)
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
-    });
-
-    const hoverables = document.querySelectorAll('a, button, .model-radio, .preset-btn, input');
-    hoverables.forEach(el => {
-        el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-        el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-    });
-}
-
-// ── SCROLL PROGRESS ─────────────────────────────────────────
-function setupScrollProgress() {
-    const bar = document.createElement('div');
-    bar.className = 'scroll-progress';
-    document.body.appendChild(bar);
-
-    window.addEventListener('scroll', () => {
-        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scrolled = (winScroll / height) * 100;
-        bar.style.width = scrolled + "%";
-    });
-}
-
-// ── NAVBAR LOGIC ────────────────────────────────────────────
-function setupNavbar() {
-    const nav = document.querySelector('.navbar');
-    const toggle = document.getElementById('navToggle');
-    const links = document.getElementById('navLinks');
-    
-    // Initial entrance
-    setTimeout(() => {
-        nav.style.opacity = '1';
-        nav.style.transform = 'translateY(0)';
-    }, 100);
-
+    // 2. Navbar Scroll Effect (Blur & Border)
+    const navbar = document.querySelector('.navbar');
     window.addEventListener('scroll', () => {
         if (window.scrollY > 80) {
-            nav.classList.add('scrolled');
+            navbar.classList.add('scrolled');
         } else {
-            nav.classList.remove('scrolled');
+            navbar.classList.remove('scrolled');
         }
     });
 
-    if (toggle) {
-        toggle.addEventListener('click', () => {
-            links.classList.toggle('open');
-            const spans = toggle.querySelectorAll('span');
-            spans[0].style.transform = links.classList.contains('open') ? 'rotate(45deg) translate(5px, 5px)' : 'none';
-            spans[1].style.opacity = links.classList.contains('open') ? '0' : '1';
-            spans[2].style.transform = links.classList.contains('open') ? 'rotate(-45deg) translate(5px, -5px)' : 'none';
-        });
-    }
-}
-
-// ── HERO PARTICLES ──────────────────────────────────────────
-function setupParticles() {
-    const container = document.querySelector('.hero-particles');
-    if (!container) return;
-
-    for (let i = 0; i < 20; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        
-        const startX = Math.random() * 100;
-        const startY = Math.random() * 100;
-        const dx = (Math.random() - 0.5) * 200;
-        const dy = (Math.random() - 0.5) * 200;
-        const duration = 8 + Math.random() * 12;
-
-        p.style.left = startX + '%';
-        p.style.top = startY + '%';
-        p.style.setProperty('--dx', dx + 'px');
-        p.style.setProperty('--dy', dy + 'px');
-        p.style.animationDuration = duration + 's';
-        
-        container.appendChild(p);
-    }
-}
-
-// ── ENTRANCE ANIMATIONS ─────────────────────────────────────
-function setupEntranceAnimations() {
-    const badge = document.querySelector('.hero-badge');
-    if (badge) {
-        setTimeout(() => {
-            badge.style.opacity = '1';
-            badge.style.transform = 'translateY(0)';
-        }, 300);
-    }
-
-    const headline = document.querySelector('.hero-headline');
-    if (headline) {
-        const text = headline.innerText;
-        headline.innerHTML = '';
-        const words = text.split(/\s+/);
-        words.forEach((word, i) => {
-            const span = document.createElement('span');
-            span.className = 'headline-word' + (word === 'HEALTH' ? ' glitch' : '');
-            span.innerText = word + ' ';
-            headline.appendChild(span);
-            setTimeout(() => {
-                span.style.opacity = '1';
-                span.style.transform = 'translateY(0) rotateX(0)';
-            }, 400 + (i * 100));
-        });
-    }
-
-    const sub = document.querySelector('.hero-sub');
-    if (sub) {
-        setTimeout(() => {
-            sub.style.opacity = '1';
-            sub.style.transform = 'translateY(0)';
-        }, 800);
-    }
-
-    const actions = document.querySelector('.hero-actions');
-    if (actions) {
-        setTimeout(() => {
-            actions.style.opacity = '1';
-            actions.style.transform = 'scale(1)';
-        }, 1000);
-    }
-
-    const stats = document.querySelector('.hero-stats');
-    if (stats) {
-        setTimeout(() => {
-            stats.style.opacity = '1';
-        }, 1200);
-    }
-
-    const svg = document.querySelector('.hero-svg');
-    if (svg) {
-        setTimeout(() => svg.classList.add('animate'), 500);
-    }
-
-    const metrics = document.querySelectorAll('.metric-card');
-    metrics.forEach((m, i) => {
-        setTimeout(() => m.classList.add('animate'), 1400 + (i * 200));
-    });
-}
-
-// ── SCROLL TRIGGERED ANIMATIONS ─────────────────────────────
-function setupScrollAnimations() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('reveal');
-                if (entry.target.classList.contains('section-how')) {
-                     const steps = entry.target.querySelectorAll('.step-card');
-                     steps.forEach((s, idx) => {
-                         setTimeout(() => s.classList.add('reveal'), idx * 100);
-                     });
-                }
-                if (entry.target.classList.contains('section-diseases')) {
-                    const cards = entry.target.querySelectorAll('.disease-card');
-                    cards.forEach((c, idx) => {
-                        setTimeout(() => {
-                            c.style.opacity = '1';
-                            c.style.transform = 'translateY(0)';
-                        }, idx * 80);
-                    });
-                }
-            }
-        });
-    }, { threshold: 0.15 });
-
-    document.querySelectorAll('.section, .card-grid, .cta-inner, .models-preview-inner').forEach(el => observer.observe(el));
-    
-    // Performance bars specific observer
+    // 3. IntersectionObserver for Bar Animations
+    // Targets: perf-fill, pbar-fill, bar-chart-fill, bc-fill, cv-bar-fill, cv-bf, mini-fill, mbar-f
     const barObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const fill = entry.target.querySelector('.perf-fill, .bar-chart-fill');
-                if (fill) {
-                    const w = fill.dataset.width || fill.style.width;
-                    fill.style.width = '0';
-                    setTimeout(() => fill.style.width = w, 100);
+                const bar = entry.target;
+                const width = bar.style.getPropertyValue('--w') || '0%';
+                bar.style.width = width;
+                
+                // Add overshoot animation if requested for specific elements
+                if (bar.classList.contains('bar-chart-fill')) {
+                    bar.style.animation = 'barOvershoot 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
                 }
+                
+                barObserver.unobserve(bar);
             }
         });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.perf-bar-wrap, .bar-chart-row').forEach(el => barObserver.observe(el));
-}
+    }, { threshold: 0.1 });
 
-// ── COUNTER ANIMATIONS ──────────────────────────────────────
-function setupCounters() {
-    const countElements = document.querySelectorAll('.stat-number');
-    const observer = new IntersectionObserver((entries) => {
+    const bars = document.querySelectorAll('.perf-fill, .pbar-fill, .bar-chart-fill, .bc-fill, .cv-bar-fill, .cv-bf, .mini-fill, .mbar-f');
+    bars.forEach(bar => barObserver.observe(bar));
+
+    // 4. IntersectionObserver for Card Fade-in with Stagger
+    // Targets: disease-card, dis-card, step-card, step, metric-card, m-card
+    const cardObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                animateCounter(entry.target);
-                observer.unobserve(entry.target);
+                entry.target.classList.add('reveal');
+                cardObserver.unobserve(entry.target);
             }
         });
-    }, { threshold: 1 });
+    }, { threshold: 0.1 });
 
-    countElements.forEach(el => observer.observe(el));
-}
-
-function animateCounter(el) {
-    const target = parseFloat(el.innerText);
-    const isFloat = el.innerText.includes('.');
-    let start = 0;
-    const duration = 2000;
-    const startTime = performance.now();
-
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const current = progress * target;
-        
-        el.innerText = isFloat ? current.toFixed(1) + '%' : Math.floor(current);
-
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        } else {
-            el.innerText = isFloat ? target.toFixed(1) + '%' : target;
-        }
-    }
-    requestAnimationFrame(update);
-}
-
-// ── BUTTON RIPPLE ──────────────────────────────────────────
-function setupRipples() {
-    document.addEventListener('click', (e) => {
-        if (e.target.closest('.btn-primary, .btn-ghost, .nav-cta, .btn-predict')) {
-            const btn = e.target.closest('.btn-primary, .btn-ghost, .nav-cta, .btn-predict');
-            const ripple = document.createElement('span');
-            ripple.className = 'ripple';
-            const rect = btn.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-            btn.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-        }
+    const cards = document.querySelectorAll('.disease-card, .dis-card, .step-card, .step, .metric-card, .m-card, .arch-card, .meth-card, .cv-card, .cm-card');
+    cards.forEach((card, i) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = `all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) ${ (i % 3) * 0.15 }s`;
+        cardObserver.observe(card);
     });
-}
+
+    // Handle "reveal" class for cards
+    document.querySelectorAll('.disease-card, .dis-card, .step-card, .step, .metric-card, .m-card, .arch-card, .meth-card, .cv-card, .cm-card').forEach(card => {
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    obs.unobserve(entry.target);
+                }
+            });
+        });
+        obs.observe(card);
+    });
+
+    // 5. IntersectionObserver for Count-up
+    // Targets: stat-number, stat-n, cv-score, cv-sc
+    const countObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateCountUp(entry.target);
+                countObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    const numbers = document.querySelectorAll('.stat-number, .stat-n, .cv-score, .cv-sc');
+    numbers.forEach(num => countObserver.observe(num));
+
+    function animateCountUp(el) {
+        const target = parseFloat(el.getAttribute('data-target'));
+        const suffix = el.getAttribute('data-suffix') || '';
+        const duration = 1500;
+        const startTime = performance.now();
+        const isDecimal = el.getAttribute('data-target').includes('.');
+
+        function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeProgress = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+            const currentVal = (easeProgress * target);
+
+            el.innerHTML = (isDecimal ? currentVal.toFixed(1) : Math.floor(currentVal)) + suffix;
+
+            if (progress < 1) {
+                requestAnimationFrame(update);
+            }
+        }
+        requestAnimationFrame(update);
+    }
+});
+
+// Custom Bar CSS Keyframe (injected)
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes barOvershoot {
+        0% { width: 0; }
+        70% { width: calc(var(--w) + 5%); }
+        100% { width: var(--w); }
+    }
+`;
+document.head.appendChild(style);

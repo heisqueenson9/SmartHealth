@@ -1,173 +1,245 @@
-<!--
-  SmartHealth AI
-  Author: Enock Queenson Eduafo | Student ID: 11014444
-  University of Ghana - Department of Computer Science
-  Information Technology | Supervisor: Prof. Solomon Mensah
-  2026
--->
 {% extends "base.html" %}
-{% block title %}Diagnose — SmartHealth AI Prediction Engine{% endblock %}
 
 {% block content %}
-<section class="page-header" style="padding-top: 100px; text-align: center;">
-  <div class="container">
-    <span class="section-tag" style="animation: logoPulse 2s infinite;">DIAGNOSIS ENGINE</span>
-    <h1 class="hero-headline" style="margin-bottom: 0.5rem;">Patient Diagnostic Input</h1>
-    <p class="hero-sub" style="margin-inline: auto; max-width: 700px;">Complete the biomarker fields obtained from the clinical health record. Use the Quick-Fill presets to demonstrate my system's prediction capabilities across all six modeled conditions.</p>
+<section class="predict-header">
+  <div class="container header-content">
+    <span class="tag">DIAGNOSIS ENGINE</span>
+    <h1>Patient Biomarker Input</h1>
+    <p>Please enter the patient's biological markers obtained from recent clinical blood screenings. For the most accurate prediction, ensure all fields are correctly populated.</p>
   </div>
 </section>
 
-<section class="predict-body" style="padding: 4rem 0 8rem;">
-  <div class="container">
-    <div class="predict-layout">
-      
-      <!-- ── FORM PANEL ────────────────────────────────────────────── -->
-      <div class="card form-panel" style="background: rgba(1, 10, 0, 0.4); border-color: rgba(255,255,255,0.05);">
-        
-        <div class="form-section" style="margin-bottom: 3rem;">
-          <h3 class="section-tag" style="margin-bottom: 1.25rem;">Classifier Select</h3>
-          <div class="model-selector" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-            <label class="model-radio active" data-model="random_forest">
-              <input type="radio" name="model" value="random_forest" checked style="display:none;"/>
-              <div class="card" style="padding: 1.25rem; text-align: center; cursor: pointer; border-radius: 12px; pointer-events: none;">
-                <div class="best-tag" style="margin-bottom: 0.5rem; display: inline-block;">Best Model</div>
-                <div style="font-weight: 800; font-size: 1rem;">Random Forest</div>
-                <div style="font-size: 0.7rem; color: var(--lime); font-weight: 700;">95.1% Accuracy</div>
-              </div>
-            </label>
-            <label class="model-radio" data-model="support_vector_machine">
-              <input type="radio" name="model" value="support_vector_machine" style="display:none;"/>
-              <div class="card" style="padding: 1.25rem; text-align: center; cursor: pointer; border-radius: 12px; pointer-events: none;">
-                <div style="font-weight: 800; font-size: 1rem; margin-top: 1rem;">SVM</div>
-                <div style="font-size: 0.7rem; color: var(--olive); font-weight: 700;">94.9% Accuracy</div>
-              </div>
-            </label>
-            <label class="model-radio" data-model="decision_tree">
-              <input type="radio" name="model" value="decision_tree" style="display:none;"/>
-              <div class="card" style="padding: 1.25rem; text-align: center; cursor: pointer; border-radius: 12px; pointer-events: none;">
-                <div style="font-weight: 800; font-size: 1rem; margin-top: 1rem;">Decision Tree</div>
-                <div style="font-size: 0.7rem; color: var(--dolive); font-weight: 700;">92.6% Accuracy</div>
-              </div>
-            </label>
-            <label class="model-radio" data-model="logistic_regression">
-              <input type="radio" name="model" value="logistic_regression" style="display:none;"/>
-              <div class="card" style="padding: 1.25rem; text-align: center; cursor: pointer; border-radius: 12px; pointer-events: none;">
-                <div style="font-weight: 800; font-size: 1rem; margin-top: 1rem;">Logistic Reg.</div>
-                <div style="font-size: 0.7rem; color: var(--yellow); font-weight: 700;">81.9% Accuracy</div>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <div class="form-section" style="margin-bottom: 3rem;">
-           <h3 class="section-tag" style="margin-bottom: 1.25rem;">Quick-Fill Health Presets</h3>
-           <div class="preset-buttons" style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-             <button class="preset-btn card" data-preset="healthy" style="padding: 0.5rem 1rem; border-radius: 50px; font-weight: 700; font-size: 0.8rem; background: rgba(255,255,255,0.02);">Healthy</button>
-             <button class="preset-btn card" data-preset="diabetes" style="padding: 0.5rem 1rem; border-radius: 50px; font-weight: 700; font-size: 0.8rem; background: rgba(255,255,255,0.02);">Diabetes</button>
-             <button class="preset-btn card" data-preset="anemia" style="padding: 0.5rem 1rem; border-radius: 50px; font-weight: 700; font-size: 0.8rem; background: rgba(255,255,255,0.02);">Anemia</button>
-             <button class="preset-btn card" data-preset="heart" style="padding: 0.5rem 1rem; border-radius: 50px; font-weight: 700; font-size: 0.8rem; background: rgba(255,255,255,0.02);">Heart Disease</button>
-             <button class="preset-btn card" data-preset="thalassemia" style="padding: 0.5rem 1rem; border-radius: 50px; font-weight: 700; font-size: 0.8rem; background: rgba(255,255,255,0.02);">Thalassemia</button>
-           </div>
-        </div>
-
-        <div class="form-section">
-          <h3 class="section-tag" style="margin-bottom: 1.25rem;">Biomarker Diagnostics <span style="font-weight: 400; text-transform: none; letter-spacing: 0;">(Range: 0.00 to 1.00)</span></h3>
-          <div class="biomarker-grid" style="display: flex; flex-direction: column; gap: 2rem;">
-            {% set feature_groups = [
-              ('Metabolic', ['Glucose','Insulin','BMI','HbA1c']),
-              ('Cardiovascular', ['Cholesterol','LDL Cholesterol','HDL Cholesterol','Triglycerides','Systolic Blood Pressure','Diastolic Blood Pressure','Heart Rate','Troponin']),
-              ('Blood Panel', ['Hemoglobin','Platelets','White Blood Cells','Red Blood Cells','Hematocrit','Mean Corpuscular Volume','Mean Corpuscular Hemoglobin','Mean Corpuscular Hemoglobin Concentration']),
-              ('Hepatic & Renal', ['ALT','AST','Creatinine','C-reactive Protein'])
-            ] %}
-            {% for group_name, group_features in feature_groups %}
-            <div class="biomarker-group" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.5rem;">
-               <div style="font-size: 0.75rem; color: var(--lime); font-weight: 800; text-transform: uppercase; margin-bottom: 1rem;">{{ group_name }} Group</div>
-               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                  {% for feat in group_features %}
-                    {% if feat in features %}
-                    <div class="input-field-wrap">
-                       <label style="display: block; font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 0.4rem;">{{ feat }}</label>
-                       <input 
-                         type="number" 
-                         class="biomarker-input" 
-                         data-feature="{{ feat }}"
-                         step="0.0001" 
-                         min="0" max="1"
-                         placeholder="0.0000"
-                         style="width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.6rem; color: var(--white); text-align: right;"
-                       />
-                    </div>
-                    {% endif %}
-                  {% endfor %}
-               </div>
+<section class="predict-main">
+  <div class="container predict-grid">
+    <!-- Form Panel -->
+    <div class="form-panel">
+      <!-- Section 1 - Select Classifier -->
+      <section class="form-section">
+        <label class="section-label">Section 1 — Select Classifier</label>
+        <div class="model-selector">
+          <div class="mcard active" data-model="random_forest">
+            <span class="best-badge">Best</span>
+            <div class="mcard-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v8M12 14v8M4.93 4.93l5.66 5.66M13.41 13.41l5.66 5.66M2 12h8M14 12h8M4.93 19.07l5.66-5.66M13.41 10.59l5.66-5.66"></path></svg>
             </div>
-            {% endfor %}
+            <div class="mcard-info">
+              <h3>Random Forest</h3>
+              <span class="mcard-acc">95.1% Accuracy</span>
+            </div>
+          </div>
+          <div class="mcard" data-model="support_vector_machine">
+            <div class="mcard-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+            </div>
+            <div class="mcard-info">
+              <h3>SVM</h3>
+              <span class="mcard-acc">94.9% Accuracy</span>
+            </div>
+          </div>
+          <div class="mcard" data-model="decision_tree">
+            <div class="mcard-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <div class="mcard-info">
+              <h3>Decision Tree</h3>
+              <span class="mcard-acc">92.6% Accuracy</span>
+            </div>
+          </div>
+          <div class="mcard" data-model="logistic_regression">
+            <div class="mcard-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            </div>
+            <div class="mcard-info">
+              <h3>Logistic Regression</h3>
+              <span class="mcard-acc">81.9% Accuracy</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2 - Quick Fill -->
+      <section class="form-section">
+        <label class="section-label">Section 2 — Quick Fill</label>
+        <div class="preset-row">
+          <button class="btn btn-ghost pbtn" data-preset="healthy">Healthy</button>
+          <button class="btn btn-ghost pbtn" data-preset="diabetes">Diabetes</button>
+          <button class="btn btn-ghost pbtn" data-preset="anemia">Anemia</button>
+          <button class="btn btn-ghost pbtn" data-preset="heart">Heart Disease</button>
+          <button class="btn btn-ghost pbtn" data-preset="thalassemia">Thalassemia</button>
+        </div>
+      </section>
+
+      <!-- Section 3 - Biomarker Values -->
+      <section class="form-section">
+        <label class="section-label">Section 3 — Biomarker Values <span class="sub-label">(Normalised 0.00 to 1.00)</span></label>
+        
+        <div class="input-group">
+          <h4 class="group-title">Metabolic</h4>
+          <div class="input-grid">
+            <div class="input-field">
+              <label>Glucose</label>
+              <input type="number" class="biomarker-input" data-feature="Glucose" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>Insulin</label>
+              <input type="number" class="biomarker-input" data-feature="Insulin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>BMI</label>
+              <input type="number" class="biomarker-input" data-feature="BMI" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>HbA1c</label>
+              <input type="number" class="biomarker-input" data-feature="HbA1c" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
           </div>
         </div>
 
-        <button class="btn-predict btn-primary active" id="predictBtn" style="width: 100%; margin-top: 4rem; padding: 1.25rem; font-size: 1.1rem; border-radius: 12px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="22" height="22" style="margin-right: 0.5rem; display: inline-block; vertical-align: middle;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          Run Diagnostic Prediction Engine
-        </button>
+        <div class="input-group">
+          <h4 class="group-title">Cardiovascular</h4>
+          <div class="input-grid">
+            <div class="input-field">
+              <label>Cholesterol</label>
+              <input type="number" class="biomarker-input" data-feature="Cholesterol" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>LDL Cholesterol</label>
+              <input type="number" class="biomarker-input" data-feature="LDL Cholesterol" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>HDL Cholesterol</label>
+              <input type="number" class="biomarker-input" data-feature="HDL Cholesterol" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>Triglycerides</label>
+              <input type="number" class="biomarker-input" data-feature="Triglycerides" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>Systolic BP</label>
+              <input type="number" class="biomarker-input" data-feature="Systolic Blood Pressure" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>Diastolic BP</label>
+              <input type="number" class="biomarker-input" data-feature="Diastolic Blood Pressure" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>Heart Rate</label>
+              <input type="number" class="biomarker-input" data-feature="Heart Rate" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>Troponin</label>
+              <input type="number" class="biomarker-input" data-feature="Troponin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <h4 class="group-title">Blood Panel</h4>
+          <div class="input-grid">
+            <div class="input-field">
+              <label>Hemoglobin</label>
+              <input type="number" class="biomarker-input" data-feature="Hemoglobin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>Platelets</label>
+              <input type="number" class="biomarker-input" data-feature="Platelets" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>White Blood Cells</label>
+              <input type="number" class="biomarker-input" data-feature="White Blood Cells" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>Red Blood Cells</label>
+              <input type="number" class="biomarker-input" data-feature="Red Blood Cells" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>Hematocrit</label>
+              <input type="number" class="biomarker-input" data-feature="Hematocrit" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>MCV</label>
+              <input type="number" class="biomarker-input" data-feature="Mean Corpuscular Volume" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>MCH</label>
+              <input type="number" class="biomarker-input" data-feature="Mean Corpuscular Hemoglobin" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>MCHC</label>
+              <input type="number" class="biomarker-input" data-feature="Mean Corpuscular Hemoglobin Concentration" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <h4 class="group-title">Hepatic and Renal</h4>
+          <div class="input-grid">
+            <div class="input-field">
+              <label>ALT</label>
+              <input type="number" class="biomarker-input" data-feature="ALT" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>AST</label>
+              <input type="number" class="biomarker-input" data-feature="AST" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>Creatinine</label>
+              <input type="number" class="biomarker-input" data-feature="Creatinine" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+            <div class="input-field">
+              <label>C-reactive Protein</label>
+              <input type="number" class="biomarker-input" data-feature="C-reactive Protein" step="0.0001" min="0" max="1" placeholder="0.0000"/>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <button id="predictBtn" class="btn btn-primary full-width">Run Diagnosis Engine</button>
+    </div>
+
+    <!-- Result Panel -->
+    <div class="result-panel">
+      <div id="resultEmpty" class="panel-state">
+        <div class="panel-icon">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <h3>Ready to Analyse</h3>
+        <p>Complete the patient data form on the left and click "Run Diagnosis" to receive medical insights.</p>
       </div>
 
-      <!-- ── RESULT PANEL ────────────────────────────────────────────── -->
-      <div class="result-panel card" id="resultPanel" style="overflow: hidden; background: #050e04; border-color: rgba(197,231,16,0.1); position: sticky; top: 120px; transition: all 0.5s ease;">
-        <!-- Animated Diagnostic Scan Grid Background -->
-        <div class="diagnostic-scan-bg"></div>
-
-        <!-- Empty State -->
-        <div class="result-empty" id="resultEmpty" style="padding: 4rem 2rem; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-          <div style="margin-bottom: 2rem; opacity: 0.2;">
-            <svg viewBox="0 0 120 120" width="100" height="100" fill="none">
-              <circle cx="60" cy="60" r="50" stroke="currentColor" stroke-width="2"/>
-              <path d="M60 30v60M30 60h60" stroke="currentColor" stroke-width="2"/>
-            </svg>
-          </div>
-          <h3 style="font-weight: 800; font-size: 1.2rem; margin-bottom: 0.5rem;">Input Diagnostics Needed</h3>
-          <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Fill in the biomarker diagnostics to begin my system's prediction engine.</p>
-        </div>
-
-        <!-- Loading State (Scan Effect) -->
-        <div class="result-loading" id="resultLoading" style="display: none; padding: 4rem 2rem; text-align: center; height: 100%; flex-direction: column; justify-content: center; align-items: center; gap: 1.5rem;">
-           <div class="spinner" style="width: 60px; height: 60px; border: 4px solid var(--dolive); border-top-color: var(--lime); border-radius: 50%; animation: spin 1s linear infinite;"></div>
-           <div style="font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.8rem; color: var(--lime);">Analyzing Clinical Biomarkers...</div>
-        </div>
-
-        <!-- Real Results Section -->
-        <div class="result-content" id="resultContent" style="display: none; padding: 2.5rem;">
-          <div class="result-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <div id="resultDot" style="width: 12px; height: 12px; border-radius: 50%;"></div>
-                <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5);">Prediction Complete</div>
-             </div>
-             <div class="confidence-badge" id="confidenceBadge" style="background: rgba(197,231,16,0.1); border: 1px solid var(--lime); color: var(--lime); font-weight: 900; font-size: 0.8rem; padding: 0.4rem 1rem; border-radius: 50px;">Calculating...</div>
-          </div>
-
-          <div id="resultDiseaseCard" style="padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 2rem; transition: background 0.5s;">
-             <div id="rdiseaseName" style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 0.5rem;"></div>
-             <div id="rdiseaseDesc" style="font-size: 0.9rem; color: rgba(255,255,255,0.7); line-height: 1.6;"></div>
-          </div>
-
-          <div style="margin-bottom: 2rem;">
-             <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); margin-bottom: 1rem;">Probability Map</div>
-             <div id="probBars" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
-          </div>
-
-          <div style="margin-bottom: 2.5rem;">
-             <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); margin-bottom: 1rem;">Clinical Recommendations</div>
-             <ul id="recoList" style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem;"></ul>
-          </div>
-
-          <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); font-style: italic; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
-            This system was developed as my final year Information Technology project (ID: 11014444). Results are for prototype testing only.
-          </div>
-
-          <button id="resetBtn" class="card" style="width: 100%; padding: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 8px;">Reset Engine Input</button>
-        </div>
-
+      <div id="resultLoading" class="panel-state" style="display:none">
+        <div class="spinner"></div>
+        <h3>Analysing Markers...</h3>
+        <p>Running multi-class classifier on biomarker data.</p>
       </div>
 
+      <div id="resultContent" style="display:none">
+        <div class="result-top">
+          <div id="resultDot" class="status-indicator"></div>
+          <div class="res-meta">
+            <span class="res-tag">PREDICTION RESULT</span>
+            <div id="confidenceBadge" class="confidence-val">0.0%</div>
+          </div>
+        </div>
+
+        <div id="resultDiseaseCard" class="disease-res-card">
+          <div id="rdiseaseIcon" class="res-icon"></div>
+          <h2 id="rdiseaseName">Result</h2>
+          <p id="rdiseaseDesc">Description here...</p>
+        </div>
+
+        <div class="res-section">
+          <label class="section-label">Probability Distribution</label>
+          <div id="probBars" class="prob-bars-container"></div>
+        </div>
+
+        <div class="res-section">
+          <label class="section-label">Clinical Recommendations</label>
+          <ul id="recoList" class="reco-list"></ul>
+        </div>
+
+        <button id="resetBtn" class="btn btn-ghost full-width">New Diagnosis</button>
+      </div>
     </div>
   </div>
 </section>

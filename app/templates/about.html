@@ -1,165 +1,284 @@
-<!--
-  SmartHealth AI
-  Author: Enock Queenson Eduafo | Student ID: 11014444
-  University of Ghana - Department of Computer Science
-  Information Technology | Supervisor: Prof. Solomon Mensah
-  2026
--->
 {% extends "base.html" %}
-{% block title %}About the Project — SmartHealth AI Student Report{% endblock %}
 
 {% block content %}
-<section class="page-header" style="padding-top: 120px; text-align: center;">
-  <div class="container">
-    <span class="section-tag">PROJECT STATEMENT &amp; REPORT</span>
-    <h1 class="hero-headline" style="margin-bottom: 0.5rem;">Academic Context</h1>
-    <p class="hero-sub" style="margin-inline: auto; max-width: 800px;">
-      This system represents my final year capstone research for my degree in Information Technology within the Department of Computer Science at the University of Ghana.
-    </p>
+<section class="about-header">
+  <div class="container header-content">
+    <span class="tag">ABOUT THE SYSTEM</span>
+    <h1>SmartHealth AI</h1>
+    <p>A multi class machine learning framework for assisting clinical diagnostics through automated analysis of patient biological markers and metabolic profiles.</p>
   </div>
 </section>
 
-<section class="about-body" style="padding: 6rem 0;">
-  <div class="container">
-    
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 6rem; align-items: start;">
-       <!-- ── TEXT CONTENT ─────────────────────────────────── -->
-       <div style="display: flex; flex-direction: column; gap: 4rem;">
-          
-          <div class="reveal">
-             <h2 style="font-size: 2.2rem; margin-bottom: 1.5rem; letter-spacing: -0.02em;">Project Purpose</h2>
-             <p style="font-size: 1.1rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
-                The objective of my study was to explore how modern information technology can augment clinical decision making in Ghana. With medical facilities facing high patient volumes, I wanted to build a prototype that uses machine learning to identify disease patterns before they become critical.
-             </p>
-             <p style="font-size: 1.1rem; color: rgba(255,255,255,0.7);">
-                My system analyzes clinical biomarker data &mdash; which includes things like hematocrit and troponin levels &mdash; to provide instant diagnostic labels. I believe that such tools could one day support practitioners in rural areas where specialist access is limited.
-             </p>
-          </div>
-
-          <div class="reveal">
-             <h2 style="font-size: 2.2rem; margin-bottom: 1.5rem; letter-spacing: -0.02em;">Technical Methodology</h2>
-             <div class="method-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
-                <div class="flip-card" style="height: 220px;">
-                   <div class="flip-card-inner">
-                      <div class="flip-front card" style="background: rgba(255,255,255,0.02); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                         <div style="font-weight: 800; font-size: 0.9rem; color: var(--lime); text-transform: uppercase; margin-bottom: 0.5rem;">Phase 1</div>
-                         <div style="font-weight: 900; font-size: 1.1rem;">Data Engineering</div>
-                      </div>
-                      <div class="flip-back card" style="background: var(--dolive); color: var(--white); padding: 1.5rem; text-align: center; font-size: 0.9rem;">
-                         Processing 2,837 clinical records through stratified splits and feature scaling for optimal model training.
-                      </div>
-                   </div>
-                </div>
-                <div class="flip-card" style="height: 220px;">
-                   <div class="flip-card-inner">
-                      <div class="flip-front card" style="background: rgba(255,255,255,0.02); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                         <div style="font-weight: 800; font-size: 0.9rem; color: var(--lime); text-transform: uppercase; margin-bottom: 0.5rem;">Phase 2</div>
-                         <div style="font-weight: 900; font-size: 1.1rem;">Model Selection</div>
-                      </div>
-                      <div class="flip-back card" style="background: var(--dolive); color: var(--white); padding: 1.5rem; text-align: center; font-size: 0.9rem;">
-                         Comparing Support Vector Machines and Random Forest architectures to maximize weighted F1 performance scores.
-                      </div>
-                   </div>
-                </div>
-                <div class="flip-card" style="height: 220px;">
-                   <div class="flip-card-inner">
-                      <div class="flip-front card" style="background: rgba(255,255,255,0.02); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                         <div style="font-weight: 800; font-size: 0.9rem; color: var(--lime); text-transform: uppercase; margin-bottom: 0.5rem;">Phase 3</div>
-                         <div style="font-weight: 900; font-size: 1.1rem;">Inference Engine</div>
-                      </div>
-                      <div class="flip-back card" style="background: var(--dolive); color: var(--white); padding: 1.5rem; text-align: center; font-size: 0.9rem;">
-                         Developing a Flask based web interface to serve model predictions in a real time clinical simulation environment.
-                      </div>
-                   </div>
-                </div>
-                <div class="flip-card" style="height: 220px;">
-                   <div class="flip-card-inner">
-                      <div class="flip-front card" style="background: rgba(255,255,255,0.02); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                         <div style="font-weight: 800; font-size: 0.9rem; color: var(--lime); text-transform: uppercase; margin-bottom: 0.5rem;">Phase 4</div>
-                         <div style="font-weight: 900; font-size: 1.1rem;">Optimization</div>
-                      </div>
-                      <div class="flip-back card" style="background: var(--dolive); color: var(--white); padding: 1.5rem; text-align: center; font-size: 0.9rem;">
-                         Fine tuning class weight balances to improve detection of minority conditions like heart disease.
-                      </div>
-                   </div>
-                </div>
-             </div>
-          </div>
-
-          <div class="reveal">
-             <h2 style="font-size: 2.2rem; margin-bottom: 1.5rem; letter-spacing: -0.02em;">Technical Challenges</h2>
-             <ul style="list-style: none; display: flex; flex-direction: column; gap: 1.5rem;">
-                <li style="display: flex; gap: 1.5rem;">
-                   <span style="font-weight: 900; color: var(--lime); font-size: 1.2rem;">01</span>
-                   <p style="color: rgba(255,255,255,0.7);">Handling data imbalance was my primary hurdle &mdash; specifically for heart disease data points which were significantly fewer than diabetes records.</p>
-                </li>
-                <li style="display: flex; gap: 1.5rem;">
-                   <span style="font-weight: 900; color: var(--lime); font-size: 1.2rem;">02</span>
-                   <p style="color: rgba(255,255,255,0.7);">Establishing a robust cross validation strategy ensured that accuracy scores were not inflated by overfitting to the training samples.</p>
-                </li>
-                <li style="display: flex; gap: 1.5rem;">
-                   <span style="font-weight: 900; color: var(--lime); font-size: 1.2rem;">03</span>
-                   <p style="color: rgba(255,255,255,0.7);">Managing the integration between the machine learning backend and a modern web interface while ensuring low inference latency.</p>
-                </li>
-             </ul>
-          </div>
-          
-       </div>
-
-       <!-- ── SIDEBAR STATS & TIMELINE ────────────────────── -->
-       <div style="position: sticky; top: 120px;">
-          <div class="card" style="padding: 3rem; background: rgba(197,231,16,0.02); border-color: rgba(197,231,16,0.15);">
-             <h3 style="font-size: 0.8rem; font-weight: 800; color: var(--lime); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2rem;">Student Information</h3>
-             
-             <div style="margin-bottom: 2.5rem;">
-                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 0.25rem;">Researcher Name</div>
-                <div style="font-size: 1.2rem; font-weight: 900;">Enock Queenson Eduafo</div>
-             </div>
-
-             <div style="margin-bottom: 2.5rem;">
-                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 0.25rem;">Student ID Number</div>
-                <div style="font-size: 1.2rem; font-weight: 900; color: var(--lime);">11014444</div>
-             </div>
-
-             <div style="margin-bottom: 2.5rem;">
-                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 0.25rem;">Department</div>
-                <div style="font-size: 1rem; font-weight: 800;">Computer Science</div>
-             </div>
-
-             <div style="margin-bottom: 2.5rem;">
-                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 0.25rem;">Supervisory Office</div>
-                <div style="font-size: 1rem; font-weight: 800;">Professor Solomon Mensah</div>
-             </div>
-
-             <div style="margin-bottom: 2.5rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 2rem;">
-                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 1.25rem;">Project Timeline</div>
-                <div style="position: relative; padding-left: 3rem;">
-                   <div class="timeline-line"></div>
-                   <div class="timeline-fill" style="height: 100%;"></div>
-                   
-                   <div style="position: relative; margin-bottom: 2rem;">
-                      <div style="position: absolute; left: -32px; width: 14px; height: 14px; background: var(--lime); border-radius: 50%; top: 4px;"></div>
-                      <div style="font-weight: 900; font-size: 0.85rem;">Literature Review</div>
-                      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Completed Jan 2026</div>
-                   </div>
-                   <div style="position: relative; margin-bottom: 2rem;">
-                      <div style="position: absolute; left: -32px; width: 14px; height: 14px; background: var(--lime); border-radius: 50%; top: 4px;"></div>
-                      <div style="font-weight: 900; font-size: 0.85rem;">Model Development</div>
-                      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Completed Feb 2026</div>
-                   </div>
-                   <div style="position: relative;">
-                      <div style="position: absolute; left: -32px; width: 14px; height: 14px; background: var(--lime); border-radius: 50%; top: 4px;"></div>
-                      <div style="font-weight: 900; font-size: 0.85rem;">Thesis Defense</div>
-                      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Projected April 2026</div>
-                   </div>
-                </div>
-             </div>
-          </div>
-       </div>
-
+<section class="mission">
+  <div class="container mission-grid">
+    <div class="mission-visual">
+      <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="#C5E710" stroke-width="1.5">
+        <path d="M12 2v20M2 12h20M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"></path>
+        <circle cx="12" cy="12" r="3" fill="#C5E710"></circle>
+        <circle cx="12" cy="5" r="1.5" fill="#C5E710" class="orbit" style="--d: 4s"></circle>
+        <circle cx="12" cy="19" r="1.5" fill="#C5E710" class="orbit" style="--d: 4s; --delay: 2s"></circle>
+        <circle cx="5" cy="12" r="1.5" fill="#C5E710" class="orbit" style="--d: 4s; --delay: 1s"></circle>
+        <circle cx="19" cy="12" r="1.5" fill="#C5E710" class="orbit" style="--d: 4s; --delay: 3s"></circle>
+      </svg>
     </div>
-
+    <div class="mission-text">
+      <h2>The Problem We Address</h2>
+      <p>Clinical diagnostic processes often face challenges due to high diagnostic variability and substantial cognitive load in high volume medical settings. This can lead to delays in identifying chronic conditions that require immediate intervention.</p>
+      <p>Modern healthcare facilities generate vast amounts of structured patient data in electronic health records which remains largely untapped for real time predictive insights. SmartHealth AI aims to bridge this gap by providing an intelligent decision support layer.</p>
+      <p>By leveraging advanced ensemble learning techniques, the system identifies patterns across twenty four distinct biomarkers that might be too subtle for manual review, ensuring a more consistent and data driven approach to patient assessment.</p>
+    </div>
   </div>
 </section>
 
+<section class="architecture">
+  <div class="container">
+    <div class="section-header">
+      <h2>System Architecture</h2>
+    </div>
+    <div class="arch-grid">
+      <div class="arch-card">
+        <span class="arch-num">01</span>
+        <div class="arch-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2H2v10h10V2zM22 2h-10v10h10V2zM12 12H2v10h10V12zM22 12h-10v10h10V12z"></path></svg>
+        </div>
+        <h3>Data Layer</h3>
+        <p>A consolidated repository of normalised patient metadata and physiological laboratory results used for both training and real time inference.</p>
+      </div>
+      <div class="arch-card">
+        <span class="arch-num">02</span>
+        <div class="arch-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        </div>
+        <h3>Preprocessing Pipeline</h3>
+        <p>A rigorous sequence of data cleaning and feature scaling that ensures mathematical consistency across disparate biological measurement units.</p>
+      </div>
+      <div class="arch-card">
+        <span class="arch-num">03</span>
+        <div class="arch-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v8M12 14v8M4.93 4.93l5.66 5.66M13.41 13.41l5.66 5.66M2 12h8M14 12h8M4.93 19.07l5.66-5.66M13.41 10.59l5.66-5.66"></path></svg>
+        </div>
+        <h3>Model Training</h3>
+        <p>An exhaustive automated selection process where multiple supervised learning architectures are evaluated using cross validation to find the optimal classifier.</p>
+      </div>
+      <div class="arch-card">
+        <span class="arch-num">04</span>
+        <div class="arch-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+        </div>
+        <h3>Flask Web Interface</h3>
+        <p>A lightweight and responsive application programming interface which serves as the bridge between clinicians and the predictive machine learning engine.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="conditions-table-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Detectable Conditions</h2>
+    </div>
+    <div class="table-wrapper">
+      <table class="conditions-table">
+        <thead>
+          <tr>
+            <th>Condition</th>
+            <th>Key Biomarkers</th>
+            <th>Training Samples</th>
+            <th>Clinical Significance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="d-flex"><div class="dot lime"></div> Healthy</div></td>
+            <td>Full Panel Range</td>
+            <td>850 Samples</td>
+            <td>Baseline Physiological State</td>
+          </tr>
+          <tr>
+            <td><div class="d-flex"><div class="dot yellow"></div> Diabetes</div></td>
+            <td>Glucose and HbA1c</td>
+            <td>720 Samples</td>
+            <td>Impaired Glucose Regulation</td>
+          </tr>
+          <tr>
+            <td><div class="d-flex"><div class="dot olive"></div> Anemia</div></td>
+            <td>Hemoglobin and MCV</td>
+            <td>640 Samples</td>
+            <td>Reduced Oxygen Transport</td>
+          </tr>
+          <tr>
+            <td><div class="d-flex"><div class="dot red"></div> Heart Disease</div></td>
+            <td>Troponin and Cholesterol</td>
+            <td>590 Samples</td>
+            <td>Cardiovascular System Stress</td>
+          </tr>
+          <tr>
+            <td><div class="d-flex"><div class="dot purple"></div> Thalassemia</div></td>
+            <td>MCH and RBC Count</td>
+            <td>480 Samples</td>
+            <td>Genetic Hemoglobin Defects</td>
+          </tr>
+          <tr>
+            <td><div class="d-flex"><div class="dot orange"></div> Thrombocytopenia</div></td>
+            <td>Platelet Concentration</td>
+            <td>420 Samples</td>
+            <td>Reduced Clotting Capability</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="tech-stack">
+  <div class="container">
+    <div class="section-header">
+      <h2>Technology Stack</h2>
+    </div>
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="stack-inner">
+          <div class="stack-front">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+            <h3>Python 3.12</h3>
+          </div>
+          <div class="stack-back">
+            <p>Core programming language for data science and backend logic.</p>
+          </div>
+        </div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-inner">
+          <div class="stack-front">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93"></path></svg>
+            <h3>Scikit learn</h3>
+          </div>
+          <div class="stack-back">
+            <p>The industry standard library for machine learning algorithms.</p>
+          </div>
+        </div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-inner">
+          <div class="stack-front">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+            <h3>Flask</h3>
+          </div>
+          <div class="stack-back">
+            <p>Lightweight web framework for serving models and handling requests.</p>
+          </div>
+        </div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-inner">
+          <div class="stack-front">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            <h3>Pandas and NumPy</h3>
+          </div>
+          <div class="stack-back">
+            <p>Tools for high performance data manipulation and numerical arrays.</p>
+          </div>
+        </div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-inner">
+          <div class="stack-front">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+            <h3>Kaggle and UCI</h3>
+          </div>
+          <div class="stack-back">
+            <p>Open access clinical repositories used to source training datasets.</p>
+          </div>
+        </div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-inner">
+          <div class="stack-front">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            <h3>Joblib</h3>
+          </div>
+          <div class="stack-back">
+            <p>Utility for efficient serialisation and loading of trained models.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ethics">
+  <div class="container">
+    <div class="section-header">
+      <h2>Ethical Framework</h2>
+    </div>
+    <div class="ethics-grid">
+      <div class="ethics-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <h3>Data Privacy</h3>
+        <p>All training data is fully anonymised to comply with ethical standards for medical informatics Research and Development.</p>
+      </div>
+      <div class="ethics-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+        <h3>Prototype Disclosure</h3>
+        <p>Clear communication that this system serves as an academic prototype and not a replacement for professional healthcare.</p>
+      </div>
+      <div class="ethics-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        <h3>No Over Reliance</h3>
+        <p>Designing workflows where the human clinician remains the final authority in every diagnostic decision and treatment plan.</p>
+      </div>
+      <div class="ethics-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"></path></svg>
+        <h3>Transparent Limitations</h3>
+        <p>Openly documenting known algorithmic biases and where the system may produce less reliable results due to data constraints.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="limitations">
+  <div class="container">
+    <div class="section-header">
+      <h2>Known Limitations</h2>
+    </div>
+    <div class="lim-grid">
+      <div class="lim-card">
+        <span class="lim-label">Data Representativeness</span>
+        <p>The current models are trained on specific demographic clusters and might show reduced accuracy when applied to global populations.</p>
+      </div>
+      <div class="lim-card">
+        <span class="lim-label">Class Imbalance</span>
+        <p>Certain rare conditions have fewer training samples which may lead to a bias towards more common diagnostic outcomes.</p>
+      </div>
+      <div class="lim-card">
+        <span class="lim-label">No Real Time Data</span>
+        <p>The system does not currently account for temporal changes in patient markers and relies on static one time blood samples.</p>
+      </div>
+      <div class="lim-card">
+        <span class="lim-label">Scope of Conditions</span>
+        <p>Diagnostic capabilities are strictly limited to the six conditions presently supported by the training dataset.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="developer">
+  <div class="container">
+    <div class="dev-card">
+      <div class="dev-content">
+        <h2>About the Developer</h2>
+        <p>This system was developed by Enock Queenson Eduafo (Student ID: 11014444) as a final year project in the Department of Computer Science, Information Technology programme, University of Ghana, under the supervision of Professor Solomon Mensah.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="disclaimer-section">
+  <div class="container">
+    <div class="disclaimer-card">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+      <p>This is an academic prototype not a certified medical device. The predictions are for informational testing only and should never be used for actual medical treatment or self diagnosis. Always consult a qualified physician for healthcare needs.</p>
+    </div>
+  </div>
+</section>
 {% endblock %}

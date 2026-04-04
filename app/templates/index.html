@@ -1,189 +1,217 @@
-<!--
-  SmartHealth AI
-  Author: Enock Queenson Eduafo | Student ID: 11014444
-  University of Ghana - Department of Computer Science
-  Information Technology | Supervisor: Prof. Solomon Mensah
-  2026
--->
 {% extends "base.html" %}
-{% block title %}SmartHealth AI — Intelligent Disease Diagnosis Prototype{% endblock %}
+
+{% block head %}
+<style>
+  .hero-word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(40px);
+    animation: wordReveal 0.7s ease forwards;
+  }
+  @keyframes wordReveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-
-<!-- ── HERO SECTION ─────────────────────────────────────────────────── -->
 <section class="hero">
-  <!-- Particle container for JS -->
-  <div class="hero-particles"></div>
-
-  <div class="container" style="display: contents;">
-    <div class="hero-left">
-      <div class="hero-badge">Machine Learning &bull; Healthcare System Prototype</div>
-      <h1 class="hero-headline">
-        INTELLIGENT<br>
-        <span class="hero-highlight glitch">HEALTH</span><br>
-        DIAGNOSIS
+  <div class="container hero-grid">
+    <div class="hero-text">
+      <span class="badge">Machine Learning and Healthcare Informatics</span>
+      <h1 class="hero-title">
+        <span class="hero-word" style="animation-delay: 0.1s">INTELLIGENT</span><br>
+        <span class="hero-word lime-text" style="animation-delay: 0.3s">HEALTH</span><br>
+        <span class="hero-word" style="animation-delay: 0.5s">DIAGNOSIS</span>
       </h1>
-      <p class="hero-sub">
-        A clinical decision-support prototype built to identify patterns in clinical biomarkers across
-        six disease conditions — using modernized machine learning algorithms trained for educational accuracy.
-      </p>
-      
-      <div class="hero-actions">
-        <a href="/predict" class="btn-primary">Run a Diagnosis</a>
-        <a href="/results" class="btn-ghost">View Model Results</a>
+      <p class="hero-sub">Detect chronic conditions with clinical precision using advanced multi-class machine learning models. Built for reliability, designed for modern care.</p>
+      <div class="hero-btns">
+        <a href="/predict" class="btn btn-primary pill">Run a Diagnosis</a>
+        <a href="/results" class="btn btn-ghost">View Model Performance</a>
       </div>
-      
       <div class="hero-stats">
-        <div class="stat">
-          <span class="stat-number">95.1%</span>
-          <span class="stat-label">Model Accuracy</span>
+        <div class="stat-item">
+          <span class="stat-number" data-target="95.1" data-suffix="%">0</span>
+          <span class="stat-label">Best Accuracy</span>
         </div>
-        <div class="stat">
-          <span class="stat-number">4</span>
-          <span class="stat-label">ML Classifiers</span>
+        <div class="stat-item">
+          <span class="stat-number" data-target="4">0</span>
+          <span class="stat-label">ML Models</span>
         </div>
-        <div class="stat">
-          <span class="stat-number">6</span>
-          <span class="stat-label">Diagnoses</span>
+        <div class="stat-item">
+          <span class="stat-number" data-target="6">0</span>
+          <span class="stat-label">Conditions</span>
         </div>
-        <div class="stat">
-          <span class="stat-number">24</span>
+        <div class="stat-item">
+          <span class="stat-number" data-target="24">0</span>
           <span class="stat-label">Biomarkers</span>
         </div>
       </div>
     </div>
-    
-    <div class="hero-right">
-      <div class="hero-visual">
-        <!-- Rotating ring behind the drawing -->
-        <div class="gradient-ring"></div>
-        
-        <svg viewBox="0 0 420 480" fill="none" class="hero-svg">
-          <!-- Background glow circles -->
-          <circle cx="210" cy="240" r="190" fill="#C5E710" opacity="0.08"/>
-          <circle cx="210" cy="240" r="140" fill="#C5E710" opacity="0.06"/>
-
-          <!-- Heartbeat line path - to be animated by JS/CSS -->
-          <path id="heartbeat" d="M40 240 L100 240 L120 180 L145 300 L170 200 L195 260 L220 240 L380 240"
-                stroke="#C5E710" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
-
-          <!-- Brain drawing segments -->
-          <path d="M160 150 C140 130 115 130 105 150 C90 150 75 165 80 185
-                   C65 195 65 215 80 225 C75 245 90 260 110 258
-                   C115 275 130 285 150 280 C160 295 180 295 190 280
-                   C210 290 230 280 235 265 C255 270 270 255 265 238
-                   C282 228 282 205 265 197 C272 177 258 160 240 162
-                   C232 145 210 138 200 150 C190 138 168 140 160 150Z"
-                stroke="#C5E710" stroke-width="2" fill="none" opacity="0.7"/>
-
-          <!-- DNA structure drawn with paths -->
-          <path d="M330 80 C310 95 350 115 330 130 C310 145 350 165 330 180 C310 195 350 215 330 230 C310 245 350 265 330 280"
-                stroke="#8E9630" stroke-width="2" fill="none" opacity="0.8"/>
-          <path d="M360 80 C380 95 340 115 360 130 C380 145 340 165 360 180 C380 195 340 215 360 230 C380 245 340 265 360 280"
-                stroke="#C5E710" stroke-width="2" fill="none" opacity="0.8"/>
-        </svg>
-
-        <!-- Floating individual metric nodes -->
-        <div class="metric-card" style="top:5%;left:-10%;">
-          <div class="metric-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </div>
-          <div>
-            <div class="metric-val">95.1%</div>
-            <div class="metric-lbl">Accuracy</div>
-          </div>
-        </div>
-        <div class="metric-card" style="bottom:15%;right:-10%;">
-          <div class="metric-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          </div>
-          <div>
-            <div class="metric-val">Fast</div>
-            <div class="metric-lbl">Inference</div>
-          </div>
-        </div>
+    <div class="hero-visual">
+      <div class="metric-card m-tr" style="--delay: 0.8s">
+        <span class="m-val">95.1%</span>
+        <span class="m-lab">Accuracy</span>
       </div>
+      <div class="metric-card m-bl" style="--delay: 1s">
+        <span class="m-val">5-Fold</span>
+        <span class="m-lab">Cross Validation</span>
+      </div>
+      <svg class="hero-svg" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="250" cy="250" r="248" stroke="#C5E710" stroke-width="2" stroke-dasharray="8 8" opacity="0.2"></circle>
+        <path d="M50 250H150L180 150L220 350L250 250H450" stroke="#C5E710" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="heartbeat-line"></path>
+        <rect x="200" y="200" width="100" height="100" rx="20" stroke="#C5E710" stroke-width="2" opacity="0.4"></rect>
+        <circle cx="250" cy="250" r="120" stroke="#C5E710" stroke-width="1" opacity="0.1"></circle>
+        <!-- Data Nodes -->
+        <circle cx="100" cy="100" r="10" fill="#C5E710" class="floating-node" style="--d: 8s; --dy: -20px"></circle>
+        <circle cx="400" cy="150" r="8" fill="#F4DF6B" class="floating-node" style="--d: 10s; --dy: 30px"></circle>
+        <circle cx="420" cy="400" r="12" fill="#8E9630" class="floating-node" style="--d: 12s; --dy: -40px"></circle>
+        <circle cx="80" cy="380" r="6" fill="#C5E710" class="floating-node" style="--d: 9s; --dy: 20px"></circle>
+      </svg>
     </div>
   </div>
 </section>
 
-<!-- ── STEPS SECTION ────────────────────────────────────────────────── -->
-<section class="section section-how">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-tag">PROCEDURE</span>
-      <h2 class="section-title">Diagnostic Process</h2>
-      <p class="section-sub">A streamlined three-step workflow to reach prediction results from raw patient health data.</p>
-    </div>
-    
-    <div class="steps-grid card-grid">
-      <div class="card step-card">
+<section class="how-it-works">
+  <div class="container text-center">
+    <span class="tag">PROCESS</span>
+    <h2>Intelligent Workflow</h2>
+    <div class="steps-grid">
+      <div class="step-card">
         <div class="step-num">01</div>
-        <h3 style="margin-bottom: 0.5rem;">Input Statistics</h3>
-        <p>A user enters up to 24 critical clinical biomarkers into the secure web interface.</p>
+        <div class="step-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        </div>
+        <h3>Enter Patient Data</h3>
+        <p>Input clinical biomarkers from blood panels and metabolic screenings.</p>
       </div>
-      <div class="card step-card">
+      <div class="step-arrow">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C5E710" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+      </div>
+      <div class="step-card">
         <div class="step-num">02</div>
-        <h3 style="margin-bottom: 0.5rem;">Neural Processing</h3>
-        <p>The system runs the data through my trained machine learning model files stored in the backend.</p>
+        <div class="step-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8M12 14v8M4.93 4.93l5.66 5.66M13.41 13.41l5.66 5.66M2 12h8M14 12h8M4.93 19.07l5.66-5.66M13.41 10.59l5.66-5.66"></path></svg>
+        </div>
+        <h3>ML Model Runs</h3>
+        <p>Optimized classifiers analyze data points against trained disease patterns.</p>
       </div>
-      <div class="card step-card">
+      <div class="step-arrow">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C5E710" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+      </div>
+      <div class="step-card">
         <div class="step-num">03</div>
-        <h3 style="margin-bottom: 0.5rem;">Clinical Results</h3>
-        <p>Receive an instant prediction label, confidence scores, and structured recommendations.</p>
+        <div class="step-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+        </div>
+        <h3>Receive Prediction</h3>
+        <p>Get a diagnostic report with confidence scores and clinical advice.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── DISEASES SECTION ─────────────────────────────────────────────── -->
-<section class="section section-diseases" style="background: #010A00;">
+<section class="conditions">
   <div class="container">
     <div class="section-header">
-      <span class="section-tag">CLASSIFICATION</span>
-      <h2 class="section-title">Scope of Detection</h2>
-      <p class="section-sub">My system was designed and trained to recognize these six distinct health conditions.</p>
+      <span class="tag">CAPABILITIES</span>
+      <h2>Six Detectable Conditions</h2>
     </div>
-    
-    <div class="disease-grid card-grid">
-      <!-- These cards animate in using staggered reveal logic in main.js -->
-      <div class="card disease-card" style="opacity: 0;">
-        <h4 style="color: var(--lime); margin-bottom: 0.5rem;">Healthy</h4>
-        <p>Baseline reference class for records with no pathological indicators.</p>
+    <div class="disease-grid">
+      <div class="disease-card" data-color="lime">
+        <div class="d-dot" style="background:#C5E710"></div>
+        <div class="d-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        </div>
+        <h3>Healthy</h3>
+        <p>Reference state indicating values within standard physiological ranges.</p>
       </div>
-      <div class="card disease-card" style="opacity: 0;">
-        <h4 style="color: var(--yellow); margin-bottom: 0.5rem;">Diabetes</h4>
-        <p>Detection of clinical metabolic markers related to glucose regulation.</p>
+      <div class="disease-card" data-color="yellow">
+        <div class="d-dot" style="background:#F4DF6B"></div>
+        <div class="d-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93"></path></svg>
+        </div>
+        <h3>Diabetes</h3>
+        <p>Metabolic indicators of chronic high blood glucose and insulin resistance.</p>
       </div>
-      <div class="card disease-card" style="opacity: 0;">
-        <h4 style="color: var(--olive); margin-bottom: 0.5rem;">Anemia</h4>
-        <p>Identification of patterns in hemoglobin and red blood cell counts.</p>
+      <div class="disease-card" data-color="olive">
+        <div class="d-dot" style="background:#8E9630"></div>
+        <div class="d-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 11V7a5 5 0 0 1 10 0v4"></path><path d="M5 11h14v10H5z"></path></svg>
+        </div>
+        <h3>Anemia</h3>
+        <p>Patterns suggesting iron deficiency or low red blood cell concentration.</p>
       </div>
-      <div class="card disease-card" style="opacity: 0;">
-        <h4 style="color: #e74c3c; margin-bottom: 0.5rem;">Heart Disease</h4>
-        <p>Analysis of troponin and structural cardiovascular risk biomarkers.</p>
+      <div class="disease-card" data-color="red">
+        <div class="d-dot" style="background:#e74c3c"></div>
+        <div class="d-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </div>
+        <h3>Heart Disease</h3>
+        <p>Cardiovascular markers indicating potential chronic heart conditions.</p>
       </div>
-      <div class="card disease-card" style="opacity: 0;">
-        <h4 style="color: #9b59b6; margin-bottom: 0.5rem;">Thalassemia</h4>
-        <p>Clinical markers indicative of hereditary hemoglobin structure issues.</p>
+      <div class="disease-card" data-color="purple">
+        <div class="d-dot" style="background:#9b59b6"></div>
+        <div class="d-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        </div>
+        <h3>Thalassemia</h3>
+        <p>Specific hemoglobin structural patterns indicating genetic blood disorders.</p>
       </div>
-      <div class="card disease-card" style="opacity: 0;">
-        <h4 style="color: #e67e22; margin-bottom: 0.5rem;">Thrombocytopenia</h4>
-        <p>Identification of dangerously low platelet counts from digital health records.</p>
+      <div class="disease-card" data-color="orange">
+        <div class="d-dot" style="background:#e67e22"></div>
+        <div class="d-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+        </div>
+        <h3>Thrombocytopenia</h3>
+        <p>Patterns consistent with critically low platelet counts in blood samples.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── CTA SECTION ──────────────────────────────────────────────────── -->
-<section class="section">
+<section class="models-preview">
+  <div class="container preview-grid">
+    <div class="preview-text">
+      <span class="tag">EVALUATION</span>
+      <h2>Four Classifiers.<br>One Winner.</h2>
+      <p>Our ensemble was evaluated against four primary architectures to find the most reliable balance of precision and recall. After 5-fold cross-validation, the winner was selected.</p>
+      <p>Random Forest demonstrated superior performance in handling the complex high-dimensional biomarker data with a finalized accuracy of 95.1%.</p>
+      <a href="/results" class="btn btn-ghost">Full Comparison</a>
+    </div>
+    <div class="preview-bars">
+      <div class="bar-row">
+        <div class="bar-info"><span>Random Forest</span><span>95.1%</span></div>
+        <div class="bar-bg"><div class="bar-fill perf-fill" style="--w: 95.1%; background: var(--lime)"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-info"><span>Support Vector Machine</span><span>94.9%</span></div>
+        <div class="bar-bg"><div class="bar-fill perf-fill" style="--w: 94.9%; background: var(--olive)"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-info"><span>Decision Tree</span><span>92.6%</span></div>
+        <div class="bar-bg"><div class="bar-fill perf-fill" style="--w: 92.6%; background: var(--dolive)"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-info"><span>Logistic Regression</span><span>81.9%</span></div>
+        <div class="bar-bg"><div class="bar-fill perf-fill" style="--w: 81.9%; background: var(--yellow)"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
   <div class="container">
-    <div class="cta-inner card" style="text-align: center; border-color: rgba(197,231,16,0.3); background: rgba(197,231,16,0.02);">
-       <h2 class="section-title" style="margin-bottom: 1rem;">Ready for Clinical Testing?</h2>
-       <p style="margin-bottom: 2rem; max-width: 600px; margin-inline: auto;">Run the diagnostic engine yourself by entering sample data from the laboratory.</p>
-       <a href="/predict" class="btn-primary large">Start the Prediction Engine</a>
+    <div class="cta-card">
+      <div class="cta-visual">
+        <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#C5E710" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      </div>
+      <div class="cta-text">
+        <h2>Ready for an Intelligent Diagnosis?</h2>
+        <p>Access the predictive engine and input laboratory markers for a comprehensive AI analysis of clinical health markers.</p>
+        <a href="/predict" class="btn btn-primary pill">Start Diagnosis Now</a>
+      </div>
     </div>
   </div>
 </section>
-
 {% endblock %}
