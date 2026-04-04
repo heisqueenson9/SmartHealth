@@ -15,9 +15,7 @@ env/
 .env
 .env.local
 
-# Trained model files (regenerate with src/train_models.py)
-models/*.pkl
-models/results_summary.json
+# Trained model files (committed to ensure they exist on live host)
 
 # Logs
 *.log
