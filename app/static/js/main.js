@@ -3,49 +3,93 @@
  * Author: Enock Queenson Eduafo (11014444)
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Mobile Hamburger Toggle - Fixed and Enhanced
-    const navToggle = document.getElementById('navToggle');
-    const navLinks  = document.getElementById('navLinks');
+// ── MOBILE NAVIGATION ──────────────────────────────────────
+(function() {
+  const navToggle  = document.getElementById('navToggle');
+  const navLinks   = document.getElementById('navLinks');
+  const navBackdrop = document.getElementById('navBackdrop');
+  const mainNav    = document.getElementById('mainNav');
 
-    if (navToggle && navLinks) {
-        navToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('open');
-            navToggle.classList.toggle('open');
-            document.body.style.overflow = 
-                navLinks.classList.contains('open') ? 'hidden' : '';
-        });
+  if (!navToggle || !navLinks) return;
 
-        // Close menu when clicking links
-        navLinks.querySelectorAll('a, .nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('open');
-                navToggle.classList.remove('open');
-                document.body.style.overflow = '';
-            });
-        });
+  function openNav() {
+    navLinks.classList.add('open');
+    navToggle.classList.add('open');
+    navToggle.setAttribute('aria-expanded', 'true');
 
-        // Close on outside click
-        document.addEventListener('click', (e) => {
-            if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
-                navLinks.classList.remove('open');
-                navToggle.classList.remove('open');
-                document.body.style.overflow = '';
-            }
-        });
+    // Show backdrop if it exists
+    if (navBackdrop) navBackdrop.classList.add('open');
+
+    // Lock body scroll so page content cannot shift
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+  }
+
+  function closeNav() {
+    navLinks.classList.remove('open');
+    navToggle.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+
+    // Hide backdrop
+    if (navBackdrop) navBackdrop.classList.remove('open');
+
+    // Restore body scroll
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+  }
+
+  function toggleNav() {
+    if (navLinks.classList.contains('open')) {
+      closeNav();
+    } else {
+      openNav();
     }
+  }
 
-    // 2. Navbar Scroll Effect (Blur & Border)
-    const navbar = document.querySelector('.navbar');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
+  // Toggle on hamburger click
+  navToggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleNav();
+  });
+
+  // Close when any nav link is clicked
+  navLinks.querySelectorAll('.nav-link').forEach(function(link) {
+    link.addEventListener('click', function() {
+      closeNav();
     });
+  });
 
-    // 3. IntersectionObserver for Bar Animations
+  // Close when backdrop is clicked
+  if (navBackdrop) {
+    navBackdrop.addEventListener('click', function() {
+      closeNav();
+    });
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && navLinks.classList.contains('open')) {
+      closeNav();
+    }
+  });
+
+  // Navbar scroll effect
+  window.addEventListener('scroll', function() {
+    if (!mainNav) return;
+    if (window.scrollY > 80) {
+      mainNav.classList.add('scrolled');
+    } else {
+      mainNav.classList.remove('scrolled');
+    }
+  }, { passive: true });
+
+})();
+
+// ── REANIMATION & OBSERVERS ──────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    // IntersectionObserver for Bar Animations
     const barObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -65,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bars = document.querySelectorAll('.perf-fill, .pbar-fill, .bar-chart-fill, .bc-fill, .cv-bar-fill, .cv-bf, .mini-fill, .mbar-f, .prob-bar-fill');
     bars.forEach(bar => barObserver.observe(bar));
 
-    // 4. IntersectionObserver for Card Fade-in with Stagger
+    // IntersectionObserver for Card Fade-in with Stagger
     const cardObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -83,19 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
         cardObserver.observe(card);
     });
 
-    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
-        const obs = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                    obs.unobserve(entry.target);
-                }
-            });
-        });
-        obs.observe(el);
-    });
-
     // Handle reveals
     setInterval(() => {
         document.querySelectorAll('.reveal').forEach(el => {
@@ -104,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 100);
 
-    // 5. IntersectionObserver for Count-up
+    // Count-up
     const countObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
