@@ -127,9 +127,11 @@ def static_test():
 
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
-    """Handles health biomarker data to generate clinical diagnostic predictions with fallback support."""
+    """Handles health biomarker data to generate clinical diagnostic predictions via POST request."""
     try:
         data = request.get_json(force=True)
+        if not data:
+            return jsonify({'error': 'Missing JSON body.', 'status': 'failed'}), 400
         
         # Model key normalizer: ensures frontend keys match backend expectations
         MODEL_KEY_MAP = {
@@ -139,73 +141,85 @@ def api_predict():
             'logistic_regression': 'logistic_regression', 'logisticregression': 'logistic_regression', 'lr': 'logistic_regression',
         }
 
-        model_key_raw = data.get('model', 'random_forest').lower().strip()
+        model_key_raw = str(data.get('model', 'random_forest')).lower().strip()
         model_key = MODEL_KEY_MAP.get(model_key_raw, 'random_forest')
         
-        # Smart Fallback logic: use any available model if specific one fails to load
+        # Fallback logic: check app context or global MODELS dictionary
+        MODELS = getattr(app, 'MODELS', {})
         model = MODELS.get(model_key)
+        
         fallback_used = False
         if model is None:
-            for fallback_key in ['random_forest', 'decision_tree', 'logistic_regression', 'svm']:
-                if MODELS.get(fallback_key) is not None:
-                    model = MODELS[fallback_key]
-                    model_key = fallback_key
+            # Emergency fallback: try and find any loaded model
+            for alt_key in ['random_forest', 'decision_tree', 'logistic_regression', 'svm']:
+                if MODELS.get(alt_key) is not None:
+                    model = MODELS[alt_key]
+                    model_key = alt_key
                     fallback_used = True
                     break
         
         if model is None:
             return jsonify({
-                'error': 'No ML models are currently available. Please check deployment configuration.',
-                'models_status': {k: v is not None for k, v in MODELS.items()}
+                'error': 'Diagnostic models not available. Please verify model binaries in /models directory.',
+                'status': 'failed',
+                'models_status': {k: (v is not None) for k, v in MODELS.items()}
             }), 503
         
         features = data.get('features', [])
-        if len(features) != 24:
-            return jsonify({'error': f'Expected 24 features, got {len(features)}'}), 400
+        if not isinstance(features, list) or len(features) != 24:
+            return jsonify({'error': f'Expected 24 biomarker fields, received {len(features)}.', 'status': 'failed'}), 400
         
+        # Standardised clinical biomarker processing
         X = np.array(features, dtype=float).reshape(1, -1)
         prediction = int(model.predict(X)[0])
         probabilities = model.predict_proba(X)[0].tolist()
         confidence = round(max(probabilities) * 100, 1)
         
+        # CORRECT ALPHABETICAL ORDER from train_models.py (F1 Score Maximised)
         CLASS_LABELS = [
-            'Healthy Reference', 'Type 2 Diabetes', 'Clinical Anemia',
-            'Heart Condition', 'Thalassemia', 'Thrombocytopenia'
+            'Clinical Anemia',    # 0
+            'Type 2 Diabetes',    # 1
+            'Healthy Reference',  # 2
+            'Heart Condition',    # 3
+            'Thalassemia',        # 4
+            'Thrombocytopenia'    # 5
         ]
+        
         CLASS_DESCRIPTIONS = {
-            'Healthy Reference': 'Biomarkers indicate physiological values within normal clinical ranges. No significant disease markers detected.',
-            'Type 2 Diabetes': 'Elevated glucose and HbA1c levels suggest chronic metabolic dysregulation consistent with Type 2 Diabetes.',
-            'Clinical Anemia': 'Low hemoglobin and RBC markers indicate iron-deficient erythropoiesis or blood loss anemia.',
-            'Heart Condition': 'Elevated troponin and cardiovascular markers suggest potential ischemic or hypertensive cardiovascular stress.',
-            'Thalassemia': 'Abnormal MCH and RBC structural markers indicate hereditary hemoglobin chain production disorder.',
-            'Thrombocytopenia': 'Critically reduced platelet count indicates increased bleeding risk requiring urgent clinical review.'
-        }
-        CLASS_RECOMMENDATIONS = {
-            'Healthy Reference': ['Maintain current lifestyle', 'Annual blood panel recommended', 'Continue balanced nutrition'],
-            'Type 2 Diabetes': ['Consult endocrinologist immediately', 'Monitor blood glucose daily', 'Reduce simple carbohydrate intake'],
-            'Clinical Anemia': ['Iron supplementation evaluation', 'Dietary iron increase', 'Consult haematologist'],
-            'Heart Condition': ['Urgent cardiology referral', 'ECG and echocardiogram advised', 'Monitor blood pressure daily'],
-            'Thalassemia': ['Genetic counselling recommended', 'Haematology specialist referral', 'Family screening advised'],
-            'Thrombocytopenia': ['Immediate haematology referral', 'Avoid NSAIDs', 'Monitor for bleeding symptoms']
+            'Healthy Reference': 'Physiological markers within established clinical baseline ranges.',
+            'Type 2 Diabetes': 'Glucose and HbA1c elevation suggests chronic metabolic dysregulation.',
+            'Clinical Anemia': 'Red blood cell counts or hemoglobin concentration below physiological norms.',
+            'Heart Condition': 'Cardiovascular enzyme and lipid markers indicate cardiac stress.',
+            'Thalassemia': 'Hereditary blood disorder affecting hemoglobin production pathways.',
+            'Thrombocytopenia': 'Low platelet count indicating critical clotting risk factors.'
         }
         
-        label = CLASS_LABELS[prediction] if prediction < len(CLASS_LABELS) else 'Unknown'
+        label = CLASS_LABELS[prediction] if 0 <= prediction < len(CLASS_LABELS) else 'Unclassified'
         
         return jsonify({
             'prediction': label,
             'confidence': confidence,
             'probabilities': dict(zip(CLASS_LABELS, probabilities)),
-            'description': CLASS_DESCRIPTIONS.get(label, ''),
-            'recommendations': CLASS_RECOMMENDATIONS.get(label, []),
+            'description': CLASS_DESCRIPTIONS.get(label, 'Diagnostic data under clinical review.'),
+            'recommendations': [
+                "Consult a licensed medical professional for formal clinical review.",
+                "Ensure all biomarker inputs match your latest laboratory report.",
+                "Do not modify any ongoing treatment based exclusively on algorithmic predictions."
+            ],
             'model_used': model_key,
-            'fallback_used': fallback_used
+            'fallback_used': fallback_used,
+            'status': 'success'
         })
         
+    except ValueError as ve:
+        return jsonify({'error': f'Invalid numeric data: {str(ve)}', 'status': 'failed'}), 400
     except Exception as e:
         import traceback
         return jsonify({
-            'error': str(e),
-            'trace': traceback.format_exc()
+            'error': 'Predictive engine encountered a runtime exception.',
+            'status': 'failed',
+            'detail': str(e),
+            'trace': traceback.format_exc() if app.debug else None
         }), 500
 
 if __name__ == '__main__':

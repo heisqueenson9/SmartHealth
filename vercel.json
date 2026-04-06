@@ -11,30 +11,8 @@
   ],
   "routes": [
     {
-      "src": "/static/css/(.*)",
-      "dest": "/app/static/css/$1",
-      "headers": { "Cache-Control": "public, max-age=31536000" }
-    },
-    {
-      "src": "/static/js/(.*)",
-      "dest": "/app/static/js/$1",
-      "headers": { "Cache-Control": "public, max-age=31536000" }
-    },
-    {
-      "src": "/static/images/(.*)",
-      "dest": "/app/static/images/$1"
-    },
-    {
-      "src": "/static/fonts/(.*)",
-      "dest": "/app/static/fonts/$1"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "/app/static/$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/api/index.py"
+      "dest": "api/index.py"
     }
   ]
 }
