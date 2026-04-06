@@ -60,6 +60,10 @@ body {
   text-transform: uppercase;
 }
 
+.section-label, .fsec-title {
+  display: block; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; color: var(--lime); letter-spacing: 2px; margin-bottom: 25px;
+}
+
 /* Fluid Typography */
 .hero-title, .hero-h {
   font-size: clamp(2rem, 8vw, 5rem);
@@ -416,9 +420,10 @@ section { padding: 100px 0; }
 /* Hero Section Extension */
 .hero-grid {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 80px;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
   align-items: center;
+  min-height: calc(100vh - 140px);
 }
 
 .badge {
@@ -593,15 +598,52 @@ section { padding: 100px 0; }
 .mcard.active { background: rgba(197, 231, 16, 0.08); border-color: var(--lime); }
 .best-badge { position: absolute; top: 10px; right: 10px; background: var(--lime); color: var(--black); font-size: 0.65rem; font-weight: 900; padding: 3px 10px; border-radius: 6px; text-transform: uppercase; }
 
-.preset-buttons, .preset-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
-.pbtn { padding: 8px 18px; border-radius: 12px; font-size: 0.85rem; min-height: 44px; }
+.preset-btns, .preset-buttons, .pbtns, .preset-row { 
+  display: flex; 
+  gap: 12px; 
+  flex-wrap: wrap; 
+  margin-bottom: 30px; 
+}
+.pbtn { padding: 8px 18px; border-radius: 12px; font-size: 0.85rem; min-height: 44px; font-weight: 600; }
 
 .input-group { background: rgba(255, 255, 255, 0.03); padding: 30px; border-radius: 24px; margin-bottom: 25px; border: 1px solid rgba(255, 255, 255, 0.05); }
-.input-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
-.biomarker-input, .bm-input {
+.biomarker-grid, .bio-grid, .input-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+  gap: 30px; 
+}
+.biomarker-group, .bio-grp {
+  background: rgba(255, 255, 255, 0.03); 
+  padding: 30px; 
+  border-radius: 24px; 
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.group-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #fff;
+  border-left: 3px solid var(--lime);
+  padding-left: 15px;
+}
+.input-field, .inp-f {
+  margin-bottom: 15px;
+}
+.input-field label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--gray);
+  margin-bottom: 10px;
+}
+.biomarker-input, .bm-input, .bio-inp {
   background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 12px 16px; color: var(--white); border-radius: 10px; font-family: inherit;
-  font-size: 1rem; transition: var(--transition); text-align: center; width: 100%; min-height: 44px;
+  font-size: 1rem; transition: var(--transition); text-align: left; width: 100%; min-height: 44px;
+}
+.biomarker-input:focus {
+  outline: none;
+  border-color: var(--lime);
+  background: rgba(197, 231, 16, 0.05);
 }
 
 .result-panel, .res-panel {
