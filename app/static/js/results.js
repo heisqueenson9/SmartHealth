@@ -24,6 +24,18 @@ document.addEventListener('DOMContentLoaded', () => {
         resultObserver.observe(card);
     });
 
+    // 2.b Animate Table Rows
+    const tableRows = document.querySelectorAll('.metrics-table tbody tr');
+    tableRows.forEach((row, index) => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(10px)';
+        row.style.transition = `all 0.4s ease ${index * 0.08}s`;
+        setTimeout(() => {
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+        }, 100);
+    });
+
     // Handle reveals for result cards
     const obs = new IntersectionObserver(entries => {
         entries.forEach(entry => {

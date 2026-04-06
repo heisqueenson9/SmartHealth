@@ -5,8 +5,8 @@
   .hero-word {
     display: inline-block;
     opacity: 0;
-    transform: translateY(40px);
-    animation: wordReveal 0.7s ease forwards;
+    transform: translateY(30px);
+    animation: wordReveal 0.6s ease forwards;
   }
   @keyframes wordReveal {
     to { opacity: 1; transform: translateY(0); }
@@ -14,6 +14,43 @@
   
   @media (max-width: 768px) {
     .hero-word { animation-duration: 0.4s; }
+  }
+  
+  .glow-pulse {
+    animation: textGlowPulse 2.5s infinite alternate ease-in-out;
+  }
+  @keyframes textGlowPulse {
+    from { text-shadow: 0 0 5px rgba(168, 230, 61, 0.2); }
+    to { text-shadow: 0 0 20px rgba(168, 230, 61, 0.8), 0 0 30px rgba(168, 230, 61, 0.6); }
+  }
+  
+  .hero-sub {
+    opacity: 0;
+    animation: fadeIn 0.8s ease 0.85s forwards;
+  }
+  .hero-btns .btn {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlideUp 0.6s ease forwards;
+  }
+  .hero-btns .btn:nth-child(1) { animation-delay: 1s; }
+  .hero-btns .btn:nth-child(2) { animation-delay: 1.15s; }
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+  @keyframes fadeSlideUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .hero-visual {
+    width: 100%;
+    overflow: hidden;
+  }
+  .hero-svg {
+    animation: spinSlow 20s linear infinite;
   }
 </style>
 {% endblock %}
@@ -24,9 +61,9 @@
     <div class="hero-text">
       <span class="badge hero-badge">Machine Learning and Healthcare Informatics</span>
       <h1 class="hero-title hero-h">
-        <span class="hero-word" style="animation-delay: 0.1s">INTELLIGENT</span><br>
-        <span class="hero-word lime-text" style="animation-delay: 0.3s">HEALTH</span><br>
-        <span class="hero-word" style="animation-delay: 0.5s">DIAGNOSIS</span>
+        <span class="hero-word" style="animation-delay: 0.15s">INTELLIGENT</span><br>
+        <span class="hero-word lime-text glow-pulse" style="animation-delay: 0.3s">HEALTH</span><br>
+        <span class="hero-word" style="animation-delay: 0.45s">DIAGNOSIS</span>
       </h1>
       <p class="hero-sub">Detect chronic conditions with clinical precision using advanced multi-class machine learning models. Built for reliability, designed for modern care by Enock Queenson Eduafo (11014444).</p>
       <div class="hero-btns hero-acts">
@@ -53,11 +90,11 @@
       </div>
     </div>
     <div class="hero-visual">
-      <div class="metric-card m-tr m-card" style="--delay: 0.8s">
-        <span class="m-val">95.1%</span>
+      <div class="metric-card m-tr m-card" style="--delay: 0.8s; right: 0; max-width: 140px;">
+        <span class="m-val stat-n" data-target="95.1" data-suffix="%">0%</span>
         <span class="m-lab">Accuracy</span>
       </div>
-      <div class="metric-card m-bl m-card" style="--delay: 1s">
+      <div class="metric-card m-bl m-card" style="--delay: 1s; left: 0; max-width: 140px;">
         <span class="m-val">5-Fold</span>
         <span class="m-lab">CV Validation</span>
       </div>
@@ -207,13 +244,13 @@
 <section class="cta sec-cta">
   <div class="container">
     <div class="cta-inner cta-in">
-      <div class="cta-illustration cta-il">
+      <div class="cta-illustration cta-il" style="animation: pulseRotate 2s ease-in-out infinite;">
         <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#C5E710" stroke-width="1.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
       </div>
       <div class="cta-text">
         <h2 class="section-title sec-title">Ready for Clinical Prediction?</h2>
         <p>Start the diagnostic engine and input laboratory biomarkers for an intelligent AI-driven clinical assessment.</p>
-        <a href="/predict" class="btn btn-primary pill btn-p">Access Predictive Engine</a>
+        <a href="/predict" class="btn btn-primary pill btn-p shimmer-btn">Access Predictive Engine</a>
       </div>
     </div>
   </div>

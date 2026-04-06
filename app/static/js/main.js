@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 barObserver.unobserve(bar);
             }
         });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
 
     const bars = document.querySelectorAll('.perf-fill, .pbar-fill, .bar-chart-fill, .bc-fill, .cv-bar-fill, .cv-bf, .mini-fill, .mbar-f, .prob-bar-fill');
     bars.forEach(bar => barObserver.observe(bar));
@@ -117,9 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 cardObserver.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
 
-    const cards = document.querySelectorAll('.disease-card, .dis-card, .step-card, .step, .metric-card, .m-card, .arch-card, .meth-card, .cv-card, .cm-card, .lim-card, .ethics-item');
+    const cards = document.querySelectorAll('.disease-card, .dis-card, .step-card, .step, .metric-card, .m-card, .arch-card, .meth-card, .cv-card, .cm-card, .lim-card, .ethics-item, .step-arrow, .stack-card, .reveal-on-scroll');
     cards.forEach((card, i) => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(30px)';
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 countObserver.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
 
     const numbers = document.querySelectorAll('.stat-number, .stat-n, .cv-score, .cv-sc');
     numbers.forEach(num => countObserver.observe(num));
@@ -182,5 +182,52 @@ styleNode.textContent = `
         70% { width: calc(var(--w) + 5%); }
         100% { width: var(--w); }
     }
+    @keyframes pulseRotate {
+        0%, 100% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(5deg) scale(1.05); }
+    }
+    .shimmer-btn {
+        position: relative;
+        overflow: hidden;
+    }
+    .shimmer-btn::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 50%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        animation: shimmerSweep 3s infinite;
+    }
+    @keyframes shimmerSweep {
+        100% { left: 200%; }
+    }
+    .step-arrow.reveal svg {
+        animation: drawArrow 1s ease forwards;
+        opacity: 0;
+    }
+    @keyframes drawArrow {
+        to { opacity: 1; transform: translateX(10px); }
+    }
+    .stack-card.reveal {
+        animation: stackEntrance 0.6s ease forwards, stackFloat 3s infinite ease-in-out;
+    }
+    @keyframes stackEntrance {
+        from { opacity: 0; transform: translateX(-40px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes stackFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+    .stack-card { 
+        position: relative; overflow: hidden; border-left: 3px solid transparent; transition: all 0.3s;
+    }
+    .stack-card:hover { transform: scale(1.03) translateY(-6px) !important; border-left: 3px solid #A8E63D; }
+    .stack-card::after {
+        content: ''; position: absolute; top:0; left:-100%; width: 50%; height:100%;
+        background: linear-gradient(90deg, transparent, rgba(168,230,61,0.2), transparent);
+    }
+    .stack-card.reveal::after { animation: shimmerPass 1.5s ease-out forwards; }
+    @keyframes shimmerPass { to { left: 200%; } }
 `;
 document.head.appendChild(styleNode);
