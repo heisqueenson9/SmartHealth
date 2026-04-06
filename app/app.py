@@ -1,179 +1,124 @@
-# =============================================================
-# SmartHealth AI - Main Flask Application
-# Author:      Enock Queenson Eduafo
-# Student ID:  11014444
-# Institution: University of Ghana
-# Department:  Computer Science - Information Technology
-# Supervisor:  Professor Solomon Mensah
-# Year:        2026
-# =============================================================
+"""
+SmartHealth AI — Flask Application Entry Point
+Author: Enock Queenson Eduafo (11014444)
+University of Ghana | Final Year Project 2026
+Supervisor: Professor Solomon Mensah
 
-import os
-import sys
-import json
-import numpy as np
-import joblib
+This module initialises the Flask web application, loads pre-trained
+machine learning models from the /models directory, exposes prediction
+API routes, and serves the frontend HTML templates.
+"""
+
+import os, json, numpy as np
 from flask import Flask, render_template, request, jsonify
+import joblib
 
-BASE_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODELS_DIR   = os.path.join(BASE_DIR, 'models')
-TEMPLATE_DIR = os.path.join(BASE_DIR, 'app', 'templates')
-STATIC_DIR   = os.path.join(BASE_DIR, 'app', 'static')
-
-app = Flask(
-    __name__,
-    template_folder=TEMPLATE_DIR,
-    static_folder=STATIC_DIR
+app = Flask(__name__, 
+    template_folder='templates',
+    static_folder='static',
+    static_url_path='/static'
 )
-app.jinja_env.globals['enumerate'] = enumerate
 
-try:
-    scaler        = joblib.load(os.path.join(MODELS_DIR, 'scaler.pkl'))
-    label_encoder = joblib.load(os.path.join(MODELS_DIR, 'label_encoder.pkl'))
-    with open(os.path.join(MODELS_DIR, 'results_summary.json')) as f:
-        results_summary = json.load(f)
-    MODELS = {
-        'logistic_regression':    joblib.load(os.path.join(MODELS_DIR, 'logistic_regression.pkl')),
-        'decision_tree':          joblib.load(os.path.join(MODELS_DIR, 'decision_tree.pkl')),
-        'random_forest':          joblib.load(os.path.join(MODELS_DIR, 'random_forest.pkl')),
-        'support_vector_machine': joblib.load(os.path.join(MODELS_DIR, 'support_vector_machine.pkl')),
-    }
-    print("All models loaded successfully.")
-except Exception as e:
-    print(f"ERROR loading models: {e}")
-    print("Run: python src/train_models.py")
-    sys.exit(1)
-
-FEATURES = results_summary['features']
-CLASSES  = results_summary['classes']
-
-DISEASE_INFO = {
-    'Healthy': {
-        'color': '#C5E710',
-        'description': 'No disease indicators detected. Continue maintaining a healthy lifestyle.',
-        'recommendations': [
-            'Regular check-ups every 12 months',
-            'Maintain a balanced diet and regular exercise',
-            'Monitor blood pressure and glucose levels annually'
-        ]
-    },
-    'Diabetes': {
-        'color': '#F4DF6B',
-        'description': 'Indicators consistent with Diabetes Mellitus. Blood glucose regulation is impaired.',
-        'recommendations': [
-            'Consult an endocrinologist immediately',
-            'Monitor blood glucose daily',
-            'Follow a low-glycaemic diet plan',
-            'Review insulin or medication regimen with your doctor'
-        ]
-    },
-    'Anemia': {
-        'color': '#8E9630',
-        'description': 'Blood markers suggest reduced red blood cell count or haemoglobin levels.',
-        'recommendations': [
-            'Consult a haematologist',
-            'Iron supplementation may be required',
-            'Increase iron-rich foods in your diet',
-            'Full blood count follow-up in 4 to 6 weeks'
-        ]
-    },
-    'Heart Disease': {
-        'color': '#e74c3c',
-        'description': 'Cardiovascular risk markers are elevated. Indicators consistent with Heart Disease.',
-        'recommendations': [
-            'Seek immediate cardiology consultation',
-            'ECG and stress test recommended',
-            'Follow a low-sodium diet and avoid smoking',
-            'Review cholesterol and blood pressure medication'
-        ]
-    },
-    'Thalassemia': {
-        'color': '#9b59b6',
-        'description': 'Haemoglobin structure abnormalities detected consistent with Thalassemia.',
-        'recommendations': [
-            'Genetic counselling is recommended',
-            'Regular haematology reviews required',
-            'Monitor for iron overload if receiving transfusions',
-            'Folic acid supplementation may be advised'
-        ]
-    },
-    'Thrombocytopenia': {
-        'color': '#e67e22',
-        'description': 'Platelet count appears significantly reduced.',
-        'recommendations': [
-            'Immediate haematology referral required',
-            'Avoid NSAIDs and blood thinners',
-            'Monitor for unusual bruising or bleeding',
-            'Bone marrow evaluation may be needed'
-        ]
-    },
+# Safe model loading — never crash the server if a model file is missing
+MODELS = {}
+MODEL_FILES = {
+    'random_forest': 'models/random_forest_model.pkl',
+    'svm': 'models/svm_model.pkl', 
+    'decision_tree': 'models/decision_tree_model.pkl',
+    'logistic_regression': 'models/logistic_regression_model.pkl'
 }
+
+def load_models():
+    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for name, path in MODEL_FILES.items():
+        full_path = os.path.join(base, path)
+        try:
+            MODELS[name] = joblib.load(full_path)
+            print(f"[SmartHealth] Loaded: {name}")
+        except Exception as e:
+            print(f"[SmartHealth] WARNING: Could not load {name}: {e}")
+            MODELS[name] = None
+
+load_models()
 
 @app.route('/')
 def index():
+    """Renders the main landing page for SmartHealth AI."""
     return render_template('index.html')
 
 @app.route('/predict')
 def predict_page():
-    return render_template('predict.html', features=FEATURES)
+    """Renders the prediction page with the data input form."""
+    return render_template('predict.html')
 
 @app.route('/results')
 def results_page():
-    return render_template(
-        'results.html',
-        models=results_summary['models'],
-        best_model=results_summary['best_model'],
-        classes=CLASSES
-    )
+    """Renders the model performance and evaluation metrics page."""
+    return render_template('results.html')
 
 @app.route('/about')
 def about_page():
+    """Renders the about page with project details and researcher info."""
     return render_template('about.html')
 
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
+    """Handles health biomarker data to generate clinical diagnostic predictions."""
     try:
-        data      = request.get_json(force=True)
-        model_key = data.get('model', results_summary['best_model_key'])
-        values    = data.get('features', {})
-        input_values = []
-        for feat in FEATURES:
-            val = values.get(feat)
-            if val is None:
-                return jsonify({'error': f'Missing feature: {feat}'}), 400
-            input_values.append(float(val))
-        X        = np.array(input_values).reshape(1, -1)
-        X_scaled = scaler.transform(X)
-        model    = MODELS.get(model_key, MODELS['random_forest'])
-        pred_enc = model.predict(X_scaled)[0]
-        pred_label = label_encoder.inverse_transform([pred_enc])[0]
-        confidence = None
-        all_probas = {}
-        if hasattr(model, 'predict_proba'):
-            proba_arr  = model.predict_proba(X_scaled)[0]
-            confidence = float(np.max(proba_arr)) * 100
-            all_probas = {
-                label_encoder.inverse_transform([i])[0]: round(float(p) * 100, 2)
-                for i, p in enumerate(proba_arr)
-            }
-        info = DISEASE_INFO.get(pred_label, {})
+        data = request.get_json(force=True)
+        model_key = data.get('model', 'random_forest')
+        features = data.get('features', [])
+        
+        if len(features) != 24:
+            return jsonify({'error': 'Exactly 24 features required'}), 400
+        
+        model = MODELS.get(model_key)
+        if model is None:
+            return jsonify({'error': f'Model {model_key} not available'}), 503
+        
+        X = np.array(features, dtype=float).reshape(1, -1)
+        prediction = model.predict(X)[0]
+        probabilities = model.predict_proba(X)[0].tolist()
+        confidence = round(max(probabilities) * 100, 1)
+        
+        CLASS_LABELS = [
+            'Clinical Anemia',
+            'Type 2 Diabetes',
+            'Healthy Reference',
+            'Heart Condition',
+            'Thalassemia',
+            'Thrombocytopenia'
+        ]
+        CLASS_DESCRIPTIONS = {
+            'Clinical Anemia': 'Low hemoglobin and RBC markers indicate iron-deficient erythropoiesis or blood loss anemia.',
+            'Type 2 Diabetes': 'Elevated glucose and HbA1c levels suggest chronic metabolic dysregulation consistent with Type 2 Diabetes.',
+            'Healthy Reference': 'Biomarkers indicate physiological values within normal clinical ranges. No significant disease markers detected.',
+            'Heart Condition': 'Elevated troponin and cardiovascular markers suggest potential ischemic or hypertensive cardiovascular stress.',
+            'Thalassemia': 'Abnormal MCH and RBC structural markers indicate hereditary hemoglobin chain production disorder.',
+            'Thrombocytopenia': 'Critically reduced platelet count indicates increased bleeding risk requiring urgent clinical review.'
+        }
+        CLASS_RECOMMENDATIONS = {
+            'Clinical Anemia': ['Iron supplementation evaluation', 'Dietary iron increase (red meat, leafy greens)', 'Consult haematologist', 'Repeat CBC in 4-6 weeks'],
+            'Type 2 Diabetes': ['Consult endocrinologist immediately', 'Monitor blood glucose daily', 'Reduce simple carbohydrate intake', 'Begin aerobic exercise program'],
+            'Healthy Reference': ['Maintain current lifestyle', 'Annual blood panel recommended', 'Continue balanced nutrition'],
+            'Heart Condition': ['Urgent cardiology referral', 'ECG and echocardiogram advised', 'Monitor blood pressure daily', 'Restrict sodium intake'],
+            'Thalassemia': ['Genetic counselling recommended', 'Haematology specialist referral', 'Regular transfusion monitoring if severe', 'Family screening advised'],
+            'Thrombocytopenia': ['Immediate haematology referral', 'Avoid NSAIDs and blood thinners', 'Monitor for bleeding symptoms', 'Bone marrow evaluation may be required']
+        }
+        
+        label = CLASS_LABELS[int(prediction)] if int(prediction) < len(CLASS_LABELS) else 'Unknown'
+        
         return jsonify({
-            'prediction':      pred_label,
-            'confidence':      round(confidence, 2) if confidence else None,
-            'probabilities':   all_probas,
-            'model_used':      model_key,
-            'color':           info.get('color', '#C5E710'),
-            'description':     info.get('description', ''),
-            'recommendations': info.get('recommendations', []),
+            'prediction': label,
+            'confidence': confidence,
+            'probabilities': dict(zip(CLASS_LABELS, probabilities)),
+            'description': CLASS_DESCRIPTIONS.get(label, ''),
+            'recommendations': CLASS_RECOMMENDATIONS.get(label, []),
+            'model_used': model_key
         })
+        
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
-
-@app.route('/api/models', methods=['GET'])
-def api_models():
-    return jsonify(results_summary)
 
 if __name__ == '__main__':
     port  = int(os.environ.get('PORT', 5000))

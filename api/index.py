@@ -1,4 +1,7 @@
-import sys, os
-d = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if d not in sys.path: sys.path.insert(0, d)
-from app.app import app
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.app import app as application
+
+# Vercel serverless handler
+app = application

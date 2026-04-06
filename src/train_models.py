@@ -98,24 +98,25 @@ def main():
         cm=confusion_matrix(y_te,y_pred)
         
         # Save the trained model to a file so the web app can load it
-        safe=name.lower().replace(' ','_')
-        joblib.dump(clf, os.path.join(MDLS,f'{safe}.pkl'))
+        safe = name.lower().replace(' ', '_')
+        model_path = os.path.join(MDLS, f'{safe}_model.pkl')
+        joblib.dump(clf, model_path)
         
-        r={'name':name,'accuracy':round(float(acc),4),'precision':round(float(prec),4),
-           'recall':round(float(rec),4),'f1_score':round(float(f1),4),
-           'cv_mean':round(float(cv_s.mean()),4),'cv_std':round(float(cv_s.std()),4),
-           'confusion_matrix':cm.tolist(),'classes':list(le.classes_)}
+        r = {'name': name, 'accuracy': round(float(acc), 4), 'precision': round(float(prec), 4),
+             'recall': round(float(rec), 4), 'f1_score': round(float(f1), 4),
+             'cv_mean': round(float(cv_s.mean()), 4), 'cv_std': round(float(cv_s.std()), 4),
+             'confusion_matrix': cm.tolist(), 'classes': list(le.classes_), 'key': safe}
         
         print(f'  {name}: acc={acc:.4f} f1={f1:.4f} cv={cv_s.mean():.4f}')
         results.append(r)
 
     # Pick the best model based on F1-score
     best = max(results, key=lambda x: x['f1_score'])
-    shutil.copy(os.path.join(MDLS,f'{best["name"].lower().replace(" ","_")}.pkl'), os.path.join(MDLS,'best_model.pkl'))
+    shutil.copy(os.path.join(MDLS, f'{best["key"]}_model.pkl'), os.path.join(MDLS, 'best_model.pkl'))
     
     # Save the summary of results for the frontend to show
-    summary = {'best_model':best['name'],'best_model_key':best['name'].lower().replace(' ','_'),
-               'models':results,'features':FEATURES,'classes':list(le.classes_),'disease_labels':DISEASE_LABELS}
+    summary = {'best_model': best['name'], 'best_model_key': best['key'],
+               'models': results, 'features': FEATURES, 'classes': list(le.classes_), 'disease_labels': DISEASE_LABELS}
     
     with open(os.path.join(MDLS,'results_summary.json'),'w') as f:
         json.dump(summary,f,indent=2)
