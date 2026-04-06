@@ -1,81 +1,60 @@
 /**
- * SmartHealth - Cinematic Animation Controller
- * Implementation: IntersectionObserver for scroll-triggered reveals
+ * SmartHealth AI - Animations Controller
+ * Full-Stack Overhaul
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Reveal Animations (Observer)
-    const revealObserverArr = new IntersectionObserver((entries) => {
+    // 1. Reveal Elements on Scroll
+    const reveals = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                // Optional: Reveal children sequentially if they have .reveal class too
-                const children = entry.target.querySelectorAll('.reveal-child');
-                children.forEach((child, index) => {
-                    setTimeout(() => {
-                        child.classList.add('visible');
-                    }, index * 100);
-                });
-                
-                // unobserve if we only want it to reveal once
-                // revealObserverArr.unobserve(entry.target);
+                entry.target.classList.add('revealed');
+                revealObserver.unobserve(entry.target);
             }
         });
-    }, { 
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px' // offset so it reveals slightly before entering viewport
-    });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => revealObserver.observe(el));
 
-    // 2. Initialize Revealable Elements
-    const revealableElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
-    revealableElements.forEach(el => revealObserverArr.observe(el));
-
-    // 3. Staggered Entrance for specific sections
-    const autoStagger = document.querySelectorAll('.stagger-grid');
-    autoStagger.forEach(grid => {
-        const items = grid.children;
-        Array.from(items).forEach((item, index) => {
-            item.classList.add('reveal');
-            item.style.transitionDelay = `${index * 0.1}s`;
-            revealObserverArr.observe(item);
-        });
-    });
-
-    // 4. Count Up Stats (Hero Section)
-    const countStats = () => {
-        const stats = document.querySelectorAll('.stat-n');
-        stats.forEach(stat => {
-            const targetStr = stat.innerText;
-            const target = parseFloat(targetStr.replace(/[^0-9.]/g, ''));
-            const suffix = targetStr.replace(/[0-9.]/g, '');
-            let count = 0;
-            const duration = 2000; // 2 seconds
-            const increment = target / (duration / 16); // 16ms per frame
-            
-            const updateCount = () => {
-                count += increment;
-                if (count < target) {
-                    if (target % 1 === 0) {
-                        stat.innerText = Math.round(count) + suffix;
-                    } else {
-                        stat.innerText = count.toFixed(1) + suffix;
-                    }
-                    requestAnimationFrame(updateCount);
-                } else {
-                    stat.innerText = targetStr;
-                }
-            };
-            
-            // Only trigger if statistic section is visible
-            const obs = new IntersectionObserver(entries => {
-                if(entries[0].isIntersecting) {
-                    updateCount();
-                    obs.unobserve(stat);
+    // 2. Animate Stat Counters (Home Page)
+    const counters = document.querySelectorAll('.stat-value[data-target]');
+    if (counters.length > 0) {
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const target = parseFloat(el.dataset.target);
+                    const suffix = el.dataset.suffix || '';
+                    const isDecimal = target % 1 !== 0;
+                    let start = null;
+                    const duration = 1800; // 1.8 seconds
+                    const step = (timestamp) => {
+                        if (!start) start = timestamp;
+                        const progress = Math.min((timestamp - start) / duration, 1);
+                        const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+                        const current = eased * target;
+                        el.textContent = (isDecimal ? current.toFixed(1) : Math.floor(current)) + suffix;
+                        if (progress < 1) requestAnimationFrame(step);
+                    };
+                    requestAnimationFrame(step);
+                    statsObserver.unobserve(el);
                 }
             });
-            obs.observe(stat);
-        });
-    };
-    
-    countStats();
+        }, { threshold: 0.5 });
+        counters.forEach(c => statsObserver.observe(c));
+    }
+
+    // 3. Animate Benchmark Bars (Results Page)
+    const benchBars = document.querySelectorAll('.bench-bar-fill[data-width]');
+    if (benchBars.length > 0) {
+        const barObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.width = entry.target.dataset.width + '%';
+                    barObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+        benchBars.forEach(bar => barObserver.observe(bar));
+    }
 });

@@ -4,105 +4,125 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>SmartHealth AI - Intelligent Healthcare Diagnosis</title>
+  
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Modern Reset & Global Styles -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+  
   {% block head %}{% endblock %}
 </head>
 <body>
 
-  <!-- Navbar -->
-  <nav class="navbar" id="mainNav">
+  <!-- Navigation Bar -->
+  <nav class="navbar" id="navbar">
     <div class="nav-inner">
-
-      <!-- Logo -->
       <a href="/" class="nav-logo">
-        <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="10" fill="#A8E63D"/>
-          <path d="M20 8L20 32M8 20L32 20" stroke="#010A00"
-                stroke-width="4" stroke-linecap="round"/>
-          <circle cx="20" cy="20" r="5" fill="#010A00"/>
-        </svg>
-        <span class="logo-text">SmartHealth</span>
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">SmartHealth<span class="logo-ai">AI</span></span>
       </a>
-
-      <!-- Hamburger toggle - only visible on mobile -->
-      <button class="nav-toggle" id="navToggle"
-              aria-label="Toggle navigation"
-              aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
+      <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
       </button>
-
-      <!-- Nav links -->
-      <ul class="nav-links" id="navLinks" role="navigation">
-        <li>
-          <a href="/" class="nav-link
-            {% if request.endpoint == 'index' %}active{% endif %}">
-            Home
-          </a>
-        </li>
-        <li>
-          <a href="/predict" class="nav-link
-            {% if request.endpoint == 'predict_page' %}active{% endif %}">
-            Diagnose
-          </a>
-        </li>
-        <li>
-          <a href="/results" class="nav-link
-            {% if request.endpoint == 'results_page' %}active{% endif %}">
-            Model Results
-          </a>
-        </li>
-        <li>
-          <a href="/about" class="nav-link
-            {% if request.endpoint == 'about_page' %}active{% endif %}">
-            About
-          </a>
-        </li>
-        <!-- Mobile only CTA -->
-        <li class="nav-mobile-cta">
-          <a href="/predict" class="btn btn-primary pill nav-cta-mobile">
-            Run Diagnosis
-          </a>
-        </li>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">Home</a></li>
+        <li><a href="/predict" class="nav-link {% if request.endpoint == 'predict_page' %}active{% endif %}">Diagnose</a></li>
+        <li><a href="/results" class="nav-link {% if request.endpoint == 'results_page' %}active{% endif %}">Results</a></li>
+        <li><a href="/about" class="nav-link {% if request.endpoint == 'about_page' %}active{% endif %}">About</a></li>
+        <li><a href="/predict" class="nav-cta-btn">Run Diagnosis</a></li>
       </ul>
-
-      <!-- CTA button - hidden on mobile -->
-      <a href="/predict" class="nav-cta hero-cta-primary btn-shimmer">Run Diagnosis</a>
-
     </div>
   </nav>
 
-  <!-- Mobile menu backdrop - separate element for full screen cover -->
-  <div class="nav-backdrop" id="navBackdrop"></div>
-
-  <main class="page-main">
+  <main>
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="footer">
-    <div class="container footer-content">
-      <div class="footer-brand">
-        <a href="/" class="nav-logo">
-          <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
-            <rect width="40" height="40" rx="10" fill="#A8E63D"/>
-            <path d="M20 8L20 32M8 20L32 20" stroke="#010A00"
-                  stroke-width="4" stroke-linecap="round"/>
-            <circle cx="20" cy="20" r="5" fill="#010A00"/>
-          </svg>
-          <span class="logo-text">SmartHealth</span>
-        </a>
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="logo-icon">⬡</span>
+          <span class="footer-name">SmartHealth<span class="logo-ai">AI</span></span>
+        </div>
+        <nav class="footer-links">
+          <a href="/">Home</a>
+          <a href="/predict">Diagnose</a>
+          <a href="/results">Results</a>
+          <a href="/about">About</a>
+        </nav>
       </div>
-      <p class="footer-disclaimer">Academic prototype. Not a substitute for clinical diagnosis. Always consult a qualified healthcare professional. Built by Enock Queenson Eduafo (11014444).</p>
+      <div class="footer-divider"></div>
       <div class="footer-bottom">
-        <p class="footer-copy">&copy; 2026 Enock Queenson Eduafo — SmartHealth AI. Final Year Project, University of Ghana. Supervisor: Professor Solomon Mensah</p>
+        <p class="footer-disclaimer">
+          Academic prototype. Not a substitute for clinical diagnosis. Always consult a qualified healthcare professional.
+        </p>
+        <p class="footer-copy">
+          © 2026 Enock Queenson Eduafo — SmartHealth AI.
+          Final Year Project, University of Ghana. Supervisor: Professor Solomon Mensah.
+        </p>
       </div>
     </div>
   </footer>
+
+  <!-- Background Particle Animation -->
+  <canvas id="bg-pulse" style="position:fixed;top:0;left:0;pointer-events:none;z-index:0;opacity:0.18;"></canvas>
+
+  <script>
+    // Particle Animation
+    const canvas = document.getElementById('bg-pulse');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.5,
+        dx: (Math.random() - 0.5) * 0.4,
+        dy: (Math.random() - 0.5) * 0.4,
+        alpha: Math.random() * 0.6 + 0.2
+      });
+    }
+    function animatePulse() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.x += p.dx; p.y += p.dy;
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(197, 231, 16, ${p.alpha})`; // Uses Lime color
+        ctx.fill();
+      });
+      // draw connecting lines
+      particles.forEach((a, i) => {
+        particles.slice(i+1).forEach(b => {
+          const dist = Math.hypot(a.x - b.x, a.y - b.y);
+          if (dist < 100) {
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(197, 231, 16, ${0.15 * (1 - dist/100)})`; // Uses Lime color
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        });
+      });
+      requestAnimationFrame(animatePulse);
+    }
+    animatePulse();
+  </script>
 
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script src="{{ url_for('static', filename='js/animations.js') }}"></script>

@@ -1,93 +1,151 @@
 {% extends "base.html" %}
 
 {% block content %}
-<header class="about-header pg-hdr">
-  <div class="container header-content">
-    <span class="tag">ACADEMIC REPORT</span>
-    <h1>The SmartHealth AI Project</h1>
-    <p>A technical overview of the development, architecture, and clinical orientation of SmartHealth AI. This final year project bridges the gap between diagnostic biomarkers and computational inference.</p>
+<!-- New about hero -->
+<section class="about-hero container">
+  <div class="about-hero-grid">
+    <div class="about-hero-text reveal">
+      <div class="page-eyebrow">About the Engine</div>
+      <h1 class="page-title">SmartHealth AI<br><span class="title-accent">Framework</span></h1>
+      <p class="page-desc">
+        A multi-class clinical decision-support system built as a final-year Computer Science 
+        project at the University of Ghana. It uses four supervised learning algorithms to 
+        predict six disease categories from 24 normalized biomarkers — achieving 95.1% 
+        accuracy with Random Forest as the production classifier.
+      </p>
+    </div>
+    <!-- Tech stack pills -->
+    <div class="tech-stack stagger-children">
+      <div class="tech-pill reveal">Python 3.12</div>
+      <div class="tech-pill reveal">Scikit-learn</div>
+      <div class="tech-pill reveal">Flask</div>
+      <div class="tech-pill reveal">NumPy / Pandas</div>
+      <div class="tech-pill reveal">Joblib</div>
+      <div class="tech-pill reveal">Vercel</div>
+      <div class="tech-pill reveal">UCI Repository</div>
+      <div class="tech-pill reveal">Kaggle Datasets</div>
+    </div>
   </div>
-</header>
+</section>
 
-<div class="about-main about-body">
-  <div class="container about-layout">
-    <!-- Main Content -->
-    <article class="academic-report abr-cnt">
-      <section class="report-section met-sec">
-        <h2 class="report-title sub-title">Core Mandate</h2>
-        <p>The primary objective of SmartHealth AI is to develop a reliable clinical screening tool that utilizes supervised learning models to predict disease states from patient blood panel data. By ensembling multiple classification architectures, the project achieves standardized diagnostics for chronic and hematological conditions.</p>
-      </section>
-
-      <section class="report-section met-sec">
-        <h2 class="report-title sub-title">System Architecture</h2>
-        <div class="architecture-flow steps-grid">
-          <div class="flow-step step-card">
-            <span class="step-num">01</span>
-            <h3>Data Preprocessing</h3>
-            <p>Raw clinical biomarkers are normalized onto a standard distribution using scikit-learn's preprocessing pipelines to ensure feature scaling consistency.</p>
-          </div>
-          <div class="flow-step step-card">
-            <span class="step-num">02</span>
-            <h3>Classification Model</h3>
-            <p>The optimized Random Forest engine performs multi-class inference across 24 clinical features to identify optimal decision boundaries.</p>
-          </div>
-          <div class="flow-step step-card">
-            <span class="step-num">03</span>
-            <h3>Clinical Validation</h3>
-            <p>Diagnostic probability scores are weighted by model confidence metrics to provide a realistic assessment for medical review.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="report-section met-sec">
-        <h2 class="report-title sub-title">Classification Set Design</h2>
-        <div class="table-container tbl-cnt">
-          <table class="conditions-table met-tbl">
-            <thead>
-              <tr>
-                <th>Disease Category</th>
-                <th>Target Biomarker</th>
-                <th>Diagnostic Precision</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Healthy Reference State</td><td>Standard Base</td><td>0.96</td></tr>
-              <tr><td>Type 2 Diabetes Mellitus</td><td>HbA1c/Glucose</td><td>0.94</td></tr>
-              <tr><td>Clinical Anemia</td><td>Hemoglobin/RBC</td><td>0.95</td></tr>
-              <tr><td>Ischemic Heart Disease</td><td>Troponin/Lipids</td><td>0.93</td></tr>
-              <tr><td>Thalassemia</td><td>MCV/MCH</td><td>0.95</td></tr>
-              <tr><td>Thrombocytopenia</td><td>Platelets</td><td>0.96</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </article>
-
-    <!-- Side Sidebar -->
-    <aside class="about-sidebar abr-side">
-      <div class="research-info res-card">
-        <h3>Development Infrastructure</h3>
-        <ul class="infra-list list-none">
-          <li><strong>Python 3.12</strong> — Computational Backend</li>
-          <li><strong>Scikit-Learn</strong> — ML Architecture</li>
-          <li><strong>Flask</strong> — Web Server Interface</li>
-          <li><strong>Joblib</strong> — Binary Model Serialisation</li>
-          <li><strong>Vercel</strong> — Production Deployment</li>
-        </ul>
-      </div>
-
-      <div class="academic-card res-card">
-        <h3>Principal Researcher</h3>
-        <p class="res-name"><strong>Enock Queenson Eduafo</strong></p>
-        <p class="res-id">Student ID: 11014444</p>
-        <p class="res-org">University of Ghana</p>
-        <p class="res-sup">Supervisor: Professor Solomon Mensah</p>
-      </div>
-
-      <div class="legal-notice res-card">
-        <p><strong>Disclaimer:</strong> This project is an academic prototype for clinical research and predictive modelling. It is not intended for use as a primary diagnostic medical device.</p>
-      </div>
-    </aside>
+<section class="container" style="margin-top: 80px; margin-bottom: 100px;">
+  <div class="section-eyebrow reveal">Core Mandate</div>
+  <h2 class="section-title reveal">Clinical Decisions, Elevated by AI</h2>
+  <div class="reveal" style="color: var(--text-secondary); max-width: 800px; line-height: 1.8; margin-bottom: 80px;">
+    The primary objective of SmartHealth AI is to develop a reliable clinical screening tool that utilizes supervised learning models 
+    to predict disease states from patient blood panel data. By ensembling multiple classification architectures, the project 
+    achieves standardized diagnostics for chronic and hematological conditions.
   </div>
-</div>
+
+  <div class="section-eyebrow reveal">Classification Set</div>
+  <h2 class="section-title reveal">Disease Categories</h2>
+  <div class="perf-table-wrap reveal">
+    <style>
+      .perf-table th { background: var(--bg-elevated); color: var(--text-secondary); padding: 12px 16px; text-align: left; }
+      .perf-table td { padding: 14px 16px; border-bottom: 1px solid var(--bg-border); color: var(--text-secondary); }
+    </style>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>Disease Category</th>
+          <th>Target Biomarkers</th>
+          <th>Diagnostic Precision</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Healthy Reference State</td><td>Standard Base</td><td style="color: var(--green-ok); font-family: var(--font-mono);">0.96</td></tr>
+        <tr><td>Type 2 Diabetes Mellitus</td><td>HbA1c/Glucose</td><td style="color: var(--green-ok); font-family: var(--font-mono);">0.94</td></tr>
+        <tr><td>Clinical Anemia</td><td>Hemoglobin/RBC</td><td style="color: var(--green-ok); font-family: var(--font-mono);">0.95</td></tr>
+        <tr><td>Ischemic Heart Disease</td><td>Troponin/Lipids</td><td style="color: var(--green-ok); font-family: var(--font-mono);">0.93</td></tr>
+        <tr><td>Thalassemia</td><td>MCV/MCH</td><td style="color: var(--green-ok); font-family: var(--font-mono);">0.95</td></tr>
+        <tr><td>Thrombocytopenia</td><td>Platelets</td><td style="color: var(--green-ok); font-family: var(--font-mono);">0.96</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Ethics Banner -->
+  <style>
+    .ethics-banner {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: rgba(244, 223, 107, 0.05);
+      border: 1px solid rgba(244, 223, 107, 0.25);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin: 80px 0;
+    }
+    .ethics-icon { color: var(--amber-warn); font-size: 1.2rem; flex-shrink: 0; }
+    .ethics-banner strong { color: var(--amber-warn); }
+  </style>
+  <div class="ethics-banner reveal">
+    <div class="ethics-icon">⚠</div>
+    <div>
+      <strong>Academic Research Prototype</strong> — This system was developed for final-year academic evaluation 
+      at the University of Ghana. It is not an FDA-cleared device. All predictions must be verified 
+      by a licensed medical practitioner. Do not use for unsupervised clinical decision-making.
+    </div>
+  </div>
+
+  <div class="section-eyebrow reveal" style="margin-top: 80px;">The Researcher</div>
+  <h2 class="section-title reveal">Meet The Architect</h2>
+  
+  <style>
+    .researcher-card {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      background: var(--bg-surface);
+      border: 1px solid var(--bg-border);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      flex-wrap: wrap;
+    }
+    .researcher-avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan-primary), var(--purple-neural));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--bg-void);
+      flex-shrink: 0;
+    }
+    .researcher-name { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+    .researcher-role { font-size: 0.85rem; color: var(--cyan-dim); margin-bottom: 6px; font-family: var(--font-mono); }
+    .researcher-meta { display: flex; gap: 6px; font-size: 0.8rem; color: var(--text-secondary); flex-wrap: wrap; }
+    .sep { color: var(--text-muted); }
+    .researcher-supervisor { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; font-style: italic; }
+    
+    .about-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; padding: 120px 0 80px; }
+    .tech-stack { display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; }
+    .tech-pill {
+      font-family: var(--font-mono); font-size: 0.78rem; color: var(--cyan-dim); 
+      border: 1px solid rgba(197, 231, 16, 0.2); background: rgba(197, 231, 16, 0.04);
+      padding: 8px 14px; border-radius: var(--radius-sm); transition: var(--transition);
+    }
+    .tech-pill:hover { border-color: var(--cyan-primary); color: var(--cyan-primary); }
+    @media (max-width: 900px) { .about-hero-grid { grid-template-columns: 1fr; padding-top: 100px; gap: 32px; } }
+  </style>
+
+  <div class="researcher-card reveal">
+    <div class="researcher-avatar">EQE</div>
+    <div class="researcher-info">
+      <div class="researcher-name">Enock Queenson Eduafo</div>
+      <div class="researcher-role">Final Year Student · Information Technology</div>
+      <div class="researcher-meta">
+        <span>University of Ghana</span>
+        <span class="sep">·</span>
+        <span>Student ID: 11014444</span>
+        <span class="sep">·</span>
+        <span>2026</span>
+      </div>
+      <div class="researcher-supervisor">Supervised by Professor Solomon Mensah</div>
+    </div>
+  </div>
+</section>
 {% endblock %}

@@ -1,28 +1,22 @@
 /* 
    SmartHealth - High-End Animation System
    Aesthetics: Cinematic Reveals, Staggered Entrances
+   Full-Stack Overhaul - Updated to match the new reveal classes
 */
 
 /* 1. Reveal Animations (Hidden state) */
-.reveal, .reveal-up {
+.reveal {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 1.2s cubic-bezier(0.19, 1, 0.22, 1), 
-              transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform, opacity;
 }
 
-.reveal.visible, .reveal-up.visible {
+.reveal.revealed {
   opacity: 1;
   transform: translateY(0);
 }
-
-/* Delay modifiers for staggered reveals */
-.delay-1 { transition-delay: 0.1s; }
-.delay-2 { transition-delay: 0.2s; }
-.delay-3 { transition-delay: 0.3s; }
-.delay-4 { transition-delay: 0.4s; }
-.delay-5 { transition-delay: 0.5s; }
 
 /* Horizontal reveal */
 .reveal-left {
@@ -39,10 +33,17 @@
               transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
-.reveal-left.visible, .reveal-right.visible {
+.reveal-left.revealed, .reveal-right.revealed {
   opacity: 1;
   transform: translateX(0);
 }
+
+/* Delay modifiers for staggered reveals */
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.2s; }
+.delay-3 { transition-delay: 0.3s; }
+.delay-4 { transition-delay: 0.4s; }
+.delay-5 { transition-delay: 0.5s; }
 
 /* 2. Micro-animations */
 @keyframes float {
@@ -56,15 +57,14 @@
 }
 
 /* Pulse for lime elements */
-@keyframes limePulse {
-  0% { box-shadow: 0 0 0 0 rgba(197, 231, 16, 0.4); }
-  70% { box-shadow: 0 0 0 15px rgba(197, 231, 16, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(197, 231, 16, 0); }
+@keyframes limePulseText {
+  0% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.1); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 0.3; }
 }
 
 .pulse-lime {
-  animation: limePulse 2s infinite;
-  border-radius: 50%;
+  animation: limePulseText 3s ease-in-out infinite;
 }
 
 /* Text Shimmer Effect */
@@ -77,3 +77,11 @@
 @keyframes shimmerAnim {
   to { background-position: 200% 0; }
 }
+
+/* Staggered children transitions */
+.stagger-children .reveal:nth-child(1) { transition-delay: 0.1s; }
+.stagger-children .reveal:nth-child(2) { transition-delay: 0.2s; }
+.stagger-children .reveal:nth-child(3) { transition-delay: 0.3s; }
+.stagger-children .reveal:nth-child(4) { transition-delay: 0.4s; }
+.stagger-children .reveal:nth-child(5) { transition-delay: 0.5s; }
+.stagger-children .reveal:nth-child(6) { transition-delay: 0.6s; }
