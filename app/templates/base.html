@@ -8,34 +8,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-  <style>
-    #scroll-progress {
-      position: fixed; top: 0; left: 0; height: 3px;
-      background: #C5E710; width: 0%; z-index: 100;
-      transition: width 0.1s linear;
-    }
-    .particle {
-      position: fixed; border-radius: 50%;
-      background: rgba(197,231,16,0.4); pointer-events: none;
-      animation: float-particle linear infinite;
-      z-index: 0;
-    }
-    @keyframes float-particle {
-      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
-      10%  { opacity: 1; }
-      90%  { opacity: 0.5; }
-      100% { transform: translateY(-100px) scale(1); opacity: 0; }
-    }
-    @keyframes navSlideDown {
-      from { transform: translateY(-100%); opacity: 0; }
-      to   { transform: translateY(0);     opacity: 1; }
-    }
-    .navbar { animation: navSlideDown 0.5s ease forwards; }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
   {% block head %}{% endblock %}
 </head>
 <body>
-  <div id="scroll-progress"></div>
 
   <!-- Navbar -->
   <nav class="navbar" id="mainNav">
@@ -96,7 +72,7 @@
       </ul>
 
       <!-- CTA button - hidden on mobile -->
-      <a href="/predict" class="nav-cta">Run Diagnosis</a>
+      <a href="/predict" class="nav-cta hero-cta-primary">Run Diagnosis</a>
 
     </div>
   </nav>
@@ -108,7 +84,7 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="footer">
+  <footer class="footer reveal" data-reveal="up">
     <div class="container footer-content">
       <div class="footer-brand">
         <a href="/" class="nav-logo">
@@ -129,30 +105,7 @@
   </footer>
 
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-  <script>
-    // Scroll progress bar
-    const prog = document.getElementById('scroll-progress');
-    window.addEventListener('scroll', () => {
-      const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-      prog.style.width = pct + '%';
-    });
-
-    // Floating background particles - Fewer on mobile
-    const particleCount = window.innerWidth < 768 ? 6 : 18;
-    for (let i = 0; i < particleCount; i++) {
-      const p = document.createElement('div');
-      p.className = 'particle';
-      const size = Math.random() * 5 + 2;
-      p.style.cssText = `
-        width:${size}px; height:${size}px;
-        left:${Math.random()*100}vw;
-        animation-duration:${Math.random()*15+8}s;
-        animation-delay:${Math.random()*10}s;
-        opacity:${Math.random()*0.4+0.1};
-      `;
-      document.body.appendChild(p);
-    }
-  </script>
+  <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,258 @@
+/* 
+   SmartHealth AI - Cinematic Animations 
+   Includes: Particles, Reveals, Counters, and Staggered Transitions
+*/
+
+/* ────────────────────────────────────────
+   GLOBAL ANIMATIONS
+   ──────────────────────────────────────── */
+
+#particle-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  background: transparent;
+}
+
+#page-transition {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  height: 100vh;
+  width: 100%;
+  background: var(--lime, #A8E63D);
+  z-index: 10000;
+  pointer-events: none;
+}
+
+/* ────────────────────────────────────────
+   REVEAL SYSTEM
+   ──────────────────────────────────────── */
+
+.reveal {
+  opacity: 0;
+  transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translate(0) scale(1) !important;
+}
+
+[data-reveal="up"] { transform: translateY(60px); }
+[data-reveal="down"] { transform: translateY(-60px); }
+[data-reveal="left"] { transform: translateX(-80px); }
+[data-reveal="right"] { transform: translateX(80px); }
+[data-reveal="scale"] { transform: scale(0.85); }
+
+/* ────────────────────────────────────────
+   HOME PAGE SPECIFICS
+   ──────────────────────────────────────── */
+
+/* Word Split Animation */
+.word-wrap {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.word-inner {
+  display: inline-block;
+  transform: translateY(100%) skewY(8deg);
+  clip-path: inset(0 0 100% 0);
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), 
+              clip-path 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.active .word-inner {
+  transform: translateY(0) skewY(0);
+  clip-path: inset(0 0 0% 0);
+}
+
+/* Hero Buttons */
+.hero-cta-primary {
+  background: linear-gradient(90deg, #A8E63D 40%, #ffffff55 50%, #A8E63D 60%);
+  background-size: 200% auto !important;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Radar Spin */
+.radar-spin, .radar-chart svg circle {
+  animation: radarSpin 20s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes radarSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Badge Pop */
+.badge-pop {
+  animation: badgePop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes badgePop {
+  0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+  70% { transform: scale(1.1) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Typewriter Wipe */
+.tag-wipe {
+  position: relative;
+  overflow: hidden;
+  width: 0;
+  white-space: nowrap;
+  animation: tagWipe 0.5s ease-out forwards;
+}
+
+@keyframes tagWipe {
+  to { width: 100%; }
+}
+
+/* Conditions Floating */
+.condition-card {
+  animation: iconFloat 4s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Dot Pulse */
+.status-dot, .d-dot {
+  position: relative;
+}
+.status-dot::before, .d-dot::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 100%; height: 100%;
+  background: inherit;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: dotPulse 2s ease-in-out infinite;
+  z-index: -1;
+}
+
+@keyframes dotPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  50% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
+
+/* Bar Shine */
+.bar-track, .bar-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.bar-fill::after, .perf-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: barShine 2s linear infinite;
+  animation-delay: 1.5s;
+}
+
+@keyframes barShine {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* Shield Heartbeat */
+.cta-shield-icon, .cta-illustration svg {
+  animation: shieldPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes shieldPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px #A8E63D44); }
+  50% { transform: scale(1.06); filter: drop-shadow(0 0 20px #A8E63D99); }
+}
+
+/* ────────────────────────────────────────
+   PAGE TRANSITIONS
+   ──────────────────────────────────────── */
+
+.sweep-in {
+  animation: sweepIn 0.4s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+.sweep-out {
+  animation: sweepOut 0.4s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+@keyframes sweepIn {
+  from { left: -100%; }
+  to { left: 0; }
+}
+
+@keyframes sweepOut {
+  from { left: 0; }
+  to { left: 100%; }
+}
+
+/* ────────────────────────────────────────
+   CUSTOM CURSOR
+   ──────────────────────────────────────── */
+
+@media (min-width: 769px) {
+  body { cursor: none !important; }
+  a, button, .mcard, .pbtn { cursor: none !important; }
+  
+  #cursor-dot {
+    width: 8px; height: 8px;
+    background: #A8E63D;
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 99999;
+    transition: transform 0.1s ease;
+    mix-blend-mode: difference;
+  }
+  
+  #cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid #A8E63D;
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 99998;
+    transition: width 0.3s ease, height 0.3s ease, background 0.3s ease;
+  }
+  
+  .ring-hover {
+    width: 56px !important;
+    height: 56px !important;
+    background: rgba(168, 230, 61, 0.15) !important;
+    border-color: transparent !important;
+  }
+}
+
+/* ────────────────────────────────────────
+   REDUCED MOTION
+   ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  #particle-canvas { display: none !important; }
+  #cursor-dot, #cursor-ring { display: none !important; }
+  body { cursor: auto !important; }
+}

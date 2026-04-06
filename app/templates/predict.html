@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="predict-header pg-hdr">
+<section class="predict-header pg-hdr reveal" data-reveal="down">
   <div class="container header-content">
-    <span class="tag">DIAGNOSIS ENGINE</span>
+    <span class="tag tag-wipe">DIAGNOSIS ENGINE</span>
     <h1>Patient Biomarker Input</h1>
     <p>Please enter the patient's biological markers obtained from recent clinical blood screenings. Ensuring accuracy in all 24 fields is essential for reliable diagnostic predictions with SmartHealth AI.</p>
   </div>
@@ -12,53 +12,53 @@
 <section class="predict-main predict-body">
   <div class="container predict-layout pred-layout">
     <!-- Form Panel -->
-    <div class="form-panel">
+    <div class="form-panel reveal" data-reveal="left">
       <!-- Section 1 - Select Classifier -->
       <section class="form-section">
         <label class="section-label fsec-title">Section 1 — Select Classifier</label>
-        <div class="model-selector model-sel">
-          <div class="mcard active" data-model="random_forest">
-            <span class="best-badge">Best</span>
+        <div class="model-selector model-sel reveal-stagger">
+          <div class="mcard active reveal-child" data-model="random_forest">
+            <span class="best-badge badge-pop">Best</span>
             <div class="mcard-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v8M12 14v8M4.93 4.93l5.66 5.66M13.41 13.41l5.66 5.66M2 12h8M14 12h8M4.93 19.07l5.66-5.66M13.41 10.59l5.66-5.66"></path></svg>
             </div>
             <div class="mcard-info">
               <h3>Random Forest</h3>
-              <span class="mcard-acc">95.1% Accuracy</span>
+              <span class="mcard-acc" data-reveal="counter">95.1% Accuracy</span>
             </div>
           </div>
-          <div class="mcard" data-model="support_vector_machine">
+          <div class="mcard reveal-child" data-model="support_vector_machine">
             <div class="mcard-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
             </div>
             <div class="mcard-info">
               <h3>SVM</h3>
-              <span class="mcard-acc">94.9% Accuracy</span>
+              <span class="mcard-acc" data-reveal="counter">94.9% Accuracy</span>
             </div>
           </div>
-          <div class="mcard" data-model="decision_tree">
+          <div class="mcard reveal-child" data-model="decision_tree">
             <div class="mcard-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             </div>
             <div class="mcard-info">
               <h3>Decision Tree</h3>
-              <span class="mcard-acc">92.6% Accuracy</span>
+              <span class="mcard-acc" data-reveal="counter">92.6% Accuracy</span>
             </div>
           </div>
-          <div class="mcard" data-model="logistic_regression">
+          <div class="mcard reveal-child" data-model="logistic_regression">
             <div class="mcard-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
             </div>
             <div class="mcard-info">
               <h3>Logistic Regression</h3>
-              <span class="mcard-acc">81.9% Accuracy</span>
+              <span class="mcard-acc" data-reveal="counter">81.9% Accuracy</span>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Section 2 - Quick Fill -->
-      <section class="form-section">
+      <section class="form-section reveal" data-reveal="up">
         <label class="section-label fsec-title">Section 2 — Quick Fill Presets</label>
         <div class="preset-buttons preset-row">
           <button class="btn btn-ghost pbtn" data-preset="healthy">Healthy</button>
@@ -70,10 +70,10 @@
       </section>
 
       <!-- Section 3 - Biomarker Values -->
-      <section class="form-section">
+      <section class="form-section reveal-stagger">
         <label class="section-label fsec-title">Section 3 — Clinical Markers <span class="sub-label">(Scale: 0.00 – 1.00)</span></label>
         
-        <div class="input-group">
+        <div class="input-group reveal-child">
           <h4 class="group-title">Metabolic Indices</h4>
           <div class="biomarker-group input-grid">
             <div class="bm-row">
@@ -95,7 +95,7 @@
           </div>
         </div>
 
-        <div class="input-group">
+        <div class="input-group reveal-child">
           <h4 class="group-title">Cardiovascular Metrics</h4>
           <div class="biomarker-group input-grid">
             <div class="bm-row">
@@ -133,7 +133,7 @@
           </div>
         </div>
 
-        <div class="input-group">
+        <div class="input-group reveal-child">
           <h4 class="group-title">Hematology Panel</h4>
           <div class="biomarker-group input-grid">
             <div class="bm-row">
@@ -171,7 +171,7 @@
           </div>
         </div>
 
-        <div class="input-group">
+        <div class="input-group reveal-child">
           <h4 class="group-title">Liver & Kidney Assessment</h4>
           <div class="biomarker-group input-grid">
             <div class="bm-row">
@@ -194,15 +194,15 @@
         </div>
       </section>
 
-      <button id="predictBtn" class="btn btn-primary full-width btn-predict btn-pred">Run Clinical Diagnosis Engine</button>
+      <button id="predictBtn" class="btn btn-primary full-width btn-predict btn-pred hero-cta-primary reveal" data-reveal="scale">Run Clinical Diagnosis Engine</button>
     </div>
 
     <!-- Result Panel -->
-    <div class="result-panel res-panel">
+    <div class="result-panel res-panel reveal" data-reveal="right">
       <!-- Empty State -->
       <div id="resultEmpty" class="panel-state result-empty res-empty">
         <div class="panel-icon">
-          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3" class="shield-pulse"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         </div>
         <h3>Analysis Pending</h3>
         <p>Complete the patient data form and click the button to start the predictive inference engine.</p>
@@ -218,14 +218,14 @@
       <!-- Content State -->
       <div id="resultContent" class="result-content res-content" style="display:none">
         <div class="result-top">
-          <div id="resultDot" class="status-indicator"></div>
+          <div id="resultDot" class="status-indicator d-dot"></div>
           <div class="res-meta">
             <span class="res-tag">SMARTHEALTH AI PREDICTION</span>
-            <div id="confidenceBadge" class="confidence-badge conf-badge">0.0% Confidence</div>
+            <div id="confidenceBadge" class="confidence-badge conf-badge badge-pop">0.0% Confidence</div>
           </div>
         </div>
 
-        <div id="resultDiseaseCard" class="disease-res-card">
+        <div id="resultDiseaseCard" class="disease-res-card reveal" data-reveal="up">
           <div id="rdiseaseIcon" class="res-icon"></div>
           <h2 id="rdiseaseName" class="rdisease-name rdis-name">Result</h2>
           <p id="rdiseaseDesc" class="rdisease-desc rdis-desc">Clinical description will appear here.</p>
@@ -233,15 +233,15 @@
 
         <div class="res-section">
           <label class="section-label">Prediction Probabilities</label>
-          <div id="probBars" class="prob-bars-container"></div>
+          <div id="probBars" class="prob-bars-container reveal-stagger"></div>
         </div>
 
         <div class="res-section">
           <label class="section-label">Care Recommendations</label>
-          <ul id="recoList" class="reco-list"></ul>
+          <ul id="recoList" class="reco-list reveal-stagger"></ul>
         </div>
 
-        <button id="resetBtn" class="btn btn-ghost full-width">Perform New Diagnosis</button>
+        <button id="resetBtn" class="btn btn-ghost full-width reveal" data-reveal="up">Perform New Diagnosis</button>
       </div>
     </div>
   </div>

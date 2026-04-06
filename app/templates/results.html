@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="results-header pg-hdr">
+<section class="results-header pg-hdr reveal" data-reveal="down">
   <div class="container header-content">
-    <span class="tag">EVALUATION</span>
+    <span class="tag tag-wipe">EVALUATION</span>
     <h1>Model Performance Report</h1>
     <p>Comprehensive analysis of machine learning classifier performance after 5-fold cross-validation on clinical biomarker datasets. Metrics represent weighted averages across all six disease categories.</p>
   </div>
@@ -11,12 +11,12 @@
 
 <section class="best-model-banner-section res-body">
   <div class="container">
-    <div class="best-model-banner best-banner">
+    <div class="best-model-banner best-banner reveal" data-reveal="scale">
       <div class="bb-icon">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C5E710" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C5E710" stroke-width="2" class="shield-pulse"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
       </div>
       <div class="bb-text">
-        <span class="bb-tag">OPTIMAL CLASSIFIER SELECTED</span>
+        <span class="bb-tag tag-wipe">OPTIMAL CLASSIFIER SELECTED</span>
         <h2 class="best-model-name best-name">{{ best_model }}</h2>
         <p>This model was finalized for the SmartHealth AI engine due to its superior F1-score (harmonic mean of precision and recall) and minimal performance variance across complex multi-class boundaries.</p>
       </div>
@@ -25,7 +25,7 @@
 </section>
 
 <section class="metrics-table-section res-body">
-  <div class="container">
+  <div class="container reveal" data-reveal="up">
     <div class="table-wrap">
       <table class="metrics-table mtbl">
         <thead>
@@ -41,15 +41,15 @@
         </thead>
         <tbody>
           {% for m in models %}
-          <tr class="{% if m.name == best_model %}best-row{% endif %}">
+          <tr class="{% if m.name == best_model %}best-row{% endif %} reveal-child">
             <td>
-              {% if m.name == best_model %}<span class="best-tag">Best</span>{% endif %}
+              {% if m.name == best_model %}<span class="best-tag badge-pop">Best</span>{% endif %}
               <strong>{{ m.name }}</strong>
             </td>
             <td>
               <div class="td-flex">
-                <span>{{ (m.accuracy*100)|round(1) }}%</span>
-                <div class="mini-bar-bg"><div class="mini-fill" style="--w: {{ m.accuracy*100 }}%"></div></div>
+                <span data-reveal="counter">{{ (m.accuracy*100)|round(1) }}%</span>
+                <div class="mini-bar-bg"><div class="mini-fill bar-fill" data-width="{{ m.accuracy*100 }}%"></div></div>
               </div>
             </td>
             <td>{{ (m.precision*100)|round(1) }}%</td>
@@ -67,18 +67,18 @@
 </section>
 
 <section class="accuracy-charts res-body">
-  <div class="container text-center">
-    <span class="tag">VISUALISATION</span>
+  <div class="container text-center reveal" data-reveal="up">
+    <span class="tag tag-wipe">VISUALISATION</span>
     <h2 class="section-title sec-title">Metric Benchmarking</h2>
-    <div class="charts-wrap">
+    <div class="charts-wrap reveal-stagger">
       <div class="bar-chart-wrap bc-wrap">
         {% for m in models %}
-        <div class="bar-chart-row barchart-row">
+        <div class="bar-chart-row barchart-row reveal-child">
           <div class="bar-chart-label bc-lbl">{{ m.name }}</div>
           <div class="bar-bg" style="flex:1;">
-            <div class="bar-fill bar-chart-fill" style="--w: {{ m.accuracy*100 }}%; background: {% if m.name == best_model %}linear-gradient(90deg, var(--lime), #eaff80){% else %}var(--olive){% endif %}"></div>
+            <div class="bar-fill bar-chart-fill perf-fill" data-width="{{ m.accuracy*100 }}%" style="background: {% if m.name == best_model %}linear-gradient(90deg, var(--lime), #eaff80){% else %}var(--olive){% endif %}"></div>
           </div>
-          <div class="bar-chart-value bc-val" style="width:40px; font-weight:700; font-size:0.9rem;">{{ (m.accuracy*100)|round(1) }}%</div>
+          <div class="bar-chart-value bc-val" style="width:40px; font-weight:700; font-size:0.9rem;" data-reveal="counter">{{ (m.accuracy*100)|round(1) }}%</div>
         </div>
         {% endfor %}
       </div>
@@ -87,20 +87,20 @@
 </section>
 
 <section class="cv-scores res-body">
-  <div class="container">
+  <div class="container reveal-stagger">
     <div class="cv-grid">
       {% for m in models %}
-      <div class="cv-card">
+      <div class="cv-card reveal-child">
         <div class="cv-header" style="margin-bottom:20px;">
           <h3 style="font-size:1.1rem;">{{ m.name }}</h3>
-          <span class="cv-tag" style="background:rgba(197,231,16,0.1); color:var(--lime); padding:4px 10px; border-radius:6px; font-size:0.7rem; font-weight:800;">5-FOLD VALIDATION</span>
+          <span class="cv-tag badge-pop" style="background:rgba(197,231,16,0.1); color:var(--lime); padding:4px 10px; border-radius:6px; font-size:0.7rem; font-weight:800;">5-FOLD VALIDATION</span>
         </div>
         <div class="cv-body">
           <div class="cv-score-row" style="margin-bottom:15px;">
-            <span class="cv-score cv-sc" data-target="{{ (m.cv_mean*100)|round(1) }}">0.0</span><span class="unit" style="font-size:1.2rem; color:var(--gray); margin-left:5px;">%</span>
+            <span class="cv-score cv-sc" data-reveal="counter">{{ (m.cv_mean*100)|round(1) }}%</span>
           </div>
           <div class="cv-bar-bg" style="height:4px; background:rgba(255,255,255,0.05); border-radius:2px; margin-bottom:10px;">
-            <div class="cv-bar-fill bc-fill" style="--w: {{ m.cv_mean*100 }}%; height:100%; background:var(--lime); border-radius:2px;"></div>
+            <div class="cv-bar-fill bc-fill bar-fill" data-width="{{ m.cv_mean*100 }}%" style="height:100%; background:var(--lime); border-radius:2px;"></div>
           </div>
           <p style="font-size:0.8rem; color:var(--gray);">Consistency: ±{{ m.cv_std }}</p>
         </div>
@@ -112,14 +112,14 @@
 
 <section class="confusion-matrices res-body">
   <div class="container">
-    <div class="section-header">
-      <span class="tag">MATRIX ANALYSIS</span>
+    <div class="section-header reveal" data-reveal="left">
+      <span class="tag tag-wipe">MATRIX ANALYSIS</span>
       <h2 class="section-title sec-title">Confusion Matrices</h2>
       <p>Tracking class-wise classification precision to identify potential diagnostic overlaps between disease markers.</p>
     </div>
-    <div class="cm-grid">
+    <div class="cm-grid reveal-stagger">
       {% for m in models %}
-      <div class="cm-card">
+      <div class="cm-card reveal-child">
         <h3 style="margin-bottom:20px; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">{{ m.name }}</h3>
         <div class="cm-table-wrap cmt">
           <table class="cm-table">
@@ -135,7 +135,7 @@
               <tr>
                 <td style="font-weight:700; color:var(--gray); font-size:0.7rem; padding-right:10px;">{{ classes[i][:3] }}</td>
                 {% for val in row %}
-                <td class="cm-cell {% if loop.index0 == i %}cm-diag{% endif %}">{{ val }}</td>
+                <td class="cm-cell {% if loop.index0 == i %}cm-diag diagonal{% endif %}">{{ val }}</td>
                 {% endfor %}
               </tr>
               {% endfor %}
@@ -143,7 +143,7 @@
           </table>
         </div>
         <div class="cm-legend" style="margin-top:20px; display:flex; gap:15px; font-size:0.75rem; color:var(--gray);">
-          <div style="display:flex; align-items:center; gap:5px;"><div style="width:10px; height:10px; background:rgba(197,231,16,0.15); border:1px solid var(--lime);"></div> Correct Predictions</div>
+          <div style="display:flex; align-items:center; gap:5px;"><div class="status-dot" style="width:10px; height:10px; background:rgba(197,231,16,0.25); border:1px solid var(--lime);"></div> Correct Predictions</div>
         </div>
       </div>
       {% endfor %}
@@ -153,29 +153,29 @@
 
 <section class="methodology-section res-body">
   <div class="container">
-    <div class="method-grid meth-grid">
-      <div class="method-card meth-card">
+    <div class="method-grid meth-grid reveal-stagger">
+      <div class="method-card meth-card reveal-child">
         <div class="method-icon meth-ico">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21h16M4 3h16M8 3v18M16 3v18M3 8h18M3 16h18"></path></svg>
         </div>
         <h3>Dataset Scaling</h3>
         <p>All clinical inputs are pre-normalized to a standard unit scale (0-1) to ensure feature equitable impact during gradient-based training.</p>
       </div>
-      <div class="method-card meth-card">
+      <div class="method-card meth-card reveal-child">
         <div class="method-icon meth-ico">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
         </div>
         <h3>Pre-loading</h3>
         <p>Models are serialized via Joblib and pre-loaded on server startup to minimize predictive latency for the user interface.</p>
       </div>
-      <div class="method-card meth-card">
+      <div class="method-card meth-card reveal-child">
         <div class="method-icon meth-ico">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
         <h3>Evaluation Rigor</h3>
         <p>Final selection was predicated on maximizing the Weighted F1-Score, ensuring reliability even in under-represented classes.</p>
       </div>
-      <div class="method-card meth-card">
+      <div class="method-card meth-card reveal-child">
         <div class="method-icon meth-ico">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         </div>
