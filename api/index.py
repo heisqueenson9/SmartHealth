@@ -8,7 +8,7 @@ sys.path.insert(0, BASE_DIR)
 from app.app import app as application
 
 # Set absolute paths for Vercel's serverless environment
-application.static_folder   = os.path.join(BASE_DIR, 'app', 'static')
+application.static_folder   = os.path.join(BASE_DIR, 'static')
 application.template_folder = os.path.join(BASE_DIR, 'app', 'templates')
 
 # Pre-load models at startup for performance and verify they exist
