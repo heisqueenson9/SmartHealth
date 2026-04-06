@@ -29,14 +29,18 @@ DATA = os.path.join(BASE, 'data')
 MDLS = os.path.join(BASE, 'models')
 os.makedirs(MDLS, exist_ok=True)
 
-# List of biomarkers used as inputs for the models
+# List of biomarkers used as inputs for the models (Ordered by Clinical Categories)
 FEATURES = [
-    'Glucose','Cholesterol','Hemoglobin','Platelets','White Blood Cells',
-    'Red Blood Cells','Hematocrit','Mean Corpuscular Volume',
-    'Mean Corpuscular Hemoglobin','Mean Corpuscular Hemoglobin Concentration',
-    'Insulin','BMI','Systolic Blood Pressure','Diastolic Blood Pressure',
-    'Triglycerides','HbA1c','LDL Cholesterol','HDL Cholesterol',
-    'ALT','AST','Heart Rate','Creatinine','Troponin','C-reactive Protein'
+    # Metabolic Indices
+    'Glucose', 'Insulin', 'BMI', 'HbA1c',
+    # Cardiovascular Metrics
+    'Cholesterol', 'LDL Cholesterol', 'HDL Cholesterol', 'Triglycerides',
+    'Systolic Blood Pressure', 'Diastolic Blood Pressure', 'Heart Rate', 'Troponin',
+    # Hematology
+    'Hemoglobin', 'Platelets', 'White Blood Cells', 'Red Blood Cells', 'Hematocrit',
+    'Mean Corpuscular Volume', 'Mean Corpuscular Hemoglobin', 'Mean Corpuscular Hemoglobin Concentration',
+    # Liver & Kidney
+    'ALT', 'AST', 'Creatinine', 'C-reactive Protein'
 ]
 
 # Map abbreviated labels to full disease names

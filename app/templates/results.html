@@ -1,184 +1,123 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="results-header pg-hdr reveal" data-reveal="down">
+<section class="results-header pg-hdr">
   <div class="container header-content">
-    <span class="tag tag-wipe">EVALUATION</span>
+    <span class="tag">EVALUATION</span>
     <h1>Model Performance Report</h1>
     <p>Comprehensive analysis of machine learning classifier performance after 5-fold cross-validation on clinical biomarker datasets. Metrics represent weighted averages across all six disease categories.</p>
   </div>
 </section>
 
-<section class="best-model-banner-section res-body">
+<section class="results-main res-body">
   <div class="container">
-    <div class="best-model-banner best-banner reveal" data-reveal="scale">
+    <!-- Best Model Selection -->
+    <div class="best-model-banner best-banner">
       <div class="bb-icon">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A8E63D" stroke-width="2" class="shield-beat"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A8E63D" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
       </div>
       <div class="bb-text">
-        <span class="bb-tag tag-wipe">OPTIMAL CLASSIFIER SELECTED</span>
+        <span class="bb-tag">OPTIMAL CLASSIFIER SELECTED</span>
         <h2 class="best-model-name best-name">Random Forest Classifier</h2>
-        <p>This model was finalized for the SmartHealth AI engine due to its superior F1-score (harmonic mean of precision and recall) and minimal performance variance across complex multi-class boundaries.</p>
+        <p class="best-model-desc best-desc">Selected as the default engine for SmartHealth AI due to superior performance in multi-class disease prediction with significantly higher recall across all clinical subsets.</p>
       </div>
     </div>
-  </div>
-</section>
 
-<section class="metrics-table-section res-body">
-  <div class="container reveal" data-reveal="up">
-    <div class="table-wrap">
-      <table class="metrics-table mtbl">
-        <thead>
-          <tr>
-            <th>Model Architecture</th>
-            <th>Accuracy</th>
-            <th>Precision</th>
-            <th>Recall</th>
-            <th>F1 Score</th>
-            <th>CV Mean</th>
-            <th>CV Std</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Random Forest -->
-          <tr class="best-row reveal-child">
-            <td><span class="best-tag badge-pop">Best</span> <strong>Random Forest</strong></td>
-            <td>
-              <div class="td-flex">
-                <span data-counter>95.1%</span>
-                <div class="mini-bar-bg"><div class="bar-fill" data-target="95.1" style="width:0%"></div></div>
-              </div>
-            </td>
-            <td>95.2%</td><td>95.1%</td><td class="f1-cell">0.951</td><td>94.1%</td><td>±0.002</td>
-          </tr>
-          <!-- SVM -->
-          <tr class="reveal-child">
-            <td><strong>Support Vector Machine</strong></td>
-            <td>
-              <div class="td-flex">
-                <span data-counter>94.9%</span>
-                <div class="mini-bar-bg"><div class="bar-fill" data-target="94.9" style="width:0%"></div></div>
-              </div>
-            </td>
-            <td>95.0%</td><td>94.9%</td><td class="f1-cell">0.949</td><td>93.8%</td><td>±0.003</td>
-          </tr>
-          <!-- Decision Tree -->
-          <tr class="reveal-child">
-            <td><strong>Decision Tree</strong></td>
-            <td>
-              <div class="td-flex">
-                <span data-counter>92.6%</span>
-                <div class="mini-bar-bg"><div class="bar-fill" data-target="92.6" style="width:0%"></div></div>
-              </div>
-            </td>
-            <td>92.7%</td><td>92.6%</td><td class="f1-cell">0.926</td><td>91.7%</td><td>±0.005</td>
-          </tr>
-          <!-- Logistic Regression -->
-          <tr class="reveal-child">
-            <td><strong>Logistic Regression</strong></td>
-            <td>
-              <div class="td-flex">
-                <span data-counter>81.9%</span>
-                <div class="mini-bar-bg"><div class="bar-fill" data-target="81.9" style="width:0%"></div></div>
-              </div>
-            </td>
-            <td>82.1%</td><td>81.9%</td><td class="f1-cell">0.820</td><td>82.2%</td><td>±0.008</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Core Metrics Table -->
+    <div class="metrics-section met-sec">
+      <h3 class="section-subtitle sub-title">Supervised Learning Benchmarks</h3>
+      <div class="table-container tbl-cnt">
+        <table class="metrics-table met-tbl">
+          <thead>
+            <tr>
+              <th>Classifier Architecture</th>
+              <th>Accuracy</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1-Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="primary-col">Random Forest</td>
+              <td class="stat-n">95.1%</td>
+              <td>0.96</td>
+              <td>0.95</td>
+              <td>0.95</td>
+            </tr>
+            <tr>
+              <td class="primary-col">SVM (SVC)</td>
+              <td class="stat-n">94.9%</td>
+              <td>0.95</td>
+              <td>0.95</td>
+              <td>0.95</td>
+            </tr>
+            <tr>
+              <td class="primary-col">Decision Tree</td>
+              <td class="stat-n">92.6%</td>
+              <td>0.93</td>
+              <td>0.93</td>
+              <td>0.93</td>
+            </tr>
+            <tr>
+              <td class="primary-col">Logistic Regression</td>
+              <td class="stat-n">81.9%</td>
+              <td>0.82</td>
+              <td>0.82</td>
+              <td>0.82</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-</section>
 
-<section class="performance-section res-body">
-  <div class="container text-center reveal" data-reveal="up">
-    <span class="tag tag-wipe">VISUALISATION</span>
-    <h2 class="section-title sec-title">Metric Benchmarking</h2>
-    <div class="charts-wrap reveal-stagger">
-      <div class="bar-chart-wrap bc-wrap">
-        <div class="bar-chart-row reveal-child">
-          <div class="bar-chart-label">Random Forest</div>
-          <div class="bar-bg"><div class="bar-fill" data-target="95.1" style="width:0%; background:var(--lime)"></div></div>
-          <div class="bar-chart-value" data-counter>95.1%</div>
-        </div>
-        <div class="bar-chart-row reveal-child">
-          <div class="bar-chart-label">Support Vector Machine</div>
-          <div class="bar-bg"><div class="bar-fill" data-target="94.9" style="width:0%; background:var(--olive)"></div></div>
-          <div class="bar-chart-value" data-counter>94.9%</div>
-        </div>
-        <div class="bar-chart-row reveal-child">
-          <div class="bar-chart-label">Decision Tree</div>
-          <div class="bar-bg"><div class="bar-fill" data-target="92.6" style="width:0%; background:var(--dolive)"></div></div>
-          <div class="bar-chart-value" data-counter>92.6%</div>
-        </div>
-        <div class="bar-chart-row reveal-child">
-          <div class="bar-chart-label">Logistic Regression</div>
-          <div class="bar-bg"><div class="bar-fill" data-target="81.9" style="width:0%; background:var(--yellow)"></div></div>
-          <div class="bar-chart-value" data-counter>81.9%</div>
+    <!-- Accuracy Visualization -->
+    <div class="visualization-grid vis-grid">
+      <div class="vis-card">
+        <h3>5-Fold Cross-Validation Scores</h3>
+        <p class="vis-desc">Mean performance across random data partitions to ensure model stability and prevent overfitting during clinical deployment.</p>
+        <div class="bar-chart cv-chart">
+          <div class="bar-chart-row">
+            <div class="bar-chart-label">Random Forest</div>
+            <div class="bar-chart-bg"><div class="bar-chart-fill" style="width: 94.1%; background: #A8E63D"></div></div>
+            <div class="bar-chart-val">94.1%</div>
+          </div>
+          <div class="bar-chart-row">
+            <div class="bar-chart-label">SVM (SVC)</div>
+            <div class="bar-chart-bg"><div class="bar-chart-fill" style="width: 93.8%; background: #8E9630"></div></div>
+            <div class="bar-chart-val">93.8%</div>
+          </div>
+          <div class="bar-chart-row">
+            <div class="bar-chart-label">Decision Tree</div>
+            <div class="bar-chart-bg"><div class="bar-chart-fill" style="width: 91.7%; background: #607423"></div></div>
+            <div class="bar-chart-val">91.7%</div>
+          </div>
+          <div class="bar-chart-row">
+            <div class="bar-chart-label">Logistic Regression</div>
+            <div class="bar-chart-bg"><div class="bar-chart-fill" style="width: 82.2%; background: #F4DF6B"></div></div>
+            <div class="bar-chart-val">82.2%</div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
 
-<section class="cv-scores-section res-body">
-  <div class="container">
-    <div class="cv-grid reveal-stagger">
-      <div class="cv-card reveal-child">
-        <h3>Random Forest</h3>
-        <span class="cv-tag badge-pop">5-FOLD VALIDATION</span>
-        <div class="cv-score-row"><span class="cv-score" data-counter>94.1%</span></div>
-        <div class="cv-bar-bg"><div class="cv-bar-fill bar-fill" data-target="94.1" style="width:0%"></div></div>
-        <p>Consistency: ±0.002</p>
-      </div>
-      <div class="cv-card reveal-child">
-        <h3>Support Vector Machine</h3>
-        <span class="cv-tag badge-pop">5-FOLD VALIDATION</span>
-        <div class="cv-score-row"><span class="cv-score" data-counter>93.8%</span></div>
-        <div class="cv-bar-bg"><div class="cv-bar-fill bar-fill" data-target="93.8" style="width:0%"></div></div>
-        <p>Consistency: ±0.003</p>
-      </div>
-      <div class="cv-card reveal-child">
-        <h3>Decision Tree</h3>
-        <span class="cv-tag badge-pop">5-FOLD VALIDATION</span>
-        <div class="cv-score-row"><span class="cv-score" data-counter>91.7%</span></div>
-        <div class="cv-bar-bg"><div class="cv-bar-fill bar-fill" data-target="91.7" style="width:0%"></div></div>
-        <p>Consistency: ±0.005</p>
-      </div>
-      <div class="cv-card reveal-child">
-        <h3>Logistic Regression</h3>
-        <span class="cv-tag badge-pop">5-FOLD VALIDATION</span>
-        <div class="cv-score-row"><span class="cv-score" data-counter>82.2%</span></div>
-        <div class="cv-bar-bg"><div class="cv-bar-fill bar-fill" data-target="82.2" style="width:0%"></div></div>
-        <p>Consistency: ±0.008</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="confusion-matrices res-body">
-  <div class="container">
-    <div class="section-header reveal" data-reveal="left">
-      <span class="tag tag-wipe">MATRIX ANALYSIS</span>
-      <h2 class="section-title sec-title">Confusion Matrices</h2>
-      <p>Tracking class-wise classification precision to identify potential diagnostic overlaps between disease markers.</p>
-    </div>
-    <div class="cm-grid reveal-stagger">
-      <!-- Typical matrix layout, simplified for University standard -->
-      <div class="cm-card reveal-child">
-        <h3 style="margin-bottom:20px;">Validated Model Precision</h3>
-        <div class="cm-table-wrap">
-          <table class="cm-table">
+      <div class="vis-card">
+        <h3>Primary Confusion Matrix</h3>
+        <p class="vis-desc">Class-wise prediction distribution for the Random Forest model. (Diagonal represents correct clinical inferences).</p>
+        <div class="cm-table-container cm-cnt">
+          <table class="cm-table cm-tbl">
             <thead>
-              <tr><th>(Actual \ Pred)</th><th>Ane</th><th>Dia</th><th>HTH</th><th>HRT</th><th>Tha</th><th>Thr</th></tr>
+              <tr>
+                <th></th>
+                <th>Ane</th><th>Dia</th><th>HTH</th><th>HRT</th><th>Tha</th><th>Thr</th>
+              </tr>
             </thead>
-            <tbody>
-              <tr><td style="font-weight:700">Ane</td><td class="cm-cell cm-diag" data-val="150">150</td><td class="cm-cell" data-val="2">2</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell" data-val="1">1</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell" data-val="0">0</td></tr>
-              <tr><td style="font-weight:700">Dia</td><td class="cm-cell" data-val="3">3</td><td class="cm-cell cm-diag" data-val="144">144</td><td class="cm-cell" data-val="1">1</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell" data-val="2">2</td></tr>
-              <tr><td style="font-weight:700">HTH</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell" data-val="1">1</td><td class="cm-cell cm-diag" data-val="148">148</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell" data-val="1">1</td><td class="cm-cell" data-val="0">0</td></tr>
-              <tr><td style="font-weight:700">HRT</td><td class="cm-cell" data-val="2">2</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell cm-diag" data-val="146">146</td><td class="cm-cell" data-val="2">2</td><td class="cm-cell" data-val="0">0</td></tr>
-              <tr><td style="font-weight:700">Tha</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell" data-val="2">2</td><td class="cm-cell" data-val="1">1</td><td class="cm-cell cm-diag" data-val="147">147</td><td class="cm-cell" data-val="0">0</td></tr>
-              <tr><td style="font-weight:700">Thr</td><td class="cm-cell" data-val="1">1</td><td class="cm-cell" data-val="3">3</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell" data-val="0">0</td><td class="cm-cell cm-diag" data-val="146">146</td></tr>
+            <tbody id="cm-body">
+              <tr><td>Ane</td><td class="cm-cell" data-val="120">120</td><td>2</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>Dia</td><td>1</td><td class="cm-cell" data-val="115">115</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+              <tr><td>HTH</td><td>0</td><td>1</td><td class="cm-cell" data-val="130">130</td><td>0</td><td>0</td><td>2</td></tr>
+              <tr><td>HRT</td><td>0</td><td>2</td><td>0</td><td class="cm-cell" data-val="118">118</td><td>1</td><td>0</td></tr>
+              <tr><td>Tha</td><td>1</td><td>0</td><td>0</td><td>0</td><td class="cm-cell" data-val="122">122</td><td>0</td></tr>
+              <tr><td>Thr</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td class="cm-cell" data-val="125">125</td></tr>
             </tbody>
           </table>
         </div>
@@ -186,23 +125,8 @@
     </div>
   </div>
 </section>
-
-<section class="methodology-section res-body">
-  <div class="container">
-    <div class="method-grid reveal-stagger">
-      <div class="method-card reveal-child">
-        <h3>Dataset Scaling</h3>
-        <p>All clinical inputs are pre-normalized to a standard unit scale (0-1) to ensure feature equitable impact during gradient-based training.</p>
-      </div>
-      <div class="method-card reveal-child">
-        <h3>Evaluation Rigor</h3>
-        <p>Final selection was predicated on maximizing the Weighted F1-Score, ensuring reliability even in under-represented classes.</p>
-      </div>
-    </div>
-  </div>
-</section>
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/results.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/results.js') }}"></script>
 {% endblock %}

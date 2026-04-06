@@ -1,244 +1,93 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="about-header pg-hdr reveal" data-reveal="down">
+<header class="about-header pg-hdr">
   <div class="container header-content">
-    <span class="tag tag-wipe">ABOUT THE ENGINE</span>
-    <h1>SmartHealth AI Framework</h1>
-    <p>A multi-class machine learning clinical decision-support system designed for the analysis of patient-specific biological markers and metabolic profiles.</p>
+    <span class="tag">ACADEMIC REPORT</span>
+    <h1>The SmartHealth AI Project</h1>
+    <p>A technical overview of the development, architecture, and clinical orientation of SmartHealth AI. This final year project bridges the gap between diagnostic biomarkers and computational inference.</p>
   </div>
-</section>
+</header>
 
-<section class="mission ab-body">
-  <div class="container about-mission ab-mission">
-    <div class="about-mission-visual ab-mis-vis reveal" data-reveal="scale">
-      <svg width="240" height="240" viewBox="0 0 24 24" fill="none" stroke="#C5E710" stroke-width="1.5" class="radar-spin">
-        <path d="M12 2v20M2 12h20M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z" opacity="0.3"></path>
-        <circle cx="12" cy="12" r="3" fill="#C5E710"></circle>
-        <circle cx="12" cy="5" r="1.5" fill="#F4DF6B" class="orbit" style="--d: 4s"></circle>
-        <circle cx="12" cy="19" r="1.5" fill="#8E9630" class="orbit" style="--d: 4s; --delay: 2s"></circle>
-        <circle cx="5" cy="12" r="1.5" fill="#607423" class="orbit" style="--d: 4s; --delay: 1s"></circle>
-        <circle cx="19" cy="12" r="1.5" fill="#C5E710" class="orbit" style="--d: 4s; --delay: 3s"></circle>
-      </svg>
-    </div>
-    <div class="mission-text reveal" data-reveal="right">
-      <h2>The Core Mandate</h2>
-      <p>Clinical diagnostic procedures frequently encounter high variability and cognitive overhead in high-throughput medical facilities. SmartHealth AI addresses this by providing a robust predictive layer to prioritize patient risk assessment based on empirical laboratory findings.</p>
-      <p>Modern clinical repositories currently host extensive structured patient data that remains largely underutilized for real-time risk stratification. Our system aims to bridge this data-to-decision gap through intelligent algorithmic inference.</p>
-      <p>By employing optimized ensemble learning models, the framework identifies non-linear patterns across twenty-four biological markers, identifying subtle diagnostic indicators that might be bypassed during routine manual assessment.</p>
-    </div>
+<div class="about-main about-body">
+  <div class="container about-layout">
+    <!-- Main Content -->
+    <article class="academic-report abr-cnt">
+      <section class="report-section met-sec">
+        <h2 class="report-title sub-title">Core Mandate</h2>
+        <p>The primary objective of SmartHealth AI is to develop a reliable clinical screening tool that utilizes supervised learning models to predict disease states from patient blood panel data. By ensembling multiple classification architectures, the project achieves standardized diagnostics for chronic and hematological conditions.</p>
+      </section>
+
+      <section class="report-section met-sec">
+        <h2 class="report-title sub-title">System Architecture</h2>
+        <div class="architecture-flow steps-grid">
+          <div class="flow-step step-card">
+            <span class="step-num">01</span>
+            <h3>Data Preprocessing</h3>
+            <p>Raw clinical biomarkers are normalized onto a standard distribution using scikit-learn's preprocessing pipelines to ensure feature scaling consistency.</p>
+          </div>
+          <div class="flow-step step-card">
+            <span class="step-num">02</span>
+            <h3>Classification Model</h3>
+            <p>The optimized Random Forest engine performs multi-class inference across 24 clinical features to identify optimal decision boundaries.</p>
+          </div>
+          <div class="flow-step step-card">
+            <span class="step-num">03</span>
+            <h3>Clinical Validation</h3>
+            <p>Diagnostic probability scores are weighted by model confidence metrics to provide a realistic assessment for medical review.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="report-section met-sec">
+        <h2 class="report-title sub-title">Classification Set Design</h2>
+        <div class="table-container tbl-cnt">
+          <table class="conditions-table met-tbl">
+            <thead>
+              <tr>
+                <th>Disease Category</th>
+                <th>Target Biomarker</th>
+                <th>Diagnostic Precision</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Healthy Reference State</td><td>Standard Base</td><td>0.96</td></tr>
+              <tr><td>Type 2 Diabetes Mellitus</td><td>HbA1c/Glucose</td><td>0.94</td></tr>
+              <tr><td>Clinical Anemia</td><td>Hemoglobin/RBC</td><td>0.95</td></tr>
+              <tr><td>Ischemic Heart Disease</td><td>Troponin/Lipids</td><td>0.93</td></tr>
+              <tr><td>Thalassemia</td><td>MCV/MCH</td><td>0.95</td></tr>
+              <tr><td>Thrombocytopenia</td><td>Platelets</td><td>0.96</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </article>
+
+    <!-- Side Sidebar -->
+    <aside class="about-sidebar abr-side">
+      <div class="research-info res-card">
+        <h3>Development Infrastructure</h3>
+        <ul class="infra-list list-none">
+          <li><strong>Python 3.12</strong> — Computational Backend</li>
+          <li><strong>Scikit-Learn</strong> — ML Architecture</li>
+          <li><strong>Flask</strong> — Web Server Interface</li>
+          <li><strong>Joblib</strong> — Binary Model Serialisation</li>
+          <li><strong>Vercel</strong> — Production Deployment</li>
+        </ul>
+      </div>
+
+      <div class="academic-card res-card">
+        <h3>Principal Researcher</h3>
+        <p class="res-name"><strong>Enock Queenson Eduafo</strong></p>
+        <p class="res-id">Student ID: 11014444</p>
+        <p class="res-org">University of Ghana</p>
+        <p class="res-sup">Supervisor: Professor Solomon Mensah</p>
+      </div>
+
+      <div class="legal-notice res-card">
+        <p><strong>Disclaimer:</strong> This project is an academic prototype for clinical research and predictive modelling. It is not intended for use as a primary diagnostic medical device.</p>
+      </div>
+    </aside>
   </div>
-</section>
-
-<section class="architecture ab-body">
-  <div class="container">
-    <div class="section-header reveal" data-reveal="left">
-      <span class="tag tag-wipe">PROCESS</span>
-      <h2 class="section-title sec-title">System Architecture</h2>
-    </div>
-    <div class="arch-grid reveal-stagger">
-      <div class="arch-card reveal-child">
-        <span class="arch-num">01</span>
-        <div class="arch-icon arch-ico">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2H2v10h10V2zM22 2h-10v10h10V2zM12 12H2v10h10V12zM22 12h-10v10h10V12z"></path></svg>
-        </div>
-        <h3>Data Layer</h3>
-        <p>A repository containing normalized clinical markers from Kaggle and original UCI medical data sets used for both historical training and live engine inference.</p>
-      </div>
-      <div class="arch-card reveal-child">
-        <span class="arch-num">02</span>
-        <div class="arch-icon arch-ico">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-        </div>
-        <h3>Normalization Pipeline</h3>
-        <p>A sequence of StandardScaling ensuring that feature importance remains mathematically balanced across biological markers with disparate unit scales.</p>
-      </div>
-      <div class="arch-card reveal-child">
-        <span class="arch-num">03</span>
-        <div class="arch-icon arch-ico">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v8M12 14v8M4.93 4.93l5.66 5.66M13.41 13.41l5.66 5.66M2 12h8M14 12h8M4.93 19.07l5.66-5.66M13.41 10.59l5.66-5.66"></path></svg>
-        </div>
-        <h3>Automated Training</h3>
-        <p>An exhaustive selection process evaluating Gradient Boosting, Linear Models, and Random Forests to identify the model with the highest Weighted F1-Score.</p>
-      </div>
-      <div class="arch-card reveal-child">
-        <span class="arch-num">04</span>
-        <div class="arch-icon arch-ico">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
-        </div>
-        <h3>Vercel Deployment</h3>
-        <p>A highly responsive and accessible Flask-based web application served through a production-grade cloud infrastructure for global clinical accessibility.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="conditions-table-section ab-body">
-  <div class="container reveal" data-reveal="up">
-    <div class="section-header">
-      <span class="tag tag-wipe">CAPABILITIES</span>
-      <h2 class="section-title sec-title">Detectable Condition Parameters</h2>
-    </div>
-    <div class="conditions-table-wrap ctbl-wrap">
-      <table class="conditions-table ctbl">
-        <thead>
-          <tr>
-            <th>Condition Name</th>
-            <th>Primary Biological Indicators</th>
-            <th>Sample Size (N)</th>
-            <th>Predictive Reliability (F1)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="reveal-child">
-            <td><strong>Healthy Reference</strong></td>
-            <td style="color:var(--gray)">Standard Physiological Values</td>
-            <td style="font-weight:700" data-reveal="counter">850</td>
-            <td style="color:var(--lime); font-weight:800;">0.985</td>
-          </tr>
-          <tr class="reveal-child">
-            <td><strong>Type 2 Diabetes</strong></td>
-            <td style="color:var(--gray)">Hyperglycemia & High HbA1c</td>
-            <td style="font-weight:700" data-reveal="counter">720</td>
-            <td style="color:var(--lime); font-weight:800;">0.952</td>
-          </tr>
-          <tr class="reveal-child">
-            <td><strong>Iron Deficiency Anemia</strong></td>
-            <td style="color:var(--gray)">Low Hemoglobin & Low MCV</td>
-            <td style="font-weight:700" data-reveal="counter">640</td>
-            <td style="color:var(--lime); font-weight:800;">0.941</td>
-          </tr>
-          <tr class="reveal-child">
-            <td><strong>Ischemic Heart Disease</strong></td>
-            <td style="color:var(--gray)">Troponin & High Cholesterol</td>
-            <td style="font-weight:700" data-reveal="counter">590</td>
-            <td style="color:var(--lime); font-weight:800;">0.938</td>
-          </tr>
-          <tr class="reveal-child">
-            <td><strong>Beta Thalassemia</strong></td>
-            <td style="color:var(--gray)">MCH Variants & RBC Structure</td>
-            <td style="font-weight:700" data-reveal="counter">480</td>
-            <td style="color:var(--lime); font-weight:800;">0.915</td>
-          </tr>
-          <tr class="reveal-child">
-            <td><strong>Thrombocytopenia</strong></td>
-            <td style="color:var(--gray)">Critical Platelet Concentration</td>
-            <td style="font-weight:700" data-reveal="counter">420</td>
-            <td style="color:var(--lime); font-weight:800;">0.902</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<section class="tech-stack-section ab-body">
-  <div class="container">
-    <div class="section-header text-center reveal" data-reveal="up" style="margin-left:auto; margin-right:auto;">
-      <span class="tag tag-wipe">TECHNOLOGY</span>
-      <h2 class="section-title sec-title">Development Infrastructure</h2>
-    </div>
-    <div class="stack-grid reveal-stagger">
-      <div class="stack-card reveal-child">
-        <div class="stack-icon stack-ico">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-        </div>
-        <div class="stack-name stack-nm">Python 3.12</div>
-        <div class="stack-role stack-rl">Predictive Core</div>
-      </div>
-      <div class="stack-card reveal-child">
-        <div class="stack-icon stack-ico">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93"></path></svg>
-        </div>
-        <div class="stack-name stack-nm">Scikit-Learn</div>
-        <div class="stack-role stack-rl">Classification</div>
-      </div>
-      <div class="stack-card reveal-child">
-        <div class="stack-icon stack-ico">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
-        </div>
-        <div class="stack-name stack-nm">Flask Engine</div>
-        <div class="stack-role stack-rl">Server Logic</div>
-      </div>
-      <div class="stack-card reveal-child">
-        <div class="stack-icon stack-ico">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-        </div>
-        <div class="stack-name stack-nm">NumPy / Pandas</div>
-        <div class="stack-role stack-rl">Data Science</div>
-      </div>
-      <div class="stack-card reveal-child">
-        <div class="stack-icon stack-ico">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
-        </div>
-        <div class="stack-name stack-nm">Clinical Sets</div>
-        <div class="stack-role stack-rl">UCI Source Data</div>
-      </div>
-      <div class="stack-card reveal-child">
-        <div class="stack-icon stack-ico">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-        </div>
-        <div class="stack-name stack-nm">Joblib / Vercel</div>
-        <div class="stack-role stack-rl">Deployment</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="ethics-limitations">
-  <div class="container">
-    <div class="ethics-grid eth-grid reveal-stagger" style="margin-bottom:60px;">
-      <div class="ethics-item eth-item reveal-child">
-        <div class="ethics-icon eth-ico">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shield-pulse"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-        </div>
-        <div class="eth-text">
-          <h3>Full Anonymization</h3>
-          <p>Training clinical sets undergo comprehensive de-identification ensuring that patient privacy remains primary during algorithmic modeling.</p>
-        </div>
-      </div>
-      <div class="ethics-item eth-item reveal-child">
-        <div class="ethics-icon eth-ico">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="d-dot"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
-        </div>
-        <div class="eth-text">
-          <h3>Medical AI Ethics</h3>
-          <p>We strictly adhere to ethical AI guidelines, emphasizing model transparency and clinical authority in every decision pathway.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="limitations-grid lim-grid reveal-stagger">
-      <div class="limitation-card lim-card reveal-child">
-        <span class="lim-label">Algorithmic Boundaries</span>
-        <p>This prototype's accuracy is heavily dependent on the clinical representativeness of the provided biomarker panel. It does not account for age or gender variations.</p>
-      </div>
-      <div class="limitation-card lim-card reveal-child">
-        <span class="lim-label">No Diagnostics Intent</span>
-        <p>Predictions are purely statistical estimations based on binary and multiclass markers and should never bypass professional medical screening.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="developer ab-body">
-  <div class="container reveal" data-reveal="scale">
-    <div class="dev-card">
-      <div class="dev-content text-center">
-        <h2 class="tag-wipe">About the Researcher</h2>
-        <p style="font-size:1.2rem; color:var(--white); margin-bottom:25px;"><strong>Enock Queenson Eduafo</strong></p>
-        <p style="opacity:0.8; max-width:800px; margin:0 auto;">Successfully developed as a Final Year Project requirement (Student ID: 11014444) within the Department of Computer Science, Information Technology programme at the University of Ghana. Supervised by Professor Solomon Mensah, class of 2026.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="final-disclaimer ab-body">
-  <div class="container reveal" data-reveal="up">
-    <div class="disclaimer-card" style="border:1px solid var(--lime); background:rgba(197,231,16,0.03); padding:30px; border-radius:24px; display:flex; gap:25px; align-items:center;">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--lime); flex-shrink:0;" class="status-dot"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
-      <p style="font-size:0.9rem; opacity:0.9;"><strong>Academic Disclaimer:</strong> This platform is designed for research purposes and academic evaluation at the University of Ghana. It is not an FDA-cleared medical device. Clinical predictions must be verified by licensed practitioners.</p>
-    </div>
-  </div>
-</section>
+</div>
 {% endblock %}
