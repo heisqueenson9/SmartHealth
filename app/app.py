@@ -14,8 +14,8 @@ from flask import Flask, render_template, request, jsonify
 import joblib
 
 app = Flask(__name__, 
-    template_folder='templates',
-    static_folder='static',
+    template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
+    static_folder=os.path.join(os.path.dirname(__file__), 'static'),
     static_url_path='/static'
 )
 
@@ -107,6 +107,23 @@ def debug():
         '__file__': __file__
     }
     return jsonify(result)
+
+@app.route('/api/static-test')
+def static_test():
+    """Diagnostic route to verify static file availability for Vercel serving."""
+    import os
+    static_dir = app.static_folder
+    files = []
+    for root, dirs, filenames in os.walk(static_dir):
+        for f in filenames:
+            full = os.path.join(root, f)
+            rel = os.path.relpath(full, static_dir)
+            files.append(rel)
+    return jsonify({
+        'static_folder': static_dir,
+        'static_folder_exists': os.path.exists(static_dir),
+        'files': sorted(files)
+    })
 
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
