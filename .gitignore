@@ -1,9 +1,8 @@
+# .gitignore - allow models to be tracked
 __pycache__/
 *.pyc
 venv/
 .env
-models/*.pkl
-models/results_summary.json
 *.zip
 .DS_Store
 Thumbs.db

@@ -19,25 +19,55 @@ app = Flask(__name__,
     static_url_path='/static'
 )
 
-# Safe model loading — never crash the server if a model file is missing
 MODELS = {}
-MODEL_FILES = {
-    'random_forest': 'models/random_forest_model.pkl',
-    'svm': 'models/svm_model.pkl', 
-    'decision_tree': 'models/decision_tree_model.pkl',
-    'logistic_regression': 'models/logistic_regression_model.pkl'
-}
+
+def find_model_file(filename):
+    """
+    Try every possible path where the model file could be on Vercel.
+    Vercel deploys to /var/task/ — models must be found relative to that.
+    """
+    search_bases = [
+        os.getcwd(),
+        os.path.dirname(os.path.abspath(__file__)),
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        '/var/task',
+        '/var/task/models',
+    ]
+    
+    search_paths = []
+    for base in search_bases:
+        search_paths.extend([
+            os.path.join(base, filename),
+            os.path.join(base, 'models', filename),
+            os.path.join(base, 'app', 'models', filename),
+        ])
+    
+    for path in search_paths:
+        if os.path.exists(path):
+            print(f'[SmartHealth] Found model at: {path}')
+            return path
+    
+    return None
 
 def load_models():
-    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    for name, path in MODEL_FILES.items():
-        full_path = os.path.join(base, path)
-        try:
-            MODELS[name] = joblib.load(full_path)
-            print(f"[SmartHealth] Loaded: {name}")
-        except Exception as e:
-            print(f"[SmartHealth] WARNING: Could not load {name}: {e}")
-            MODELS[name] = None
+    """Initialises all models by searching through multiple potential locations."""
+    model_files = {
+        'random_forest':      'random_forest_model.pkl',
+        'svm':                'svm_model.pkl',
+        'decision_tree':      'decision_tree_model.pkl',
+        'logistic_regression':'logistic_regression_model.pkl',
+    }
+    for key, filename in model_files.items():
+        path = find_model_file(filename)
+        if path:
+            try:
+                MODELS[key] = joblib.load(path)
+                print(f'[SmartHealth] SUCCESS: loaded {key}')
+            except Exception as e:
+                print(f'[SmartHealth] LOAD ERROR for {key}: {e}')
+                MODELS[key] = None
+        else:
+            MODELS[key] = None
 
 load_models()
 
@@ -61,71 +91,88 @@ def about_page():
     """Renders the about page with project details and researcher info."""
     return render_template('about.html')
 
+@app.route('/api/debug')
+def debug():
+    """Diagnostic route to verify environment and file mapping for Vercel deployment."""
+    import os
+    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    model_dir = os.path.join(base, 'models')
+    result = {
+        'cwd': os.getcwd(),
+        'base': base,
+        'model_dir': model_dir,
+        'model_dir_exists': os.path.exists(model_dir),
+        'files_in_models': os.listdir(model_dir) if os.path.exists(model_dir) else 'FOLDER NOT FOUND',
+        'models_loaded': {k: (v is not None) for k, v in MODELS.items()},
+        '__file__': __file__
+    }
+    return jsonify(result)
+
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
-    """Handles health biomarker data to generate clinical diagnostic predictions."""
+    """Handles health biomarker data to generate clinical diagnostic predictions with fallback support."""
     try:
         data = request.get_json(force=True)
         
         # Model key normalizer: ensures frontend keys match backend expectations
         MODEL_KEY_MAP = {
-            'random_forest': 'random_forest',
-            'randomforest': 'random_forest',
-            'rf': 'random_forest',
-            'svm': 'svm',
-            'support_vector_machine': 'svm',
-            'supportvectormachine': 'svm',
-            'decision_tree': 'decision_tree',
-            'decisiontree': 'decision_tree',
-            'dt': 'decision_tree',
-            'logistic_regression': 'logistic_regression',
-            'logisticregression': 'logistic_regression',
-            'lr': 'logistic_regression',
+            'random_forest': 'random_forest', 'randomforest': 'random_forest', 'rf': 'random_forest',
+            'svm': 'svm', 'support_vector_machine': 'svm', 'supportvectormachine': 'svm',
+            'decision_tree': 'decision_tree', 'decisiontree': 'decision_tree', 'dt': 'decision_tree',
+            'logistic_regression': 'logistic_regression', 'logisticregression': 'logistic_regression', 'lr': 'logistic_regression',
         }
 
         model_key_raw = data.get('model', 'random_forest').lower().strip()
         model_key = MODEL_KEY_MAP.get(model_key_raw, 'random_forest')
         
-        features = data.get('features', [])
-        
-        if len(features) != 24:
-            return jsonify({'error': 'Exactly 24 features required'}), 400
-        
+        # Smart Fallback logic: use any available model if specific one fails to load
         model = MODELS.get(model_key)
+        fallback_used = False
         if model is None:
-            return jsonify({'error': f'Model {model_key} not available'}), 503
+            for fallback_key in ['random_forest', 'decision_tree', 'logistic_regression', 'svm']:
+                if MODELS.get(fallback_key) is not None:
+                    model = MODELS[fallback_key]
+                    model_key = fallback_key
+                    fallback_used = True
+                    break
+        
+        if model is None:
+            return jsonify({
+                'error': 'No ML models are currently available. Please check deployment configuration.',
+                'models_status': {k: v is not None for k, v in MODELS.items()}
+            }), 503
+        
+        features = data.get('features', [])
+        if len(features) != 24:
+            return jsonify({'error': f'Expected 24 features, got {len(features)}'}), 400
         
         X = np.array(features, dtype=float).reshape(1, -1)
-        prediction = model.predict(X)[0]
+        prediction = int(model.predict(X)[0])
         probabilities = model.predict_proba(X)[0].tolist()
         confidence = round(max(probabilities) * 100, 1)
         
         CLASS_LABELS = [
-            'Clinical Anemia',
-            'Type 2 Diabetes',
-            'Healthy Reference',
-            'Heart Condition',
-            'Thalassemia',
-            'Thrombocytopenia'
+            'Healthy Reference', 'Type 2 Diabetes', 'Clinical Anemia',
+            'Heart Condition', 'Thalassemia', 'Thrombocytopenia'
         ]
         CLASS_DESCRIPTIONS = {
-            'Clinical Anemia': 'Low hemoglobin and RBC markers indicate iron-deficient erythropoiesis or blood loss anemia.',
-            'Type 2 Diabetes': 'Elevated glucose and HbA1c levels suggest chronic metabolic dysregulation consistent with Type 2 Diabetes.',
             'Healthy Reference': 'Biomarkers indicate physiological values within normal clinical ranges. No significant disease markers detected.',
+            'Type 2 Diabetes': 'Elevated glucose and HbA1c levels suggest chronic metabolic dysregulation consistent with Type 2 Diabetes.',
+            'Clinical Anemia': 'Low hemoglobin and RBC markers indicate iron-deficient erythropoiesis or blood loss anemia.',
             'Heart Condition': 'Elevated troponin and cardiovascular markers suggest potential ischemic or hypertensive cardiovascular stress.',
             'Thalassemia': 'Abnormal MCH and RBC structural markers indicate hereditary hemoglobin chain production disorder.',
             'Thrombocytopenia': 'Critically reduced platelet count indicates increased bleeding risk requiring urgent clinical review.'
         }
         CLASS_RECOMMENDATIONS = {
-            'Clinical Anemia': ['Iron supplementation evaluation', 'Dietary iron increase (red meat, leafy greens)', 'Consult haematologist', 'Repeat CBC in 4-6 weeks'],
-            'Type 2 Diabetes': ['Consult endocrinologist immediately', 'Monitor blood glucose daily', 'Reduce simple carbohydrate intake', 'Begin aerobic exercise program'],
             'Healthy Reference': ['Maintain current lifestyle', 'Annual blood panel recommended', 'Continue balanced nutrition'],
-            'Heart Condition': ['Urgent cardiology referral', 'ECG and echocardiogram advised', 'Monitor blood pressure daily', 'Restrict sodium intake'],
-            'Thalassemia': ['Genetic counselling recommended', 'Haematology specialist referral', 'Regular transfusion monitoring if severe', 'Family screening advised'],
-            'Thrombocytopenia': ['Immediate haematology referral', 'Avoid NSAIDs and blood thinners', 'Monitor for bleeding symptoms', 'Bone marrow evaluation may be required']
+            'Type 2 Diabetes': ['Consult endocrinologist immediately', 'Monitor blood glucose daily', 'Reduce simple carbohydrate intake'],
+            'Clinical Anemia': ['Iron supplementation evaluation', 'Dietary iron increase', 'Consult haematologist'],
+            'Heart Condition': ['Urgent cardiology referral', 'ECG and echocardiogram advised', 'Monitor blood pressure daily'],
+            'Thalassemia': ['Genetic counselling recommended', 'Haematology specialist referral', 'Family screening advised'],
+            'Thrombocytopenia': ['Immediate haematology referral', 'Avoid NSAIDs', 'Monitor for bleeding symptoms']
         }
         
-        label = CLASS_LABELS[int(prediction)] if int(prediction) < len(CLASS_LABELS) else 'Unknown'
+        label = CLASS_LABELS[prediction] if prediction < len(CLASS_LABELS) else 'Unknown'
         
         return jsonify({
             'prediction': label,
@@ -133,11 +180,16 @@ def api_predict():
             'probabilities': dict(zip(CLASS_LABELS, probabilities)),
             'description': CLASS_DESCRIPTIONS.get(label, ''),
             'recommendations': CLASS_RECOMMENDATIONS.get(label, []),
-            'model_used': model_key
+            'model_used': model_key,
+            'fallback_used': fallback_used
         })
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        import traceback
+        return jsonify({
+            'error': str(e),
+            'trace': traceback.format_exc()
+        }), 500
 
 if __name__ == '__main__':
     port  = int(os.environ.get('PORT', 5000))
