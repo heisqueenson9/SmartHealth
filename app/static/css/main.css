@@ -250,8 +250,11 @@ h2, .section-title, .sec-title {
   bottom: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(1,10,0,0.98);
-  z-index: 9998;
+  /* Fixed overlay: using rgba for transparency instead of opacity filter */
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 40; /* Below the menu links */
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -291,13 +294,14 @@ h2, .section-title, .sec-title {
     width: 100vw;
     height: 100vh;
 
-    /* Stack above backdrop */
-    z-index: 9999;
+    /* Stack above backdrop (40) but below toggle if needed */
+    z-index: 50;
 
-    /* Fully opaque dark background */
-    background: rgba(1,10,0,0.99);
+    /* Solid background to prevent inheritance issues */
+    background: #010A00;
+    color: #ffffff;
 
-    /* Hidden by default */
+    /* Animation-ready but solid visibility */
     opacity: 0;
     pointer-events: none;
     transform: translateY(-8px);
