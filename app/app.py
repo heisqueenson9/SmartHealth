@@ -66,7 +66,26 @@ def api_predict():
     """Handles health biomarker data to generate clinical diagnostic predictions."""
     try:
         data = request.get_json(force=True)
-        model_key = data.get('model', 'random_forest')
+        
+        # Model key normalizer: ensures frontend keys match backend expectations
+        MODEL_KEY_MAP = {
+            'random_forest': 'random_forest',
+            'randomforest': 'random_forest',
+            'rf': 'random_forest',
+            'svm': 'svm',
+            'support_vector_machine': 'svm',
+            'supportvectormachine': 'svm',
+            'decision_tree': 'decision_tree',
+            'decisiontree': 'decision_tree',
+            'dt': 'decision_tree',
+            'logistic_regression': 'logistic_regression',
+            'logisticregression': 'logistic_regression',
+            'lr': 'logistic_regression',
+        }
+
+        model_key_raw = data.get('model', 'random_forest').lower().strip()
+        model_key = MODEL_KEY_MAP.get(model_key_raw, 'random_forest')
+        
         features = data.get('features', [])
         
         if len(features) != 24:

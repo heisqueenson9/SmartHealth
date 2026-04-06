@@ -188,7 +188,7 @@ function showResult(result) {
         
         // Animate bars
         setTimeout(() => {
-            probContainer.querySelectorAll('.prob-bar-fill').forEach(bar => {
+            probContainer.querySelectorAll('.bar-fill').forEach(bar => {
                 const target = bar.getAttribute('data-target');
                 bar.style.transition = 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
                 bar.style.width = target + '%';
