@@ -1,5 +1,5 @@
 # =============================================================
-# SmartHealth AI - Flask Blueprints / Routes
+# Smart Health Sync - Flask Blueprints / Routes
 # Author:      Enock Queenson Eduafo
 # Student ID:  11014444
 # Institution: University of Ghana (2026)
@@ -17,7 +17,7 @@ def metadata():
     """Root metadata about the project."""
     return jsonify({
         "status": "online",
-        "project": "SmartHealth AI Serverless API",
+        "project": "Smart Health Sync Serverless API",
         "developer": {
             "name": "Enock Queenson Eduafo",
             "student_id": "11014444",

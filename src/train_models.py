@@ -1,5 +1,5 @@
 # =============================================================
-# SmartHealth AI - Model Training Script
+# Smart Health Sync - Model Training Script
 # Author:      Enock Queenson Eduafo
 # Student ID:  11014444
 # Institution: University of Ghana

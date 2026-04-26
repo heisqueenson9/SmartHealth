@@ -1,5 +1,5 @@
 /**
- * SmartHealth AI - Animations Controller
+ * Smart Health Sync - Animations Controller
  * Full-Stack Overhaul
  */
 

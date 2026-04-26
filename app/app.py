@@ -1,5 +1,5 @@
 """
-SmartHealth AI — Flask Application Entry Point
+Smart Health Sync — Flask Application Entry Point
 Author: Enock Queenson Eduafo (11014444)
 University of Ghana | Final Year Project 2026
 Supervisor: Professor Solomon Mensah
@@ -73,7 +73,7 @@ load_models()
 
 @app.route('/')
 def index():
-    """Renders the main landing page for SmartHealth AI."""
+    """Renders the main landing page for Smart Health Sync."""
     return render_template('index.html')
 
 @app.route('/predict')

@@ -1,5 +1,5 @@
 /**
- * SmartHealth AI - Results Page JavaScript
+ * Smart Health Sync - Results Page JavaScript
  * Author: Enock Queenson Eduafo
  */
 

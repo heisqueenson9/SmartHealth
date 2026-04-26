@@ -1,5 +1,5 @@
 /**
- * SmartHealth AI - Predict Page JavaScript
+ * Smart Health Sync - Predict Page JavaScript
  * Full-Stack Overhaul (Lime & Black Theme)
  */
 

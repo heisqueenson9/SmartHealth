@@ -1,5 +1,5 @@
 /**
- * SmartHealth AI - Main JavaScript
+ * Smart Health Sync - Main JavaScript
  * Full-Stack Overhaul
  */
 

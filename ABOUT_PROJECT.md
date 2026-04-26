@@ -1,4 +1,4 @@
-# SmartHealth AI — Project Statement and Technical Report
+# Smart Health Sync — Project Statement and Technical Report
 
 By: **Enock Queenson Eduafo** | Student ID: 11014444  
 Supervisor: **Professor Solomon Mensah**  
@@ -14,7 +14,7 @@ I decided to choose disease prediction because health access and diagnostic accu
 
 ## What I Built
 
-I developed a clinical decision-support prototype called SmartHealth AI. It is a system that can predict six different health conditions by analyzing 24 clinical biomarkers like glucose, cholesterol, and hemoglobin levels. For the engine, I trained and compared four different machine learning classifiers: Random Forest, Support Vector Machine, Decision Tree, and Logistic Regression. I then built a web interface using the Flask framework so a clinician or researcher can input patient data and get an instant prediction with a confidence score and recommended next steps.
+I developed a clinical decision-support prototype called Smart Health Sync. It is a system that can predict six different health conditions by analyzing 24 clinical biomarkers like glucose, cholesterol, and hemoglobin levels. For the engine, I trained and compared four different machine learning classifiers: Random Forest, Support Vector Machine, Decision Tree, and Logistic Regression. I then built a web interface using the Flask framework so a clinician or researcher can input patient data and get an instant prediction with a confidence score and recommended next steps.
 
 ## Challenges I Faced and How I Overcame Them
 

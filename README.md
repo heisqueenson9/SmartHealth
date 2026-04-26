@@ -1,4 +1,4 @@
-# SmartHealth AI — Predictive Modelling for Disease Diagnosis Using Health Data
+# Smart Health Sync — Predictive Modelling for Disease Diagnosis Using Health Data
 
 **Author:** Enock Queenson Eduafo  
 **Student ID:** 11014444  
@@ -11,7 +11,7 @@
 
 ## Project Overview
 
-For my final year project, I built SmartHealth AI to tackle the challenges of disease diagnosis using machine learning. I wanted to see how we could use clinical biomarker data — things like glucose levels, blood pressure, and cholesterol — to help clinicians make faster and more accurate decisions. I developed a system that uses four different machine learning models to predict six different health conditions. I also built a web interface using Flask so that anyone can enter health data and see the engine's predictions in real-time.
+For my final year project, I built Smart Health Sync to tackle the challenges of disease diagnosis using machine learning. I wanted to see how we could use clinical biomarker data — things like glucose levels, blood pressure, and cholesterol — to help clinicians make faster and more accurate decisions. I developed a system that uses four different machine learning models to predict six different health conditions. I also built a web interface using Flask so that anyone can enter health data and see the engine's predictions in real-time.
 
 ---
 

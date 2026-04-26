@@ -1,5 +1,5 @@
 # =============================================================
-# SmartHealth AI - Startup Script
+# Smart Health Sync - Startup Script
 # Author:      Enock Queenson Eduafo
 # Student ID:  11014444
 # Institution: University of Ghana
@@ -37,7 +37,7 @@ def train():
 
 if __name__ == '__main__':
     print("=" * 55)
-    print("  SmartHealth AI")
+    print("  Smart Health Sync")
     print("  Enock Queenson Eduafo | 11014444")
     print("  University of Ghana | 2026")
     print("=" * 55)
