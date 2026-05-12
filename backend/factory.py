@@ -7,8 +7,16 @@ import logging
 import os
 from flask import Flask
 from flask_cors import CORS
+from flask_migrate import Migrate
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from backend.config import get_config
+from backend.database.models import db
+
+# Singletons for extensions
+migrate = Migrate()
+limiter = Limiter(key_func=get_remote_address)
 
 
 def configure_logging(level: str = "INFO"):
@@ -27,19 +35,40 @@ def create_app() -> Flask:
     configure_logging(cfg.LOG_LEVEL)
     log = logging.getLogger("smarthealth.factory")
 
-    # ── Create Flask app pointing to legacy templates/static ──
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # ── Path Resolution ──
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    template_dir = os.path.join(root_dir, "frontend", "templates")
+    static_dir = os.path.join(root_dir, "frontend", "static")
+
+    # ── Create Flask app ──
     app = Flask(
         __name__,
-        template_folder=os.path.join(base_dir, "app", "templates"),
-        static_folder=os.path.join(base_dir, "static"),
+        template_folder=template_dir,
+        static_folder=static_dir,
         static_url_path="/static",
     )
-    app.config["SECRET_KEY"] = cfg.SECRET_KEY
-    app.config["DEBUG"]      = cfg.DEBUG
+    app.config.from_object(cfg)
 
-    # ── CORS ──────────────────────────────────────────────────
+    # ── Extensions ────────────────────────────────────────────
     CORS(app, resources={r"/api/*": {"origins": cfg.CORS_ORIGINS}})
+    db.init_app(app)
+    migrate.init_app(app, db)
+    
+    # Configure Limiter
+    limiter.init_app(app)
+    app.config["RATELIMIT_STORAGE_URI"] = cfg.RATELIMIT_STORAGE_URI
+    app.config["RATELIMIT_DEFAULT"] = cfg.RATELIMIT_DEFAULT
+
+    # Ensure DB tables exist (Dev only)
+    if cfg.DEBUG:
+        with app.app_context():
+            db.create_all()
+            log.info("[SmartHealth] Database tables synchronised.")
+
+    # ── Error Handlers ────────────────────────────────────────
+    @app.errorhandler(429)
+    def ratelimit_handler(e):
+        return {"error": "Rate limit exceeded", "details": str(e.description)}, 429
 
     # ── Register blueprints ───────────────────────────────────
     from backend.api.routes import api_bp

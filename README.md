@@ -25,33 +25,55 @@ Smart Health Sync is a final-year Computer Science research project at the **Uni
 
 ## Architecture
 
+```mermaid
+graph TD
+    A[Frontend: HTML/JS/CSS] -->|REST API| B[Backend: Flask]
+    B --> C[ML Inference: Scikit-Learn]
+    B --> D[Database: PostgreSQL/SQLite]
+    B --> E[Security: Rate Limiter]
+    C --> F[Models Registry]
+```
+
+### Project Structure
 ```
 smarthealth/
 ├── backend/
-│   ├── api/
-│   │   ├── routes.py          # RESTful API endpoints
-│   │   └── views.py           # HTML page views
-│   ├── ml/
-│   │   └── model_manager.py   # Professional ModelManager singleton
-│   ├── config.py              # Centralised environment configuration
-│   └── factory.py             # Flask application factory
-├── app/
-│   └── templates/             # Jinja2 HTML templates
-├── static/
-│   ├── css/                   # Main stylesheet + animations
-│   └── js/                    # Frontend logic
-├── models/                    # ML model binaries (.pkl) + metadata
-├── datasets/                  # Training/test CSV data
-├── notebooks/                 # Jupyter analysis notebooks
-├── docker/                    # Dockerfile
-├── docs/                      # Architecture diagrams + documentation
-├── .github/workflows/         # CI/CD pipeline (GitHub Actions)
-├── main.py                    # Production entry point
-├── requirements.txt
-├── Procfile
-├── render.yaml
-└── docker-compose.yml
+│   ├── api/                # Blueprints for Routes & Views
+│   ├── database/           # SQLAlchemy Models & Migrations
+│   ├── ml/                 # Training, Inference, & Registry
+│   ├── middleware/         # Security & Custom Logic
+│   ├── config.py           # Multi-env Config
+│   └── factory.py          # App Factory Init
+├── frontend/
+│   ├── static/             # Assets (CSS/JS/Images)
+│   └── templates/          # Jinja2 HTML Templates
+├── models/                 # Model Registry (Sync with Backend)
+├── datasets/               # Clinical Data (CSV)
+├── docker/                 # Production Dockerisation
+├── .github/                # CI/CD Workflows
+├── main.py                 # Production Entry
+└── README.md
 ```
+
+---
+
+## Database Schema (SQLAlchemy)
+
+The system implements a production-grade relational schema for clinical data management:
+
+- **Users**: Authentication and RBAC (Admin/Provider roles).
+- **Patients**: Encrypted patient metadata and clinical history.
+- **DiagnosticRecords**: Immutable logs of AI predictions with biomarker snapshots.
+- **ModelAuditLogs**: Traceability for model usage and performance drift.
+
+---
+
+## Security & Reliability
+
+- **Rate Limiting**: Integrated `Flask-Limiter` with Redis/Memory support (200/day, 10/min).
+- **Environment Isolation**: Secure config management via `pathlib` and environment variables.
+- **Model Fallback**: Cascade system ensures diagnostic availability even if primary models are corrupt.
+- **CORS**: Strict origin-based access control.
 
 ---
 

@@ -39,7 +39,14 @@ class Config:
     # CORS
     CORS_ORIGINS     = os.environ.get("CORS_ORIGINS", "*")
 
+    # Database
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///" + str(BASE_DIR / "smarthealth.db"))
+    if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
+        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
     # Rate limiting
+    RATELIMIT_STORAGE_URI = os.environ.get("REDIS_URL", "memory://")
     RATELIMIT_DEFAULT = "200 per day;50 per hour;10 per minute"
 
     # Logging
