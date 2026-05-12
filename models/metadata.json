@@ -1,0 +1,79 @@
+{
+  "version": "2.0.0",
+  "last_trained": "2026-01-15",
+  "framework": "scikit-learn 1.4.2",
+  "python": "3.11",
+  "models": {
+    "random_forest": {
+      "filename": "random_forest.pkl",
+      "algorithm": "Random Forest Classifier",
+      "accuracy": 0.9507,
+      "precision": 0.9437,
+      "recall": 0.9507,
+      "f1_score": 0.945,
+      "cv_mean": 0.9414,
+      "cv_std": 0.0075,
+      "n_estimators": 200,
+      "status": "production",
+      "description": "Best performing ensemble model deployed in production inference."
+    },
+    "svm": {
+      "filename": "support_vector_machine.pkl",
+      "algorithm": "Support Vector Classifier (RBF Kernel)",
+      "accuracy": 0.9489,
+      "precision": 0.9421,
+      "recall": 0.9489,
+      "f1_score": 0.9449,
+      "cv_mean": 0.9383,
+      "cv_std": 0.0046,
+      "status": "valid",
+      "description": "High-performing kernel-based classifier. Close second to Random Forest."
+    },
+    "decision_tree": {
+      "filename": "decision_tree.pkl",
+      "algorithm": "Decision Tree Classifier (GINI)",
+      "accuracy": 0.9261,
+      "precision": 0.9255,
+      "recall": 0.9261,
+      "f1_score": 0.9254,
+      "cv_mean": 0.9167,
+      "cv_std": 0.0164,
+      "status": "valid",
+      "description": "Interpretable rule-based model. Good for explainability studies."
+    },
+    "logistic_regression": {
+      "filename": "logistic_regression.pkl",
+      "algorithm": "Logistic Regression (L2, Multi-class OvR)",
+      "accuracy": 0.8187,
+      "precision": 0.8392,
+      "recall": 0.8187,
+      "f1_score": 0.8225,
+      "cv_mean": 0.8224,
+      "cv_std": 0.0219,
+      "status": "baseline",
+      "description": "Linear baseline classifier. Useful for understanding linear separability."
+    }
+  },
+  "preprocessing": {
+    "scaler": {
+      "filename": "scaler.pkl",
+      "type": "StandardScaler",
+      "description": "Feature standardisation (zero mean, unit variance)."
+    },
+    "label_encoder": {
+      "filename": "label_encoder.pkl",
+      "type": "LabelEncoder",
+      "classes": ["Anemia", "Diabetes", "Healthy", "Heart Disease", "Thalassemia", "Thrombocytopenia"]
+    }
+  },
+  "dataset": {
+    "training_samples": 3700,
+    "test_samples": 924,
+    "features": 24,
+    "classes": 6,
+    "balancing": "SMOTE",
+    "split": "80/20",
+    "cross_validation": "Stratified 5-Fold",
+    "sources": ["UCI Machine Learning Repository", "Kaggle Health Datasets"]
+  }
+}

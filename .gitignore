@@ -1,8 +1,53 @@
-# .gitignore - allow models to be tracked
+# ── Python ────────────────────────────────────────────────────
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.pyo
+
+# ── Virtual environments ──────────────────────────────────────
 venv/
+.venv/
+env/
+ENV/
+
+# ── Environment secrets ───────────────────────────────────────
 .env
-*.zip
+.env.*
+!.env.example
+
+# ── OS artifacts ─────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# ── IDE / Editor ─────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# ── Logs ─────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Test output ───────────────────────────────────────────────
+.pytest_cache/
+htmlcov/
+.coverage
+
+# ── Node (if frontend tooling added) ─────────────────────────
+node_modules/
+dist/
+build/
+
+# ── Archives ─────────────────────────────────────────────────
+*.zip
+*.tar.gz
+
+# ── DO NOT IGNORE ML MODEL BINARIES ─────────────────────────
+# These MUST be committed so deployment works without downloading
+!models/
+!models/*.pkl
+!models/*.joblib
+!models/*.onnx
+!models/*.json

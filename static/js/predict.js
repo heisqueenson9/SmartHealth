@@ -1,177 +1,244 @@
 /**
- * Smart Health Sync - Predict Page JavaScript
- * Full-Stack Overhaul (Lime & Black Theme)
+ * Smart Health Sync v2.0 — Diagnosis Engine JavaScript
+ * Author: Enock Queenson Eduafo | University of Ghana 2026
+ *
+ * Key fix: sends features as a named dict (matches new backend API)
  */
 
+"use strict";
+
+// ── Feature order (matches backend FEATURE_ORDER) ─────────────
 const FEATURES = [
-    'Glucose', 'Insulin', 'BMI', 'HbA1c', 'Cholesterol', 'LDL Cholesterol', 
-    'HDL Cholesterol', 'Triglycerides', 'Systolic Blood Pressure', 
-    'Diastolic Blood Pressure', 'Heart Rate', 'Troponin', 'Hemoglobin', 
-    'Platelets', 'White Blood Cells', 'Red Blood Cells', 'Hematocrit', 
-    'Mean Corpuscular Volume', 'Mean Corpuscular Hemoglobin', 
-    'Mean Corpuscular Hemoglobin Concentration', 'ALT', 'AST', 'Creatinine', 
-    'C-reactive Protein'
+    'Glucose', 'Cholesterol', 'Hemoglobin', 'Platelets',
+    'White Blood Cells', 'Red Blood Cells', 'Hematocrit',
+    'Mean Corpuscular Volume', 'Mean Corpuscular Hemoglobin',
+    'Mean Corpuscular Hemoglobin Concentration',
+    'Insulin', 'BMI', 'Systolic Blood Pressure', 'Diastolic Blood Pressure',
+    'Triglycerides', 'HbA1c', 'LDL Cholesterol', 'HDL Cholesterol',
+    'ALT', 'AST', 'Heart Rate', 'Creatinine', 'Troponin', 'C-reactive Protein'
 ];
 
 const DISEASE_COLORS = {
-    'Healthy Reference': '#C5E710',
-    'Type 2 Diabetes': '#F4DF6B',
-    'Clinical Anemia': '#8E9630',
-    'Heart Condition': '#ff4757',
-    'Thalassemia': '#a855f7',
-    'Thrombocytopenia': '#0099bb'
+    'Healthy':          '#C5E710',
+    'Diabetes':         '#F4DF6B',
+    'Anemia':           '#ff9966',
+    'Heart Disease':    '#ff4757',
+    'Thalassemia':      '#a855f7',
+    'Thrombocytopenia': '#0099bb',
 };
 
+// ── Preset clinical biomarker values ─────────────────────────
+// Order matches FEATURES array above
 const PRESETS = {
-    'healthy': [0.12, 0.15, 0.22, 0.10, 0.15, 0.14, 0.65, 0.12, 0.20, 0.15, 0.18, 0.05, 0.65, 0.55, 0.45, 0.60, 0.58, 0.52, 0.55, 0.50, 0.15, 0.14, 0.18, 0.08],
-    'diabetes': [0.85, 0.72, 0.62, 0.78, 0.45, 0.48, 0.25, 0.55, 0.45, 0.42, 0.48, 0.15, 0.55, 0.62, 0.58, 0.52, 0.50, 0.48, 0.45, 0.42, 0.45, 0.42, 0.52, 0.55],
-    'anemia': [0.42, 0.35, 0.45, 0.38, 0.35, 0.32, 0.45, 0.38, 0.35, 0.32, 0.65, 0.12, 0.15, 0.45, 0.42, 0.22, 0.18, 0.25, 0.22, 0.18, 0.35, 0.32, 0.38, 0.45],
-    'heart': [0.52, 0.45, 0.58, 0.48, 0.85, 0.82, 0.15, 0.75, 0.82, 0.78, 0.85, 0.88, 0.45, 0.52, 0.65, 0.42, 0.40, 0.45, 0.42, 0.40, 0.52, 0.48, 0.55, 0.85]
+    healthy:  [0.12, 0.15, 0.65, 0.55, 0.45, 0.60, 0.58, 0.52, 0.55, 0.50,
+               0.15, 0.22, 0.65, 0.45, 0.18, 0.10, 0.14, 0.65, 0.15, 0.14,
+               0.18, 0.15, 0.05, 0.08],
+    diabetes: [0.85, 0.45, 0.55, 0.62, 0.42, 0.52, 0.50, 0.48, 0.45, 0.42,
+               0.72, 0.62, 0.45, 0.42, 0.55, 0.78, 0.48, 0.25, 0.45, 0.42,
+               0.48, 0.52, 0.15, 0.55],
+    anemia:   [0.42, 0.35, 0.15, 0.45, 0.42, 0.22, 0.18, 0.25, 0.22, 0.18,
+               0.35, 0.45, 0.35, 0.32, 0.38, 0.38, 0.32, 0.45, 0.35, 0.32,
+               0.65, 0.38, 0.12, 0.45],
+    heart:    [0.52, 0.85, 0.45, 0.52, 0.55, 0.40, 0.40, 0.45, 0.42, 0.40,
+               0.45, 0.58, 0.82, 0.78, 0.65, 0.48, 0.82, 0.15, 0.52, 0.48,
+               0.85, 0.55, 0.88, 0.85],
 };
 
+// ── DOM Ready ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    // Model Selection
-    const modelOptions = document.querySelectorAll('.model-option');
-    const selectedModelInput = document.getElementById('selectedModel');
-    
-    modelOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            modelOptions.forEach(opt => opt.classList.remove('selected'));
-            option.classList.add('selected');
-            selectedModelInput.value = option.dataset.model;
+    initModelSelector();
+    initPresets();
+    initForm();
+});
+
+// ── Model Selector ────────────────────────────────────────────
+function initModelSelector() {
+    const options = document.querySelectorAll('.model-option');
+    const hidden  = document.getElementById('selectedModel');
+    options.forEach(opt => {
+        opt.addEventListener('click', () => {
+            options.forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            if (hidden) hidden.value = opt.dataset.model;
         });
     });
+}
 
-    // Preset Selection
-    const presetBtns = document.querySelectorAll('.preset-btn');
-    presetBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const presetKey = btn.dataset.preset;
-            applyPreset(presetKey);
-        });
+// ── Presets ───────────────────────────────────────────────────
+function initPresets() {
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
     });
+}
 
-    const predictionForm = document.getElementById('predictionForm');
-    const submitBtn = document.getElementById('submitBtn');
+function applyPreset(key) {
+    const values = PRESETS[key];
+    if (!values) return;
+    const inputs = document.querySelectorAll('.biomarker-input');
+    inputs.forEach((input, i) => {
+        if (values[i] !== undefined) {
+            setTimeout(() => {
+                input.value = values[i];
+                input.style.borderColor = 'var(--cyan-primary)';
+                setTimeout(() => (input.style.borderColor = ''), 500);
+            }, i * 25);
+        }
+    });
+}
 
-    if (predictionForm) {
-        predictionForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await runDiagnosis();
+// ── Form ──────────────────────────────────────────────────────
+function initForm() {
+    const form = document.getElementById('predictionForm');
+    if (!form) return;
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
+        await runDiagnosis();
+    });
+}
+
+async function runDiagnosis() {
+    const features = collectFeatures();
+    if (!features) return;                     // validation failed
+    const model = document.getElementById('selectedModel')?.value || 'random_forest';
+
+    const btn = document.getElementById('submitBtn');
+    setLoading(btn, true);
+
+    try {
+        const res = await fetch('/api/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ features, model }),
         });
-    }
 
-    async function runDiagnosis() {
-        const features = getFormValues();
-        const model = selectedModelInput.value;
+        const data = await res.json();
 
-        if (features.length !== 24) {
-            alert('Please ensure all 24 biomarkers are filled.');
+        if (!res.ok) {
+            const msg = data.details
+                ? `${data.error}\n\nDetails: ${JSON.stringify(data.details, null, 2)}`
+                : (data.error || `HTTP ${res.status}`);
+            showError(msg);
             return;
         }
 
-        // Show loading state
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
+        setTimeout(() => showResult(data), 600);
+    } catch (err) {
+        showError('Network error: ' + err.message);
+    } finally {
+        setTimeout(() => setLoading(btn, false), 650);
+    }
+}
 
-        try {
-            const response = await fetch('/api/predict', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ features, model })
-            });
+/**
+ * Collect inputs and return a named dict {featureName: value}
+ * or null if validation fails.
+ */
+function collectFeatures() {
+    const inputs  = document.querySelectorAll('.biomarker-input');
+    const dict    = {};
+    let hasError  = false;
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Server error');
-            }
-
-            const result = await response.json();
-            
-            // Wait a small bit for "thinking" feel
-            setTimeout(() => {
-                showResult(result);
-                submitBtn.classList.remove('loading');
-                submitBtn.disabled = false;
-            }, 800);
-
-        } catch (error) {
-            alert('Error: ' + error.message);
-            submitBtn.classList.remove('loading');
-            submitBtn.disabled = false;
+    inputs.forEach((input, i) => {
+        const name = input.dataset.feature || FEATURES[i];
+        const val  = parseFloat(input.value);
+        if (isNaN(val)) {
+            hasError = true;
+            input.style.borderColor = 'var(--red-critical)';
+        } else {
+            dict[name] = val;
+            input.style.borderColor = '';
         }
+    });
+
+    if (hasError) {
+        showError('Please fill in all 24 biomarker fields with valid numbers (0.0 – 1.0).');
+        return null;
     }
+    return dict;
+}
 
-    function getFormValues() {
-        const inputs = document.querySelectorAll('.biomarker-input');
-        const values = [];
-        inputs.forEach(input => {
-            if (input.value !== '') values.push(parseFloat(input.value));
-        });
-        return values;
-    }
+// ── Results Panel ─────────────────────────────────────────────
+function showResult(result) {
+    const panel = document.getElementById('resultsPanel');
+    if (!panel) return;
 
-    function applyPreset(key) {
-        const values = PRESETS[key];
-        if (!values) return;
-        
-        const inputs = document.querySelectorAll('.biomarker-input');
-        inputs.forEach((input, i) => {
-            if (values[i] !== undefined) {
-                // Staggered fill effect
-                setTimeout(() => {
-                    input.value = values[i];
-                    input.style.borderColor = 'var(--cyan-primary)';
-                    setTimeout(() => input.style.borderColor = '', 500);
-                }, i * 30);
-            }
-        });
-    }
+    panel.style.display = 'block';
+    setTimeout(() => panel.classList.add('visible'), 10);
 
-    function showResult(result) {
-        const resultsPanel = document.getElementById('resultsPanel');
-        const diagnosisName = document.getElementById('diagnosisName');
-        const diagnosisDescription = document.getElementById('diagnosisDescription');
-        const confidencePercent = document.getElementById('confidencePercent');
-        const confidenceBar = document.getElementById('confidenceBar');
-        const probTable = document.getElementById('probTable');
-        const clinicalAdvice = document.getElementById('clinicalAdvice');
+    document.getElementById('diagnosisName').textContent  = result.prediction || '—';
+    document.getElementById('diagnosisName').style.color  =
+        DISEASE_COLORS[result.prediction] || 'var(--cyan-primary)';
+    document.getElementById('diagnosisDescription').textContent = result.description || '';
+    document.getElementById('confidencePercent').textContent    =
+        `Confidence: ${(result.confidence || 0).toFixed(1)}%`;
+    document.getElementById('confidenceBar').style.width        =
+        (result.confidence || 0) + '%';
 
-        resultsPanel.style.display = 'block';
-        resultsPanel.classList.add('visible');
-
-        diagnosisName.textContent = result.prediction;
-        diagnosisName.style.color = DISEASE_COLORS[result.prediction] || 'var(--cyan-primary)';
-        diagnosisDescription.textContent = result.description;
-        
-        confidencePercent.textContent = `Confidence: ${result.confidence.toFixed(1)}%`;
-        confidenceBar.style.width = result.confidence + '%';
-        
-        // Probability Table
-        probTable.innerHTML = '';
-        Object.entries(result.probabilities).forEach(([name, prob]) => {
+    // Probability bars
+    const table = document.getElementById('probTable');
+    if (table) {
+        table.innerHTML = '';
+        const sorted = Object.entries(result.probabilities || {})
+            .sort(([, a], [, b]) => b - a);
+        sorted.forEach(([name, prob]) => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${name}</td>
+                <td style="padding: 8px 0; font-size:0.85rem;">${name}</td>
                 <td class="prob-bar-cell">
                     <div class="prob-bar">
-                        <div class="prob-fill" style="width: ${prob}%; background: ${DISEASE_COLORS[name] || 'var(--cyan-primary)'}"></div>
+                        <div class="prob-fill" style="width:${prob}%;
+                             background:${DISEASE_COLORS[name] || 'var(--cyan-primary)'}">
+                        </div>
                     </div>
                 </td>
-                <td style="text-align: right; font-family: var(--font-mono);">${prob.toFixed(1)}%</td>
-            `;
-            probTable.appendChild(row);
+                <td style="text-align:right;font-family:var(--font-mono);font-size:0.8rem;">
+                    ${prob.toFixed(1)}%
+                </td>`;
+            table.appendChild(row);
         });
+    }
 
-        // Advice List
-        clinicalAdvice.innerHTML = '';
-        result.recommendations.forEach(rec => {
+    // Recommendations
+    const list = document.getElementById('clinicalAdvice');
+    if (list) {
+        list.innerHTML = '';
+        (result.recommendations || []).forEach(rec => {
             const li = document.createElement('li');
             li.textContent = rec;
-            clinicalAdvice.appendChild(li);
+            list.appendChild(li);
         });
-
-        // Scroll to results
-        resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-});
+
+    if (result.fallback_used) {
+        console.warn('[SmartHealth] Fallback model was used:', result.model_used);
+    }
+
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── UI Helpers ────────────────────────────────────────────────
+function setLoading(btn, loading) {
+    if (!btn) return;
+    btn.disabled = loading;
+    btn.classList.toggle('loading', loading);
+}
+
+function showError(message) {
+    // Try to use the results panel for a cleaner UX, fall back to alert
+    const panel = document.getElementById('resultsPanel');
+    if (panel) {
+        panel.style.display = 'block';
+        setTimeout(() => panel.classList.add('visible'), 10);
+        const nameEl = document.getElementById('diagnosisName');
+        const descEl = document.getElementById('diagnosisDescription');
+        if (nameEl) { nameEl.textContent = '⚠ Diagnosis Error'; nameEl.style.color = 'var(--red-critical)'; }
+        if (descEl) descEl.textContent = message;
+        const probTable = document.getElementById('probTable');
+        if (probTable) probTable.innerHTML = '';
+        const advice = document.getElementById('clinicalAdvice');
+        if (advice) advice.innerHTML = '<li>Please check model availability at <code>/api/health/models</code></li>';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        alert('Error: ' + message);
+    }
+}

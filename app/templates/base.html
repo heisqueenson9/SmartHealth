@@ -29,10 +29,10 @@
         <span></span><span></span><span></span>
       </button>
       <ul class="nav-links" id="nav-links">
-        <li><a href="/" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">Home</a></li>
-        <li><a href="/predict" class="nav-link {% if request.endpoint == 'predict_page' %}active{% endif %}">Diagnose</a></li>
-        <li><a href="/results" class="nav-link {% if request.endpoint == 'results_page' %}active{% endif %}">Results</a></li>
-        <li><a href="/about" class="nav-link {% if request.endpoint == 'about_page' %}active{% endif %}">About</a></li>
+        <li><a href="/" class="nav-link {% if request.endpoint == 'views.index' %}active{% endif %}">Home</a></li>
+        <li><a href="/predict" class="nav-link {% if request.endpoint == 'views.predict_page' %}active{% endif %}">Diagnose</a></li>
+        <li><a href="/results" class="nav-link {% if request.endpoint == 'views.results_page' %}active{% endif %}">Results</a></li>
+        <li><a href="/about" class="nav-link {% if request.endpoint == 'views.about_page' %}active{% endif %}">About</a></li>
         <li><a href="/predict" class="nav-cta-btn">Run Diagnosis</a></li>
       </ul>
     </div>

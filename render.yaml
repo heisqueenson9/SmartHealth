@@ -1,11 +1,20 @@
+# ── Render.com Deployment Configuration ─────────────────────
+# Smart Health Sync v2.0
+# Author: Enock Queenson Eduafo | University of Ghana 2026
+
 services:
   - type: web
-    name: smarthealth-ai-eduafo
+    name: smart-health-sync
     env: python
-    buildCommand: pip install -r requirements.txt && python src/train_models.py
-    startCommand: gunicorn app.app:app
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn main:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
       - key: FLASK_ENV
         value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: LOG_LEVEL
+        value: INFO
+    healthCheckPath: /api/health
