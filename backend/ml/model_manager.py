@@ -1,6 +1,6 @@
 """
 Smart Health Sync — Professional Model Manager
-Author: Enock Queenson Eduafo | University of Ghana 2026
+Authors: Enock Queenson Eduafo & Christabel Araba Edumadze | University of Ghana 2026
 
 Handles model discovery, loading, validation, caching, and inference
 with robust path resolution for local and cloud environments.
