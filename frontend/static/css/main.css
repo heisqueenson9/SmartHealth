@@ -1060,44 +1060,93 @@ body {
   color: var(--cyan-primary);
   background: rgba(197,231,16,0.04);
 }
-#print-result-card { display: none; }
+/* screen: hide the print card completely */
+@media screen {
+  #print-result-card { display: none; }
+}
 
+/* ── Print: show ONLY the result card ───────────────────────── */
 @media print {
-  * { visibility: hidden !important; }
-  #print-result-card,
-  #print-result-card * { visibility: visible !important; }
+  /* 1. White out the page */
+  html, body {
+    background: #fff !important;
+    background-image: none !important;
+    color: #111 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 2. Explicitly hide every page chrome element */
+  #cold-start-overlay,
+  .navbar,
+  nav,
+  .page-header,
+  #predictionForm,
+  .normalization-notice,
+  .data-info-strip,
+  .preset-strip,
+  .form-section-header,
+  .biomarker-group-title,
+  .result-panel,
+  .site-footer,
+  footer,
+  canvas,
+  #bg-pulse {
+    display: none !important;
+  }
+
+  /* 3. Strip containers of their dark styles */
+  main, section, .container, .predict-main {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* 4. Show and style the print card */
   #print-result-card {
     display: block !important;
-    position: fixed !important;
-    top: 0 !important; left: 0 !important;
+    position: static !important;
     width: 100% !important;
-    height: auto !important;
+    padding: 28px 36px !important;
+    margin: 0 !important;
     background: #fff !important;
     color: #111 !important;
-    padding: 32px 40px !important;
     font-family: Georgia, 'Times New Roman', serif !important;
     font-size: 11pt !important;
-    z-index: 99999 !important;
+    box-shadow: none !important;
+    border: none !important;
   }
-  .prc-header    { border-bottom: 2px solid #111; padding-bottom: 12px; margin-bottom: 18px; }
-  .prc-logo      { font-size: 18pt; font-weight: bold; font-family: Arial, sans-serif; }
-  .prc-ref       { font-size: 9pt; color: #555; font-family: monospace; }
-  .prc-diagnosis { font-size: 22pt; font-weight: bold; margin: 14px 0 4px; }
-  .prc-conf      { font-size: 13pt; color: #333; margin-bottom: 14px; }
-  .prc-conf-bar  { height: 8px; background: #eee; border-radius: 4px; margin-bottom: 18px; }
-  .prc-conf-fill { height: 100%; background: #2e7d32; border-radius: 4px; }
-  .prc-section-title { font-size: 10pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.06em; color: #555; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin: 16px 0 10px; font-family: Arial, sans-serif; }
-  .prc-grid      { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px 16px; margin-bottom: 6px; }
-  .prc-item      { font-size: 9pt; }
-  .prc-item-label { color: #555; font-family: monospace; }
-  .prc-item-val  { font-weight: bold; }
-  .prc-fi-row    { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
-  .prc-fi-label  { width: 180px; font-size: 9pt; font-family: monospace; }
-  .prc-fi-bar-outer { flex: 1; height: 6px; background: #eee; border-radius: 3px; }
+
+  /* 5. Print-card internal styles */
+  .prc-header       { border-bottom: 2px solid #111; padding-bottom: 10px; margin-bottom: 16px; }
+  .prc-logo         { font-size: 17pt; font-weight: bold; font-family: Arial, sans-serif; }
+  .prc-ref          { font-size: 8.5pt; color: #555; font-family: monospace; margin-top: 3px; }
+  .prc-diagnosis    { font-size: 21pt; font-weight: bold; margin: 12px 0 3px; }
+  .prc-conf         { font-size: 12pt; color: #333; margin-bottom: 10px; }
+  .prc-conf-bar     { height: 7px; background: #eee; border-radius: 4px; margin-bottom: 14px; }
+  .prc-conf-fill    { height: 100%; background: #2e7d32; border-radius: 4px; }
+  .prc-section-title {
+    font-size: 9.5pt; font-weight: bold; text-transform: uppercase;
+    letter-spacing: 0.06em; color: #555; border-bottom: 1px solid #ddd;
+    padding-bottom: 3px; margin: 14px 0 8px; font-family: Arial, sans-serif;
+  }
+  .prc-fi-row       { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+  .prc-fi-label     { width: 200px; font-size: 9pt; font-family: monospace; color: #333; }
+  .prc-fi-bar-outer { flex: 1; height: 5px; background: #ddd; border-radius: 3px; }
   .prc-fi-bar-fill  { height: 100%; background: #1565c0; border-radius: 3px; }
-  .prc-fi-pct    { width: 40px; font-size: 9pt; font-family: monospace; text-align: right; }
-  .prc-disclaimer { background: #fff8e1; border: 1px solid #f9a825; padding: 10px 14px; border-radius: 4px; font-size: 9pt; color: #555; line-height: 1.6; margin-top: 16px; }
-  .prc-footer    { border-top: 1px solid #ddd; margin-top: 18px; padding-top: 10px; font-size: 8pt; color: #777; font-family: Arial, sans-serif; display: flex; justify-content: space-between; }
+  .prc-fi-pct       { width: 38px; font-size: 9pt; font-family: monospace; text-align: right; color: #333; }
+  .prc-disclaimer   {
+    background: #fff8e1; border: 1px solid #f9a825;
+    padding: 9px 12px; border-radius: 4px;
+    font-size: 8.5pt; color: #555; line-height: 1.65; margin-top: 14px;
+  }
+  .prc-footer       {
+    border-top: 1px solid #ddd; margin-top: 16px; padding-top: 8px;
+    font-size: 8pt; color: #777; font-family: Arial, sans-serif;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px;
+  }
 }
 
 /* ── Expanded About Page (C5) ────────────────────────────────── */
