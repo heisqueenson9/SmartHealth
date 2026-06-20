@@ -1942,11 +1942,90 @@ body.portal-page .dashboard-sidebar {
 /* Hide site footer inside dashboard */
 body.portal-page .dashboard-layout ~ .site-footer,
 body.portal-page .site-footer { display: none; }
-
 body.portal-page .predict-main {
   padding: 0 0 40px;
 }
 
 body.portal-page #cold-start-overlay {
   display: none !important;
+}
+
+/* Split Modal Styling */
+.modal-split-container {
+    display: flex;
+    gap: 20px;
+    height: 100%;
+    min-height: 480px;
+}
+.modal-left-details {
+    flex: 3;
+    overflow-y: auto;
+    padding-right: 15px;
+}
+.modal-right-chat {
+    flex: 1;
+    border-left: 1px solid var(--bg-border);
+    padding-left: 15px;
+    display: flex;
+    flex-direction: column;
+}
+.ai-chat-box {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+    min-height: 250px;
+}
+.ai-chat-history {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 320px;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 1px solid var(--bg-border);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    background: var(--bg-void);
+}
+.biomarkers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+.biomarker-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--bg-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+}
+.biomarker-name {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.biomarker-val {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+.model-predictions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+.model-predictions-table th, .model-predictions-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--bg-border);
+}
+.model-predictions-table th {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+.modal-wide {
+    max-width: 960px !important;
 }
