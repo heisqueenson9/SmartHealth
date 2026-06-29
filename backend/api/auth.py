@@ -50,11 +50,16 @@ def register():
             return jsonify({"error": "Only Doctor registration is allowed on this platform."}), 400
 
         email = request.form.get("email", "").strip().lower()
+        title = request.form.get("title", "").strip()
         full_name = request.form.get("full_name", "").strip()
         password = request.form.get("password", "")
 
         if not email or not full_name or not password:
             return jsonify({"error": "Email, Full Name, and Password are required."}), 400
+
+        if title and title != "Other":
+            if not full_name.startswith(title):
+                full_name = f"{title} {full_name}"
 
         if len(password) < 8:
             return jsonify({"error": "Password must be at least 8 characters."}), 400
