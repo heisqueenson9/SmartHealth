@@ -75,13 +75,107 @@ const PRESETS = {
 let _lastResult = null;
 let _lastFeatures = null;
 
+const STORAGE_KEY = "shs_diagnosis_form_state";
+
+function saveFormState() {
+    const state = {
+        patientId: document.getElementById('linkPatientSelect')?.value || "",
+        patientRef: document.getElementById('patientReferenceInput')?.value || "",
+        category: document.getElementById('diseaseCategorySelect')?.value || "all",
+        biomarkers: {}
+    };
+    document.querySelectorAll('.biomarker-input').forEach(input => {
+        state.biomarkers[input.id] = input.value;
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadFormState() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    try {
+        const state = JSON.parse(raw);
+        
+        // Restore category first
+        const categorySelect = document.getElementById('diseaseCategorySelect');
+        if (categorySelect && state.category) {
+            categorySelect.value = state.category;
+            updateFieldVisibility(state.category);
+        }
+        
+        const patientSelect = document.getElementById('linkPatientSelect');
+        const refInput = document.getElementById('patientReferenceInput');
+        if (patientSelect && state.patientId) {
+            patientSelect.value = state.patientId;
+            setTimeout(() => {
+                const event = new Event('change');
+                patientSelect.dispatchEvent(event);
+                if (refInput && state.patientRef) {
+                    refInput.value = state.patientRef;
+                }
+            }, 100);
+        } else {
+            if (refInput && state.patientRef) {
+                refInput.value = state.patientRef;
+            }
+        }
+        
+        // Restore biomarkers
+        if (state.biomarkers) {
+            for (const [id, val] of Object.entries(state.biomarkers)) {
+                const input = document.getElementById(id);
+                if (input && val !== undefined) {
+                    input.value = val;
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Error loading saved form state:", e);
+    }
+}
+
+function clearFormState() {
+    localStorage.removeItem(STORAGE_KEY);
+    const form = document.getElementById('predictionForm');
+    if (form) form.reset();
+    
+    const categorySelect = document.getElementById('diseaseCategorySelect');
+    if (categorySelect) {
+        categorySelect.value = "all";
+        updateFieldVisibility("all");
+    }
+    
+    const patientSelect = document.getElementById('linkPatientSelect');
+    if (patientSelect) {
+        patientSelect.value = "";
+        const event = new Event('change');
+        patientSelect.dispatchEvent(event);
+    }
+}
+
 // ── DOM Ready ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    initModelSelector();
     initPresets();
     initForm();
     initPatientLinking();
     initCategorySelector();
+    
+    // Bind state saving events
+    document.getElementById('linkPatientSelect')?.addEventListener('change', saveFormState);
+    document.getElementById('diseaseCategorySelect')?.addEventListener('change', saveFormState);
+    document.querySelectorAll('.biomarker-input').forEach(input => {
+        input.addEventListener('input', saveFormState);
+    });
+    
+    // Clear form button
+    document.getElementById('clearFormBtn')?.addEventListener('click', () => {
+        if (confirm("Are you sure you want to clear all inputs?")) {
+            clearFormState();
+        }
+    });
+
+    // Load saved form state
+    loadFormState();
 });
 
 // ── Category Selection Visibility Control ─────────────────────
@@ -439,6 +533,15 @@ function showResult(result) {
     }
 
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Hook up review draft button
+    const reviewBtn = document.getElementById("reviewDraftBtn");
+    if (reviewBtn) {
+        reviewBtn.onclick = () => {
+            clearFormState();
+            window.location.href = "/portal?section=view_record&record_id=" + result.record_id;
+        };
+    }
 }
 
 // ── Feature Importance Chart (A4/C1) ─────────────────────────
@@ -477,84 +580,6 @@ function renderFeatureImportance(importanceMap) {
             if (fill) setTimeout(() => { fill.style.width = barWidth + '%'; }, 80);
         });
     });
-}
-
-// ── Print Result Card (C2) — results & advice only ───────────
-function preparePrintCard() {
-    if (!_lastResult) return;
-
-    const ts  = new Date().toLocaleString();
-    const ref = 'SHS-' + Date.now().toString(36).toUpperCase();
-
-    document.getElementById('prc-ref').textContent = `Ref: ${ref}  ·  ${ts}`;
-
-    const diagEl = document.getElementById('prc-diagnosis');
-    if (diagEl) diagEl.textContent = _lastResult.prediction || '—';
-
-    const confEl = document.getElementById('prc-conf');
-    if (confEl) confEl.textContent = `Confidence Score: ${(_lastResult.confidence || 0).toFixed(1)}%`;
-
-    const confFill = document.getElementById('prc-conf-fill');
-    if (confFill) confFill.style.width = (_lastResult.confidence || 0) + '%';
-
-    // Clinical description
-    const descEl = document.getElementById('prc-desc');
-    if (descEl) descEl.textContent = _lastResult.description || '';
-
-    // Explanations for print card
-    const prcTitle = document.getElementById('prc-explanation-title');
-    const prcExps = document.getElementById('prc-explanations');
-    if (prcTitle && prcExps) {
-        prcExps.innerHTML = '';
-        const exps = _lastResult.explanations || [];
-        if (exps.length > 0) {
-            exps.forEach(exp => {
-                const li = document.createElement('li');
-                li.textContent = exp;
-                prcExps.appendChild(li);
-            });
-            prcTitle.style.display = 'block';
-            prcExps.style.display = 'block';
-        } else {
-            prcTitle.style.display = 'none';
-            prcExps.style.display = 'none';
-        }
-    }
-
-    // Feature importance rows
-    const fiRows = document.getElementById('prc-fi-rows');
-    if (fiRows) {
-        fiRows.innerHTML = '';
-        const entries = Object.entries(_lastResult.feature_importance || {});
-        if (entries.length === 0) {
-            fiRows.innerHTML = '<p style="font-size:9pt;color:#777;">Feature importance not available for this model.</p>';
-        } else {
-            const maxV = Math.max(...entries.map(([, v]) => v));
-            entries.forEach(([name, pct]) => {
-                const w = maxV > 0 ? (pct / maxV) * 100 : 0;
-                const row = document.createElement('div');
-                row.className = 'prc-fi-row';
-                row.innerHTML = `
-                    <div class="prc-fi-label">${FEATURE_LABELS[name] || name}</div>
-                    <div class="prc-fi-bar-outer"><div class="prc-fi-bar-fill" style="width:${w}%"></div></div>
-                    <div class="prc-fi-pct">${pct.toFixed(1)}%</div>`;
-                fiRows.appendChild(row);
-            });
-        }
-    }
-
-    // Clinical advice
-    const adviceEl = document.getElementById('prc-advice');
-    if (adviceEl) {
-        adviceEl.innerHTML = '';
-        (_lastResult.recommendations || []).forEach(rec => {
-            const li = document.createElement('li');
-            li.textContent = rec;
-            adviceEl.appendChild(li);
-        });
-    }
-
-    window.print();
 }
 
 // ── UI Helpers ────────────────────────────────────────────────
@@ -597,15 +622,6 @@ function initPatientLinking() {
     const draftSelectRow = document.getElementById('draftSelectRow');
     const draftRecordSelect = document.getElementById('draftRecordSelect');
 
-    function getInitials(name) {
-        if (!name) return "GEN";
-        const parts = name.trim().split(/\s+/);
-        if (parts.length >= 2) {
-            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-        }
-        return parts[0].substring(0, 2).toUpperCase();
-    }
-
     function generateRandomSuffix() {
         const chars = '0123456789ABCDEF';
         let suffix = '';
@@ -629,10 +645,9 @@ function initPatientLinking() {
     }
 
     // Set initial reference
-    if (patientRefInput) {
-        patientRefInput.value = "SHS-GEN-" + generateRandomSuffix();
+    if (patientRefInput && !patientRefInput.value) {
+        patientRefInput.value = "PAT-GEN-" + generateRandomSuffix();
         updatePreview();
-        patientRefInput.addEventListener('input', updatePreview);
     }
 
     let patientDrafts = [];
@@ -649,11 +664,9 @@ function initPatientLinking() {
 
             if (patientSelect.value) {
                 const selectedOption = patientSelect.options[patientSelect.selectedIndex];
-                const patientName = selectedOption.getAttribute('data-name') || selectedOption.text;
-                const initials = getInitials(patientName);
-                const generatedRef = "SHS-" + initials + "-" + generateRandomSuffix();
-                patientRefInput.value = generatedRef;
-                patientRefInput.disabled = true;
+                const patientUuid = selectedOption.getAttribute('data-uuid');
+                patientRefInput.value = patientUuid || ("PAT-GEN-" + generateRandomSuffix());
+                patientRefInput.readOnly = true;
 
                 // Fetch patient drafts
                 try {
@@ -673,10 +686,11 @@ function initPatientLinking() {
                     console.error("Error fetching patient drafts:", err);
                 }
             } else {
-                patientRefInput.value = "SHS-GEN-" + generateRandomSuffix();
-                patientRefInput.disabled = false;
+                patientRefInput.value = "PAT-GEN-" + generateRandomSuffix();
+                patientRefInput.readOnly = true;
             }
             updatePreview();
+            saveFormState();
         });
     }
 
@@ -696,13 +710,13 @@ function initPatientLinking() {
                         const input = document.querySelector(`.biomarker-input[data-feature="${bmName}"]`);
                         if (input) {
                             input.value = bmVal;
-                            // Clear style and validation
                             input.classList.remove('invalid');
                             const errId = 'err-' + input.id.replace('f-', '');
                             const errEl = document.getElementById(errId);
                             if (errEl) errEl.classList.remove('visible');
                         }
                     }
+                    saveFormState();
                 }
             } else {
                 window.selectedDraftId = null;
