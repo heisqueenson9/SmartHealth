@@ -6,6 +6,23 @@ Authors: Enock Queenson Eduafo & Christabel Araba Edumadze | University of Ghana
 import os
 from pathlib import Path
 
+# Load .env file manually if it exists to avoid python-dotenv dependency
+# def load_env_file():
+#     base_dir = Path(__file__).resolve().parent.parent
+#     env_path = base_dir / ".env"
+#     if env_path.exists():
+#         with open(env_path, "r", encoding="utf-8") as f:
+#             for line in f:
+#                 line = line.strip()
+#                 if line and not line.startswith("#") and "=" in line:
+#                     k, v = line.split("=", 1)
+#                     val = v.strip()
+#                     if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
+#                         val = val[1:-1]
+#                     os.environ.setdefault(k.strip(), val)
+
+# load_env_file()
+
 # ─── Base Paths ───────────────────────────────────────────────
 BASE_DIR    = Path(__file__).resolve().parent.parent
 BACKEND_DIR = Path(__file__).resolve().parent
