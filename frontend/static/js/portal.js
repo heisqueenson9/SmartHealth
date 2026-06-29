@@ -35,6 +35,28 @@ document.addEventListener("DOMContentLoaded", () => {
             el.innerHTML = marked.parse(el.textContent || el.innerText);
         });
     }
+
+    // Auto-dismiss and acknowledge verification success notification (Component 3)
+    const verificationAlert = document.getElementById("verificationSuccessAlert");
+    if (verificationAlert) {
+        const userId = window.USER_ID || "default";
+        const ackKey = "verification_acknowledged_" + userId;
+        if (localStorage.getItem(ackKey)) {
+            verificationAlert.style.display = "none";
+            verificationAlert.classList.add("d-none");
+        } else {
+            // Automatically dismiss after 4 seconds (4000ms)
+            setTimeout(() => {
+                verificationAlert.style.transition = "opacity 0.5s ease";
+                verificationAlert.style.opacity = "0";
+                setTimeout(() => {
+                    verificationAlert.style.display = "none";
+                    verificationAlert.classList.add("d-none");
+                }, 500);
+                localStorage.setItem(ackKey, "true");
+            }, 4000);
+        }
+    }
 });
 
 /* ── Notification Utilities ── */
@@ -103,15 +125,32 @@ async function readAllNotifications(event) {
 }
 
 function toggleNotificationsPanel(event) {
-    if (event) event.preventDefault();
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
     const panel = document.getElementById("notificationsPanel");
     if (panel) {
-        if (panel.style.display === "none") {
+        if (panel.style.display === "none" || !panel.style.display) {
             panel.style.display = "block";
+            document.body.classList.add("no-scroll");
             fetchNotifications();
         } else {
             panel.style.display = "none";
+            document.body.classList.remove("no-scroll");
         }
+    }
+}
+
+function closeNotificationsPanel(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    const panel = document.getElementById("notificationsPanel");
+    if (panel) {
+        panel.style.display = "none";
+        document.body.classList.remove("no-scroll");
     }
 }
 
@@ -121,6 +160,7 @@ document.addEventListener("click", (e) => {
     if (panel && panel.style.display === "block") {
         if (!panel.contains(e.target) && (!link || !link.contains(e.target))) {
             panel.style.display = "none";
+            document.body.classList.remove("no-scroll");
         }
     }
 });
@@ -707,6 +747,29 @@ function openEditPatientModal(id, name, dob, gender, notes) {
     }
 }
 
+function openViewPatientModal(id, name, dob, gender, notes, uuid) {
+    const uuidEl = document.getElementById("viewPatientUUID");
+    const nameEl = document.getElementById("viewPatientName");
+    const dobEl = document.getElementById("viewPatientDOB");
+    const genderEl = document.getElementById("viewPatientGender");
+    const notesEl = document.getElementById("viewPatientNotes");
+
+    if (uuidEl) uuidEl.value = uuid || "";
+    if (nameEl) nameEl.value = name || "";
+    if (dobEl) dobEl.value = dob || "";
+    if (genderEl) genderEl.value = gender || "";
+    if (notesEl) notesEl.value = notes || "No clinical notes recorded.";
+    
+    const modalEl = document.getElementById('viewPatientModal');
+    if (modalEl) {
+        let modal = bootstrap.Modal.getInstance(modalEl);
+        if (!modal) {
+            modal = new bootstrap.Modal(modalEl);
+        }
+        modal.show();
+    }
+}
+
 function filterPatientTable() {
     const queryInput = document.getElementById("patientSearchInput");
     if (!queryInput) return;
@@ -893,3 +956,29 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+function filterAdminActivityTable() {
+    const select = document.getElementById("adminDoctorFilterSelect");
+    const search = document.getElementById("adminDoctorSearchInput");
+    if (!select || !search) return;
+    
+    const selectedDoctorId = select.value;
+    const searchQuery = search.value.toLowerCase().trim();
+    
+    const rows = document.querySelectorAll(".admin-activity-row");
+    rows.forEach(row => {
+        const docId = row.getAttribute("data-doctor-id");
+        const docName = row.getAttribute("data-doctor-name");
+        
+        let matchSelect = !selectedDoctorId || (docId === selectedDoctorId);
+        let matchSearch = !searchQuery || (docName && docName.includes(searchQuery));
+        
+        if (matchSelect && matchSearch) {
+            row.classList.remove("d-none");
+            row.style.display = "";
+        } else {
+            row.classList.add("d-none");
+            row.style.display = "none";
+        }
+    });
+}
