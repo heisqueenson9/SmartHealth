@@ -130,7 +130,17 @@ class DiagnosticRecord(db.Model):
 
     def to_dict(self):
         import json
-        return {
+        p_dict = {}
+        if self.patient:
+            p_dict = {
+                "patient_name": f"{self.patient.first_name} {self.patient.last_name}",
+                "patient_uuid": self.patient.patient_uuid,
+                "patient_dob": self.patient.date_of_birth.strftime('%d %b %Y') if self.patient.date_of_birth else '—',
+                "patient_gender": self.patient.gender or '—',
+                "patient_email": self.patient.user.email if (self.patient.user and self.patient.user.email) else '—'
+            }
+        
+        base_dict = {
             "id": self.id,
             "patient_reference": self.patient_reference,
             "prediction": self.prediction_label,
@@ -148,6 +158,8 @@ class DiagnosticRecord(db.Model):
             "biomarkers": json.loads(self.biomarkers_json) if self.biomarkers_json else {},
             "result": json.loads(self.result_json) if self.result_json else {},
         }
+        base_dict.update(p_dict)
+        return base_dict
 
 
 class Notification(db.Model):
