@@ -61,29 +61,25 @@
 {% elif session.get('role') == 'doctor' and record.status == 'draft' %}
 <div class="portal-card">
   <div class="portal-section-title"><i class="fa-solid fa-file-medical"></i> Review Diagnosis Draft</div>
-  <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:15px;">Compare predictions from all four
-    classifiers, select the final model, and submit clinical remarks to sign off.</p>
+  <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:15px;">
+    Review the generated prediction draft, make observations and treatment notes, generate AI explainer content, and download the finalized patient clinical report as a PDF.
+  </p>
 
   <div class="patient-details-card mb-3"
     style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:var(--radius-md);padding:15px;">
     <h5 style="color:var(--text-primary);font-size:0.95rem;margin-bottom:12px;font-family:var(--font-display);"><i
-        class="fa-solid fa-id-card-clip" style="color:var(--cyan-primary);margin-right:6px;"></i> Patient Association
-      Details</h5>
+        class="fa-solid fa-id-card-clip" style="color:var(--cyan-primary);margin-right:6px;"></i> Patient Details</h5>
     <div class="row g-2 text-start">
       {% if record.patient %}
-      <div class="col-12 col-sm-6"><strong>Name:</strong> {{ record.patient.first_name }} {{ record.patient.last_name }}
-      </div>
-      <div class="col-12 col-sm-6"><strong>Email:</strong> {{ record.patient.user.email if record.patient.user else '—'
-        }}</div>
-      <div class="col-12 col-sm-6"><strong>Date of Birth:</strong> {{ record.patient.date_of_birth.strftime('%d %b %Y')
-        }}</div>
+      <div class="col-12 col-sm-6"><strong>Name:</strong> {{ record.patient.first_name }} {{ record.patient.last_name }}</div>
+      <div class="col-12 col-sm-6"><strong>Email:</strong> {{ record.patient.user.email if record.patient.user else '—' }}</div>
+      <div class="col-12 col-sm-6"><strong>Date of Birth:</strong> {{ record.patient.date_of_birth.strftime('%d %b %Y') }}</div>
       <div class="col-12 col-sm-6"><strong>Gender:</strong> {{ record.patient.gender or '—' }}</div>
+      <div class="col-12"><strong>Patient ID:</strong> <span style="font-family:var(--font-mono);font-size:0.85rem;color:var(--cyan-primary);">{{ record.patient.patient_uuid }}</span></div>
       {% else %}
       <div class="col-12"><strong>Standalone Diagnosis Run</strong> (No patient profile linked)</div>
+      <div class="col-12"><strong>Patient ID:</strong> <span style="font-family:var(--font-mono);font-size:0.85rem;color:var(--cyan-primary);">{{ record.patient_reference or ('PAT-GEN-' ~ record.id) }}</span></div>
       {% endif %}
-      <div class="col-12"><strong>Reference:</strong> <span
-          style="font-family:var(--font-mono);font-size:0.85rem;color:var(--cyan-primary);">{{ record.patient_reference
-          or ('SHS-' ~ record.id) }}</span></div>
     </div>
   </div>
 
@@ -97,37 +93,9 @@
     {% endfor %}
   </div>
 
-  <div class="fi-title mt-4"><i class="fa-solid fa-chart-bar"></i> Multi-Model Classification Comparison</div>
-  <div id="modelPreviewArea">
-    <p style="color:var(--text-secondary);"><i class="fa-solid fa-spinner fa-spin"></i> Running models for comparative
-      preview...</p>
-  </div>
-
-  <div class="fi-title mt-4"><i class="fa-solid fa-signature"></i> Diagnosis Decision & Finalization</div>
+  <div class="portal-section-title mt-4"><i class="fa-solid fa-signature"></i> Diagnosis Decision & Finalization</div>
   
-  <div class="row g-3">
-    <div class="col-12 col-md-6">
-      <div class="auth-form-group">
-        <label class="auth-label">Choose Approved Model Classifier</label>
-        <select id="modalSelectModel" class="auth-input">
-          <option value="random_forest">Random Forest (Accuracy: ~95%)</option>
-          <option value="svm">Support Vector Machine (Accuracy: ~95%)</option>
-          <option value="decision_tree">Decision Tree (Accuracy: ~92%)</option>
-          <option value="logistic_regression">Logistic Regression (Accuracy: ~82%)</option>
-        </select>
-      </div>
-    </div>
-    
-    <div class="col-12 col-md-6">
-      <div class="auth-form-group">
-        <label class="auth-label">Diagnosis Option</label>
-        <select id="diagnosisDecisionSelect" class="auth-input" onchange="toggleDiagnosisOverride(this.value, '{{ record.prediction_label }}')">
-          <option value="accept">Accept Prediction: "{{ record.prediction_label }}"</option>
-          <option value="override">Override Prediction (Type Custom Diagnosis)</option>
-        </select>
-      </div>
-    </div>
-  </div>
+  <input type="hidden" id="modalSelectModel" value="random_forest">
 
   <div class="auth-form-group mt-3">
     <label class="auth-label">Final Diagnosis Label *</label>
@@ -149,11 +117,16 @@
     </div>
   </div>
 
+  <div class="auth-form-group mt-3">
+    <label class="auth-label">Prediction Notes</label>
+    <textarea id="modalPredictionRemarks" class="auth-input" rows="3" placeholder="Additional doctor remarks, prediction notes, or clinical justifications..."></textarea>
+  </div>
+
   <!-- AI EXPLANATION GENERATOR MODULE -->
   <div class="portal-card mt-4" style="background: rgba(197, 231, 16, 0.02); border: 1px solid rgba(197, 231, 16, 0.15);">
     <div class="portal-section-title d-flex justify-content-between align-items-center flex-wrap gap-2">
       <span style="color: var(--cyan-primary);"><i class="fa-solid fa-brain"></i> Patient-Friendly AI Explainer</span>
-      <button class="btn-outline btn-sm" style="border-color: var(--cyan-primary); color: var(--cyan-primary);" data-record-id="{{ record.id }}" onclick="generateAIExplanationInline(this.dataset.recordId)">
+      <button class="btn-outline btn-sm" style="border-color: var(--cyan-primary); color: var(--cyan-primary);" data-record-id="{{ record.id }}" onclick="generateAIExplanationInline(this, this.dataset.recordId)">
         <i class="fa-solid fa-wand-magic-sparkles"></i> Generate AI Explanation
       </button>
     </div>
@@ -222,11 +195,11 @@
 
   <div class="auth-form-group mt-3">
     <label class="auth-label">Physician Electronic Signature (Sign Full Name) *</label>
-    <input type="text" id="modalDoctorSignature" class="auth-input mt-1" value="Dr. {{ session.get('full_name', '') }}" placeholder="Sign your full name to approve..." required>
+    <input type="text" id="modalDoctorSignature" class="auth-input mt-1" value="{{ session.get('full_name', '') }}" placeholder="Sign your full name to approve..." required>
   </div>
 
-  <button class="auth-btn mt-4" style="background:var(--cyan-primary); color:#111;" data-record-id="{{ record.id }}" onclick="finalizeDiagnosisInline(this.dataset.recordId)">
-    <i class="fa-solid fa-signature"></i> Finalize, Save & Approve Diagnosis
+  <button class="auth-btn mt-4" style="background:var(--cyan-primary); color:#111;" data-record-id="{{ record.id }}" onclick="finalizeAndGeneratePDF(this.dataset.recordId)">
+    <i class="fa-solid fa-file-pdf"></i> Generate PDF
   </button>
 </div>
 {% else %}
@@ -705,21 +678,44 @@
 
 <div class="portal-card mt-4">
   <div class="portal-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Diagnostic Activity</div>
+  
+  <!-- Doctor Filter & Search Controls -->
+  <div class="row g-3 mb-4 align-items-center text-start">
+    <div class="col-12 col-md-6">
+      <label class="auth-label" style="font-size:0.82rem;">Filter by Doctor</label>
+      <select id="adminDoctorFilterSelect" class="auth-input" onchange="filterAdminActivityTable()">
+        <option value="">-- All Doctors --</option>
+        {% for doc in doctors %}
+          <option value="{{ doc.id }}">{{ doc.full_name }} ({{ doc.email }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="auth-label" style="font-size:0.82rem;">Search Doctor Name</label>
+      <input type="text" id="adminDoctorSearchInput" class="auth-input" placeholder="Type doctor name to filter..." onkeyup="filterAdminActivityTable()">
+    </div>
+  </div>
+
   {% if records %}
   <div class="admin-table-wrap">
     <table class="admin-table">
       <thead>
         <tr>
           <th>Date</th>
+          <th>Doctor</th>
           <th>Prediction</th>
           <th>Confidence</th>
           <th>Model</th>
         </tr>
       </thead>
       <tbody>
-        {% for r in records[:10] %}
-        <tr>
+        {% for r in records %}
+        <tr class="admin-activity-row" data-doctor-id="{{ r.user_id }}" data-doctor-name="{{ r.author.full_name | lower if r.author else '' }}">
           <td>{{ r.created_at.strftime('%d %b %Y, %H:%M') if r.created_at else '—' }}</td>
+          <td>
+            <strong>{{ r.author.full_name if r.author else 'System/Deleted' }}</strong><br>
+            <small style="color:var(--text-secondary);">{{ r.author.email if r.author else '' }}</small>
+          </td>
           <td>{{ r.prediction_label }}</td>
           <td>{{ '%.1f' | format(r.confidence_score) }}%</td>
           <td>{{ r.model_version or '—' }}</td>
@@ -739,7 +735,7 @@
 {# ── DOCTOR: DASHBOARD ── #}
 {% if section == 'dashboard' %}
 {% if doctor.status == 'approved' %}
-<div class="alert alert-success d-flex align-items-center gap-3 mb-4"
+<div id="verificationSuccessAlert" class="alert alert-success d-flex align-items-center gap-3 mb-4"
   style="background:rgba(197,231,16,0.08);border:1px solid rgba(197,231,16,0.3);color:var(--green-ok);">
   <i class="fa-solid fa-circle-check" style="font-size:1.5rem;"></i>
   <div><strong>Verification Approved</strong><br>Your credentials are verified. Full diagnostic access is enabled.</div>
@@ -850,7 +846,11 @@
     <div class="portal-card">
       <div class="portal-section-title"><i class="fa-solid fa-id-card"></i> Physician Profile</div>
       <div class="portal-meta-item"><span class="portal-meta-label">Full Name</span><span class="portal-meta-value">{{
-          doctor.full_name }}</span></div>
+          doctor.full_name }}
+          {% if doctor.role == 'doctor' and doctor.status == 'approved' %}
+            <i class="fa-solid fa-circle-check text-success" title="Verified Physician" style="color: var(--cyan-primary) !important; margin-left: 5px;"></i>
+          {% endif %}
+          </span></div>
       <div class="portal-meta-item"><span class="portal-meta-label">Email</span><span class="portal-meta-value">{{
           doctor.email }}</span></div>
       <div class="portal-meta-item"><span class="portal-meta-label">Facility</span><span class="portal-meta-value">{{
@@ -1028,18 +1028,12 @@
   
   <div id="patientManagerAlert" class="alert d-none mt-3" role="alert"></div>
 
-  <!-- Search & Filter Bar -->
+  <!-- Search Bar -->
   <div class="row g-3 my-2 align-items-center">
-    <div class="col-12 col-md-6">
+    <div class="col-12 col-md-12">
       <div class="search-box-wrap" style="position:relative;">
         <input type="text" id="patientSearchInput" class="auth-input ps-5" placeholder="Search patients by name or ID..." onkeyup="filterPatientTable()">
         <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:20px; top:16px; color:var(--text-secondary);"></i>
-      </div>
-    </div>
-    <div class="col-12 col-md-6 text-md-end">
-      <div class="btn-group" role="group">
-        <button type="button" class="btn-outline btn-sm active" id="btnShowActive" onclick="toggleArchivedView(false)">Active Cases</button>
-        <button type="button" class="btn-outline btn-sm" id="btnShowArchived" onclick="toggleArchivedView(true)">Archived Cases</button>
       </div>
     </div>
   </div>
@@ -1061,7 +1055,7 @@
       <tbody>
         {% if patients %}
           {% for p in patients %}
-          <tr class="patient-row {% if p.is_archived %}archived-row d-none{% else %}active-row{% endif %}" id="patient-row-{{ p.id }}" data-id="{{ p.id }}" data-name="{{ p.full_name }}" data-uuid="{{ p.patient_uuid }}">
+          <tr class="patient-row active-row" id="patient-row-{{ p.id }}" data-id="{{ p.id }}" data-name="{{ p.full_name }}" data-uuid="{{ p.patient_uuid }}">
             <td style="font-family:var(--font-mono); font-size:0.8rem; font-weight:600; color:var(--cyan-primary);">{{ p.patient_uuid }}</td>
             <td style="font-weight:600; color:var(--text-primary);">{{ p.full_name }}</td>
             <td>{{ p.age }} yrs</td>
@@ -1071,12 +1065,8 @@
             <td>
               <div class="d-flex gap-2">
                 <a href="/predict?patient_id={{ p.id }}" class="btn-action-verify btn-approve" title="Run AI Diagnosis"><i class="fa-solid fa-stethoscope"></i> Predict</a>
-                <button data-id="{{ p.id }}" data-name="{{ p.full_name | escape }}" data-dob="{{ p.date_of_birth.strftime('%Y-%m-%d') if p.date_of_birth else '' }}" data-gender="{{ p.gender }}" data-notes="{{ (p.clinical_notes or '') | escape }}" onclick="openEditPatientModal(this.dataset.id, this.dataset.name, this.dataset.dob, this.dataset.gender, this.dataset.notes)" class="btn-action-verify btn-approve" style="background:rgba(255,255,255,0.05); color:var(--text-primary); border-color:rgba(255,255,255,0.1);"><i class="fa-solid fa-pen-to-square"></i></button>
-                {% if p.is_archived %}
-                  <button data-id="{{ p.id }}" onclick="archivePatientCase(this.dataset.id, false)" class="btn-action-verify btn-approve" style="background:rgba(197,231,16,0.1); color:var(--green-ok); border-color:rgba(197,231,16,0.2);"><i class="fa-solid fa-box-open"></i> Restore</button>
-                {% else %}
-                  <button data-id="{{ p.id }}" onclick="archivePatientCase(this.dataset.id, true)" class="btn-action-verify btn-reject"><i class="fa-solid fa-box-archive"></i> Archive</button>
-                {% endif %}
+                <button data-id="{{ p.id }}" data-name="{{ p.full_name | escape }}" data-dob="{{ p.date_of_birth.strftime('%Y-%m-%d') if p.date_of_birth else '' }}" data-gender="{{ p.gender }}" data-notes="{{ (p.clinical_notes or '') | escape }}" onclick="openEditPatientModal(this.dataset.id, this.dataset.name, this.dataset.dob, this.dataset.gender, this.dataset.notes)" class="btn-action-verify btn-approve" style="background:rgba(255,255,255,0.05); color:var(--text-primary); border-color:rgba(255,255,255,0.1);" title="Edit Case"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                <button data-id="{{ p.id }}" data-name="{{ p.full_name | escape }}" data-dob="{{ p.date_of_birth.strftime('%d %b %Y') if p.date_of_birth else '' }}" data-gender="{{ p.gender }}" data-notes="{{ (p.clinical_notes or '') | escape }}" data-uuid="{{ p.patient_uuid }}" onclick="openViewPatientModal(this.dataset.id, this.dataset.name, this.dataset.dob, this.dataset.gender, this.dataset.notes, this.dataset.uuid)" class="btn-action-verify btn-approve" style="background:rgba(197,231,16,0.1); color:var(--cyan-primary); border-color:rgba(197,231,16,0.2);" title="View Case"><i class="fa-solid fa-eye"></i> View</button>
               </div>
             </td>
           </tr>
@@ -1188,6 +1178,47 @@
           </div>
           <button type="submit" class="auth-btn mt-3" id="updatePatientBtn" style="background:var(--cyan-primary); color:var(--bg-void); font-weight:600;">Save Changes</button>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW PATIENT MODAL -->
+<div class="modal fade" id="viewPatientModal" tabindex="-1" aria-labelledby="viewPatientModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="max-width:100%; border:1px solid var(--bg-border) !important; background:var(--bg-surface) !important; color:var(--text-primary) !important; box-shadow:0 10px 30px rgba(0,0,0,0.6); padding: 24px; border-radius: var(--radius-lg); position: relative; z-index: 2;">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="m-0" id="viewPatientModalLabel" style="color:var(--text-primary) !important; font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; letter-spacing: -0.02em;">View Patient Case</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="auth-form-group">
+          <label class="auth-label" style="color:var(--text-secondary) !important;">Patient ID</label>
+          <input type="text" id="viewPatientUUID" class="auth-input" style="font-family:var(--font-mono); color:var(--text-secondary); background:rgba(255,255,255,0.02); border:1px solid var(--bg-border);" readonly>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label" style="color:var(--text-secondary) !important;">Full Name</label>
+          <input type="text" id="viewPatientName" class="auth-input" style="color:var(--text-primary); background:rgba(255,255,255,0.02); border:1px solid var(--bg-border);" readonly>
+        </div>
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="auth-form-group">
+              <label class="auth-label" style="color:var(--text-secondary) !important;">Date of Birth</label>
+              <input type="text" id="viewPatientDOB" class="auth-input" style="color:var(--text-primary); background:rgba(255,255,255,0.02); border:1px solid var(--bg-border);" readonly>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="auth-form-group">
+              <label class="auth-label" style="color:var(--text-secondary) !important;">Gender</label>
+              <input type="text" id="viewPatientGender" class="auth-input" style="color:var(--text-primary); background:rgba(255,255,255,0.02); border:1px solid var(--bg-border);" readonly>
+            </div>
+          </div>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label" style="color:var(--text-secondary) !important;">Clinical Notes</label>
+          <textarea id="viewPatientNotes" class="auth-input" rows="3" style="color:var(--text-primary); background:rgba(255,255,255,0.02); border:1px solid var(--bg-border);" readonly></textarea>
+        </div>
+        <button type="button" class="auth-btn mt-3" data-bs-dismiss="modal" style="background:var(--cyan-primary); color:var(--bg-void); font-weight:600;">Close</button>
       </div>
     </div>
   </div>
@@ -1404,8 +1435,7 @@
     }
   }
 
-  async function generateAIExplanationInline(id) {
-    const btn = document.querySelector(`[onclick="generateAIExplanationInline(${id})"]`);
+  async function generateAIExplanationInline(btn, id) {
     if (btn) {
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating...`;
@@ -1434,13 +1464,26 @@
     }
   }
 
-  async function finalizeDiagnosisInline(id) {
+  // Helper to load html2pdf dynamically
+  function loadHtml2PdfLibrary(callback) {
+      if (window.html2pdf) {
+          callback();
+          return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+      script.onload = callback;
+      document.head.appendChild(script);
+  }
+
+  async function finalizeAndGeneratePDF(id) {
     const finalDiagnosis = document.getElementById("finalDiagnosisLabel").value.trim();
     const observations = document.getElementById("modalObservations").value.trim();
     const treatmentNotes = document.getElementById("modalTreatmentNotes").value.trim();
+    const remarks = document.getElementById("modalPredictionRemarks") ? document.getElementById("modalPredictionRemarks").value.trim() : "";
     const aiExplanation = document.getElementById("modalAIExplanation").value.trim();
     const signature = document.getElementById("modalDoctorSignature").value.trim();
-    const model = document.getElementById("modalSelectModel").value;
+    const model = document.getElementById("modalSelectModel")?.value || "random_forest";
 
     const sections = [];
     const sectionIds = [
@@ -1473,6 +1516,7 @@
           ai_explanation: aiExplanation,
           doctor_signature: signature,
           model: model,
+          remarks: remarks,
           report_sections: sections
         })
       });
@@ -1481,11 +1525,160 @@
         alert(data.error || "Failed to finalize diagnosis.");
         return;
       }
-      alert(data.message || "Diagnosis finalized successfully.");
-      window.location.href = "/portal?section=history";
+      
+      const record = data.record;
+      downloadFinalizedPDF(record, sections);
+      
     } catch (err) {
       alert("Network error finalizing diagnosis.");
     }
+  }
+
+  function downloadFinalizedPDF(record, selectedSections) {
+      let html = `
+          <div style="background:#ffffff; color:#111111; padding:24px; font-family:'DM Sans', sans-serif;">
+      `;
+      
+      if (selectedSections.includes('logo')) {
+          html += `
+              <div style="text-align:center; margin-bottom:20px;">
+                <h4 style="margin:5px 0 0 0; color:#111111; font-weight: bold;">Smart Health Sync Clinic</h4>
+                <small style="color:#555555;">Clinical Decision Support System</small>
+              </div>
+          `;
+      }
+      
+      if (selectedSections.includes('patient')) {
+          html += `
+              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+                <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:10px; font-weight: bold;">Patient Information</h5>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size:0.88rem;">
+                  <div><strong>Name:</strong> ${record.patient_name || 'Standalone Case'}</div>
+                  <div><strong>Patient ID:</strong> ${record.patient_uuid || '—'}</div>
+                  <div><strong>Date of Birth:</strong> ${record.patient_dob || '—'}</div>
+                  <div><strong>Gender:</strong> ${record.patient_gender || '—'}</div>
+                  <div><strong>Email:</strong> ${record.patient_email || '—'}</div>
+                  <div><strong>Reference:</strong> <span style="font-family:monospace;">${record.patient_reference || '—'}</span></div>
+                </div>
+              </div>
+          `;
+      }
+      
+      if (selectedSections.includes('biomarkers')) {
+          html += `
+              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+                <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:10px; font-weight: bold;">Biomarker Results</h5>
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size:0.85rem;">
+          `;
+          for (const [k, v] of Object.entries(record.biomarkers || {})) {
+              html += `
+                  <div style="border:1px solid #dddddd; padding:6px; border-radius:4px; background:#fafafa;">
+                    <div style="color:#555555; font-size:0.75rem;">${k}</div>
+                    <div style="font-weight:600; font-size:0.95rem;">${typeof v === 'number' ? v.toFixed(2) : v}</div>
+                  </div>
+              `;
+          }
+          html += `
+                </div>
+              </div>
+          `;
+      }
+      
+      if (selectedSections.includes('final_diag')) {
+          html += `
+              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+                <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:5px; font-weight: bold;">Final Diagnosis</h5>
+                <p style="font-size:1.1rem; font-weight:600; color:#111111; margin:0;">${record.final_diagnosis || record.prediction}</p>
+              </div>
+          `;
+      }
+      
+      if (selectedSections.includes('confidence') || selectedSections.includes('ml_pred')) {
+          html += `
+              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+                <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:10px; font-weight: bold;">Machine Learning Inference</h5>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size:0.88rem;">
+                  <div><strong>Prediction Confidence:</strong> ${record.confidence.toFixed(1)}%</div>
+                  <div><strong>Classifier Model:</strong> ${record.model_used ? record.model_used.replace(/_/g, ' ').toUpperCase() : '—'}</div>
+                </div>
+              </div>
+          `;
+      }
+      
+      if (selectedSections.includes('ai_exp')) {
+          html += `
+              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+                <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:10px; font-weight: bold;">AI Simplified Explanation</h5>
+                <div style="font-size:0.88rem; color:#333333; line-height:1.6;">${record.ai_explanation || 'No explanation generated.'}</div>
+              </div>
+          `;
+      }
+      
+      if (selectedSections.includes('doctor_notes')) {
+          html += `
+              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+                <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:10px; font-weight: bold;">Doctor Notes & Recommendations</h5>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size:0.88rem;">
+                  <div>
+                    <strong>Observations:</strong>
+                    <p style="margin:4px 0 0 0; color:#333333; line-height:1.5;">${record.observations || '—'}</p>
+                  </div>
+                  <div>
+                    <strong>Treatment Plan:</strong>
+                    <p style="margin:4px 0 0 0; color:#333333; line-height:1.5;">${record.treatment_notes || '—'}</p>
+                  </div>
+                </div>
+              </div>
+          `;
+      }
+      
+      if (selectedSections.includes('signature')) {
+          html += `
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px; padding-top:12px; border-top:1px dashed #dddddd;">
+                <div>
+                  <small style="color:#555555; display:block;">Diagnosis Verdict Status</small>
+                  <span style="display:inline-block; padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold; background:#d4edda; color:#155724;">Approved & Finalized</span>
+                </div>
+                <div style="text-align:right;">
+                  <small style="color:#555555; display:block;">Attending Physician</small>
+                  <strong style="color:#111; font-size:1.05rem;">${record.doctor_signature || '—'}</strong>
+                </div>
+              </div>
+          `;
+      }
+      
+      html += `</div>`;
+      
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      
+      // Add container to DOM so html2canvas can measure layout dimensions
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '0';
+      tempDiv.style.width = '800px';
+      tempDiv.style.background = '#ffffff';
+      tempDiv.style.color = '#111111';
+      document.body.appendChild(tempDiv);
+      
+      const opt = {
+          margin:       10,
+          filename:     `SmartHealth-Report-${record.patient_reference || record.id}.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      
+      loadHtml2PdfLibrary(() => {
+          window.html2pdf().set(opt).from(tempDiv).save().then(() => {
+              document.body.removeChild(tempDiv);
+              window.location.href = "/portal?section=history";
+          }).catch(err => {
+              console.error("PDF generation failed:", err);
+              document.body.removeChild(tempDiv);
+              window.location.href = "/portal?section=history";
+          });
+      });
   }
 </script>
 {% endblock %}
