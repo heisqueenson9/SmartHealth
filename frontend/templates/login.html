@@ -39,6 +39,7 @@
           <div class="auth-form-group">
             <label for="email" class="auth-label">Email Address</label>
             <input type="email" id="email" class="auth-input" placeholder="doctor@facility.org" required>
+            <div class="field-error-msg" id="err-email" style="display:none; color: var(--red-critical, #ff4757); font-size: 0.82rem; margin-top: 5px;">Please enter a valid email address (e.g., doctor@hospital.org).</div>
           </div>
 
           <div class="auth-form-group">
@@ -68,9 +69,18 @@
   document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("loginForm");
     const emailInput = document.getElementById("email");
+    const emailErr = document.getElementById("err-email");
     const passwordInput = document.getElementById("password");
     const btn = document.getElementById("loginBtn");
     const alertBox = document.getElementById("loginAlert");
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    emailInput.addEventListener("input", () => {
+      if (emailRegex.test(emailInput.value.trim())) {
+        emailErr.style.display = "none";
+        emailInput.classList.remove("invalid");
+      }
+    });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -78,6 +88,16 @@
 
       const email = emailInput.value.trim();
       const password = passwordInput.value;
+
+      if (!emailRegex.test(email)) {
+        emailErr.style.display = "block";
+        emailInput.classList.add("invalid");
+        emailInput.focus();
+        return;
+      } else {
+        emailErr.style.display = "none";
+        emailInput.classList.remove("invalid");
+      }
 
       btn.disabled = true;
       btn.querySelector(".btn-spinner").style.display = "block";
