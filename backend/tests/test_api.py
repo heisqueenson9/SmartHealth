@@ -3,15 +3,18 @@ Smart Health Sync — Backend Test Suite
 Authors: Enock Queenson Eduafo & Christabel Araba Edumadze | University of Ghana 2026
 """
 
+import io
 import json
 import pytest
 import sys
 import os
+from unittest.mock import patch
 
 # Allow importing from project root
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from backend.factory import create_app
+from backend.database.models import db, User
 
 
 @pytest.fixture
@@ -143,3 +146,141 @@ class TestPages:
     def test_about_page(self, client):
         resp = client.get("/about")
         assert resp.status_code == 200
+
+
+# ── Email validation ─────────────────────────────────────────
+class TestEmailValidation:
+    """Backend regex check on /api/auth/register and /api/auth/login."""
+
+    def test_register_rejects_bad_email(self, client):
+        # multipart/form-data because the register endpoint expects a file upload;
+        # the email check runs before any other validation
+        data = {
+            "account_type": "doctor",
+            "title": "Dr.",
+            "full_name": "Bad Email User",
+            "email": "not-an-email",
+            "password": "longenough123",
+        }
+        resp = client.post(
+            "/api/auth/register",
+            data=data,
+            content_type="multipart/form-data",
+        )
+        assert resp.status_code == 400
+        payload = json.loads(resp.data)
+        assert "valid email" in payload["error"].lower()
+
+    def test_login_rejects_bad_email(self, client):
+        resp = client.post(
+            "/api/auth/login",
+            data=json.dumps({"email": "not-an-email", "password": "whatever"}),
+            content_type="application/json",
+        )
+        assert resp.status_code == 400
+        payload = json.loads(resp.data)
+        assert "valid email" in payload["error"].lower()
+
+
+# ── Email notifications (Resend) ────────────────────────────
+@pytest.fixture
+def pending_doctor(app):
+    """Insert a pending doctor directly and return the User object."""
+    with app.app_context():
+        # Remove any leftover from previous runs
+        existing = User.query.filter_by(email="dr.test@example.com").first()
+        if existing:
+            db.session.delete(existing)
+            db.session.commit()
+
+        doctor = User(
+            username="dr.test@example.com",
+            email="dr.test@example.com",
+            full_name="Dr. Test User",
+            role="doctor",
+            status="pending",
+            license_number="TEST-001",
+        )
+        doctor.set_password("testpass123")
+        db.session.add(doctor)
+        db.session.commit()
+        doctor_id = doctor.id
+    yield doctor_id
+
+
+def _approve_as_admin(client, doctor_id, action):
+    """Hit the verify endpoint with an admin-flavored session.
+
+    The verify route only checks `session.get("role") == "admin"`. We patch the
+    session check to keep the test independent of the login flow.
+    """
+    with client.session_transaction() as sess:
+        sess["user_id"] = 1
+        sess["role"] = "admin"
+        sess["email"] = "admin@test"
+        sess["full_name"] = "Admin"
+        sess["status"] = "approved"
+
+    return client.post(
+        f"/api/admin/doctors/{doctor_id}/verify",
+        data=json.dumps({"action": action}),
+        content_type="application/json",
+    )
+
+
+class TestEmailNotifications:
+    """Verify the admin→approve/reject flow short-circuits when Resend is unset,
+    and actually sends when RESEND_API_KEY is configured."""
+
+    def test_approve_skips_email_when_resend_not_configured(
+        self, app, client, pending_doctor
+    ):
+        # Ensure RESEND_API_KEY is NOT set for this test
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("RESEND_API_KEY", None)
+
+            with patch("resend.Emails.send") as mock_send:
+                resp = _approve_as_admin(client, pending_doctor, "approve")
+                assert resp.status_code == 200
+                assert mock_send.call_count == 0
+
+    def test_reject_skips_email_when_resend_not_configured(
+        self, app, client, pending_doctor
+    ):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("RESEND_API_KEY", None)
+
+            with patch("resend.Emails.send") as mock_send:
+                resp = _approve_as_admin(client, pending_doctor, "reject")
+                assert resp.status_code == 200
+                assert mock_send.call_count == 0
+
+    def test_approve_calls_resend_when_api_key_is_set(
+        self, app, client, pending_doctor
+    ):
+        with patch.dict(os.environ, {"RESEND_API_KEY": "test_key_abc"}, clear=False):
+            with patch("resend.Emails.send") as mock_send:
+                resp = _approve_as_admin(client, pending_doctor, "approve")
+                assert resp.status_code == 200
+                assert mock_send.call_count == 1
+
+                # Inspect the payload that mail_utils sent
+                args, _ = mock_send.call_args
+                payload = args[0]
+                assert payload["to"] == ["dr.test@example.com"]
+                assert "Approved" in payload["subject"]
+                assert "Dr. Test User" in payload["text"]
+
+    def test_reject_calls_resend_when_api_key_is_set(
+        self, app, client, pending_doctor
+    ):
+        with patch.dict(os.environ, {"RESEND_API_KEY": "test_key_abc"}, clear=False):
+            with patch("resend.Emails.send") as mock_send:
+                resp = _approve_as_admin(client, pending_doctor, "reject")
+                assert resp.status_code == 200
+                assert mock_send.call_count == 1
+
+                args, _ = mock_send.call_args
+                payload = args[0]
+                assert payload["to"] == ["dr.test@example.com"]
+                assert "Registration Status" in payload["subject"] or "Rejected" in payload["subject"] or "rejected" in payload["text"].lower()
