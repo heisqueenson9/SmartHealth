@@ -10,7 +10,6 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from flask_mail import Mail
 
 from backend.config import get_config
 from backend.database.models import db
@@ -18,7 +17,6 @@ from backend.database.models import db
 # Singletons for extensions
 migrate = Migrate()
 limiter = Limiter(key_func=get_remote_address)
-mail = Mail()
 
 
 def _rebuild_diagnostic_records_table(col_info):
@@ -190,8 +188,7 @@ def create_app() -> Flask:
     CORS(app, resources={r"/api/*": {"origins": cfg.CORS_ORIGINS}})
     db.init_app(app)
     migrate.init_app(app, db)
-    mail.init_app(app)
-    
+
     # Configure Limiter
     limiter.init_app(app)
     app.config["RATELIMIT_STORAGE_URI"] = cfg.RATELIMIT_STORAGE_URI
