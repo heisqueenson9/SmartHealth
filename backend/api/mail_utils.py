@@ -55,7 +55,7 @@ def notify_doctor_status_change(doctor, action: str) -> None:
     if action == "approve":
         subject = "Smart Health Sync — Account Approved"
         body = (
-            f"Dear Dr. {doctor.full_name},\n\n"
+            f"Dear {doctor.full_name},\n\n"
             "We are pleased to inform you that your doctor account at Smart Health Sync "
             "has been approved and is now active.\n\n"
             "You can now log in to the portal and start using our clinical diagnosis tools.\n\n"
@@ -68,7 +68,7 @@ def notify_doctor_status_change(doctor, action: str) -> None:
         # needs to know they can submit a fresh credential document.
         subject = "Smart Health Sync — Account Registration Status"
         body = (
-            f"Dear Dr. {doctor.full_name},\n\n"
+            f"Dear {doctor.full_name},\n\n"
             "Thank you for registering with Smart Health Sync.\n\n"
             "Unfortunately, your doctor registration request was not approved at this time. "
             "Reason: Your uploaded document was rejected or did not meet our verification criteria.\n\n"
