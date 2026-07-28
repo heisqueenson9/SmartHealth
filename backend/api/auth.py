@@ -186,6 +186,9 @@ def login():
         if not email or not password:
             return jsonify({"error": "Email and password are required."}), 400
 
+        if not EMAIL_REGEX.match(email):
+            return jsonify({"error": "Please enter a valid email address."}), 400
+
         user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
             return jsonify({"error": "Invalid email address or password."}), 401
@@ -246,12 +249,9 @@ def verify_doctor():
         doctor.status = "approved" if action == "approve" else "rejected"
         db.session.commit()
 
-        # Send email notification after commit
-        try:
-            from backend.api.mail_utils import send_status_email
-            send_status_email(doctor.email, doctor.full_name, action)
-        except Exception as mail_exc:
-            logger.warning(f"[Auth] Could not send account status email to {doctor.email}: {mail_exc}")
+        # Send email notification after commit (no-op if SMTP not configured)
+        from backend.api.mail_utils import notify_doctor_status_change
+        notify_doctor_status_change(doctor, action)
 
         logger.info(f"[Auth] Admin {session.get('user_id')} updated Doctor {doctor.email} status to: {doctor.status}")
         return jsonify({
