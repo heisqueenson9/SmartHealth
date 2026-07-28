@@ -1,6 +1,3 @@
-# ── Smart Health Sync — Docker Image ─────────────────────────
-# Authors: Enock Queenson Eduafo & Christabel Araba Edumadze | University of Ghana 2026
-
 FROM python:3.11-slim
 
 # Metadata
@@ -11,10 +8,7 @@ LABEL version="2.0.0"
 # Set working directory
 WORKDIR /app
 
-# System dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# No system packages required — use Python's urllib for HEALTHCHECK below.
 
 # Python dependencies
 COPY requirements.txt .
@@ -29,9 +23,10 @@ RUN mkdir -p /app/models
 # Expose port
 EXPOSE 5000
 
-# Health check
+# Health check (uses python stdlib, no curl dependency)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:5000/api/health || exit 1
+  CMD python -c "import urllib.request,sys; \
+sys.exit(0 if urllib.request.urlopen('http://localhost:5000/api/health',timeout=5).status==200 else 1)"
 
 # Production startup
 CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "--log-level", "info"]
