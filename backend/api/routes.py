@@ -1401,13 +1401,10 @@ def admin_verify_doctor(doctor_id):
     )
     db.session.add(notif)
     db.session.commit()
-    
-    # Send email notification after commit
-    try:
-        from backend.api.mail_utils import send_status_email
-        send_status_email(doctor.email, doctor.full_name, action)
-    except Exception as mail_exc:
-        logger.warning(f"[API] Could not send account status email to {doctor.email}: {mail_exc}")
+
+    # Send email notification after commit (no-op if SMTP not configured)
+    from backend.api.mail_utils import notify_doctor_status_change
+    notify_doctor_status_change(doctor, action)
         
     return jsonify({
         "status": "success",
