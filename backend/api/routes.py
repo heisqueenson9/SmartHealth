@@ -17,6 +17,24 @@ logger  = logging.getLogger("smarthealth.api")
 api_bp  = Blueprint("api", __name__)
 
 
+@api_bp.errorhandler(Exception)
+def _handle_api_exception(exc):
+    """Blueprint-wide safety net. Catches anything not already caught inside
+    an individual view function, rolls back the DB session so a failed
+    transaction can't poison the next query on this connection, logs the
+    full traceback, and returns clean JSON instead of a bare 500 page."""
+    from werkzeug.exceptions import HTTPException
+    if isinstance(exc, HTTPException):
+        return exc  # let normal 404s/405s/etc pass through unchanged
+    db.session.rollback()
+    logger.exception(f"[API] Unhandled exception: {exc}")
+    return jsonify({
+        "error": "Internal server error.",
+        "status": "failed",
+        "details": str(exc) if current_app.debug else None,
+    }), 500
+
+
 # ── /api/health ──────────────────────────────────────────────
 @api_bp.route("/health", methods=["GET"])
 def health():
@@ -2350,14 +2368,19 @@ def build_case_report(case_id):
         
         import uuid
         report_uuid = f"REP-{uuid.uuid4().hex[:8].upper()}"
-        
+        pdf_filename = f"Report_{report_uuid}.pdf"
+
+        from backend.api.pdf_report import generate_case_report_pdf
+        output_path = os.path.join(current_app.config["REPORTS_FOLDER"], pdf_filename)
+        generate_case_report_pdf(record, sections, signature, output_path)
+
         from backend.database.models import GeneratedReport
         gr = GeneratedReport(
             case_id=case_id,
             report_uuid=report_uuid,
             selected_sections_json=json.dumps(sections),
             doctor_signature=signature,
-            pdf_filename=f"Report_{report_uuid}.pdf"
+            pdf_filename=pdf_filename
         )
         db.session.add(gr)
         
@@ -2372,7 +2395,8 @@ def build_case_report(case_id):
             "status": "success",
             "message": "Report generated successfully.",
             "case_status": record.case_status,
-            "report": gr.to_dict()
+            "report": gr.to_dict(),
+            "download_url": f"/api/cases/{case_id}/reports/{report_uuid}/download",
         }), 201
     except Exception as exc:
         db.session.rollback()
@@ -2382,3 +2406,29 @@ def build_case_report(case_id):
             "status": "failed",
             "details": str(exc) if current_app.debug else None,
         }), 500
+
+
+@api_bp.route("/cases/<int:case_id>/reports/<string:report_uuid>/download", methods=["GET"])
+def download_case_report(case_id, report_uuid):
+    """Serve a previously generated PDF, regenerating it on the fly if the
+    file itself didn't survive a redeploy (Render's disk is ephemeral) —
+    all the source data lives in the database, so this is always possible."""
+    from flask import send_from_directory
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
+
+    from backend.database.models import GeneratedReport
+    gr = GeneratedReport.query.filter_by(case_id=case_id, report_uuid=report_uuid).first()
+    if not gr:
+        return jsonify({"error": "Report not found."}), 404
+
+    reports_folder = current_app.config["REPORTS_FOLDER"]
+    full_path = os.path.join(reports_folder, gr.pdf_filename)
+
+    if not os.path.exists(full_path):
+        from backend.api.pdf_report import generate_case_report_pdf
+        sections = json.loads(gr.selected_sections_json) if gr.selected_sections_json else []
+        generate_case_report_pdf(record, sections, gr.doctor_signature, full_path)
+
+    return send_from_directory(reports_folder, gr.pdf_filename, as_attachment=True, download_name=gr.pdf_filename)

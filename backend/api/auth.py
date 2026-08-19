@@ -18,6 +18,20 @@ from backend.database.models import db, User, Patient
 logger = logging.getLogger("smarthealth.auth")
 auth_bp = Blueprint("auth", __name__)
 
+
+@auth_bp.errorhandler(Exception)
+def _handle_auth_exception(exc):
+    from werkzeug.exceptions import HTTPException
+    from backend.database.models import db
+    if isinstance(exc, HTTPException):
+        return exc
+    db.session.rollback()
+    logger.exception(f"[Auth] Unhandled exception: {exc}")
+    return jsonify({
+        "error": "Internal server error.",
+        "status": "failed",
+    }), 500
+
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx'}
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 

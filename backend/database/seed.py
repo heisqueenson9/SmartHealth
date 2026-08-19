@@ -5,9 +5,23 @@ Populates default symptom catalog, investigation catalog, and investigation rule
 
 import json
 import logging
+from pathlib import Path
 from backend.database.models import db, SymptomCatalog, InvestigationCatalog, InvestigationRule
 
 logger = logging.getLogger("smarthealth.seed")
+
+VOCAB_PATH = Path(__file__).resolve().parent / "symptom_vocabulary.json"
+
+
+def _load_extended_vocabulary():
+    if not VOCAB_PATH.exists():
+        return []
+    try:
+        with open(VOCAB_PATH, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except Exception as exc:
+        logger.warning(f"[Seed] Could not read symptom_vocabulary.json: {exc}")
+        return []
 
 DEFAULT_SYMPTOMS = [
     {
@@ -212,21 +226,31 @@ DEFAULT_RULES = [
 
 
 def seed_clinical_catalogs():
-    """Populate default symptom catalog, investigation catalog, and rules if empty."""
+    """Populate default + extended symptom catalog, investigation catalog,
+    and rules. Idempotent per-item (checked by unique code), so it's safe
+    to run on every deploy and will pick up newly added vocabulary."""
     try:
-        # 1. Seed Symptoms Catalog
-        if SymptomCatalog.query.count() == 0:
-            for s in DEFAULT_SYMPTOMS:
-                sc = SymptomCatalog(
-                    code=s["code"],
-                    display_name=s["display_name"],
-                    category=s["category"],
-                    synonyms_json=json.dumps(s["synonyms"]),
-                    description=s["description"]
-                )
-                db.session.add(sc)
+        # 1. Seed Symptom Catalog — curated defaults + extended vocabulary,
+        #    added by code so re-running never duplicates existing entries.
+        existing_codes = {row[0] for row in db.session.query(SymptomCatalog.code).all()}
+        all_symptoms = DEFAULT_SYMPTOMS + _load_extended_vocabulary()
+        added = 0
+        for s in all_symptoms:
+            if s["code"] in existing_codes:
+                continue
+            sc = SymptomCatalog(
+                code=s["code"],
+                display_name=s["display_name"],
+                category=s.get("category"),
+                synonyms_json=json.dumps(s.get("synonyms", [])),
+                description=s.get("description"),
+            )
+            db.session.add(sc)
+            existing_codes.add(s["code"])
+            added += 1
+        if added:
             db.session.commit()
-            logger.info("[Seed] Seeded default SymptomCatalog items.")
+            logger.info(f"[Seed] Added {added} new SymptomCatalog entries.")
 
         # 2. Seed Investigation Catalog
         if InvestigationCatalog.query.count() == 0:

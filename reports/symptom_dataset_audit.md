@@ -1,5 +1,7 @@
 # Symptom & Biomarker Dataset Audit Report
 
+> **Update — 2026-08-19:** The biomarker dataset issues described below (train/test duplication, missing Heart Disease training examples, abbreviated taxonomy) have been resolved. `data/train_data.csv` and `data/test_data.csv` now contain 440/111 deduplicated rows respectively across the 6 standardized classes (Anemia, Diabetes, Healthy, Heart Disease, Thalassemia, Thrombocytopenia), with zero exact-duplicate rows and zero train/test overlap. The findings below describe the dataset state *before* that repair and are kept for audit-trail purposes.
+
 **Date:** 2026-08-19
 **Symptom Dataset File:** `data/Final_Augmented_dataset_Diseases_and_Symptoms.csv`
 

@@ -1,0 +1,2641 @@
+[
+  {
+    "code": "SYM_ANXIETY_AND_NERVOUSNESS",
+    "display_name": "Anxiety And Nervousness",
+    "category": "Psychiatric",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DEPRESSION",
+    "display_name": "Depression",
+    "category": "Psychiatric",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SHORTNESS_OF_BREATH",
+    "display_name": "Shortness Of Breath",
+    "category": "Respiratory",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DEPRESSIVE_OR_PSYCHOTIC_SYMPTOMS",
+    "display_name": "Depressive Or Psychotic Symptoms",
+    "category": "Psychiatric",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SHARP_CHEST_PAIN",
+    "display_name": "Sharp Chest Pain",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DIZZINESS",
+    "display_name": "Dizziness",
+    "category": "Neurological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_INSOMNIA",
+    "display_name": "Insomnia",
+    "category": "Psychiatric",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ABNORMAL_INVOLUNTARY_MOVEMENTS",
+    "display_name": "Abnormal Involuntary Movements",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_CHEST_TIGHTNESS",
+    "display_name": "Chest Tightness",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PALPITATIONS",
+    "display_name": "Palpitations",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_IRREGULAR_HEARTBEAT",
+    "display_name": "Irregular Heartbeat",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BREATHING_FAST",
+    "display_name": "Breathing Fast",
+    "category": "Respiratory",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HOARSE_VOICE",
+    "display_name": "Hoarse Voice",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SORE_THROAT",
+    "display_name": "Sore Throat",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DIFFICULTY_SPEAKING",
+    "display_name": "Difficulty Speaking",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_COUGH",
+    "display_name": "Cough",
+    "category": "Respiratory",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NASAL_CONGESTION",
+    "display_name": "Nasal Congestion",
+    "category": "Respiratory",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_THROAT_SWELLING",
+    "display_name": "Throat Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DIMINISHED_HEARING",
+    "display_name": "Diminished Hearing",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LUMP_IN_THROAT",
+    "display_name": "Lump In Throat",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_THROAT_FEELS_TIGHT",
+    "display_name": "Throat Feels Tight",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DIFFICULTY_IN_SWALLOWING",
+    "display_name": "Difficulty In Swallowing",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_SWELLING",
+    "display_name": "Skin Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_RETENTION_OF_URINE",
+    "display_name": "Retention Of Urine",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_GROIN_MASS",
+    "display_name": "Groin Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LEG_PAIN",
+    "display_name": "Leg Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HIP_PAIN",
+    "display_name": "Hip Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SUPRAPUBIC_PAIN",
+    "display_name": "Suprapubic Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BLOOD_IN_STOOL",
+    "display_name": "Blood In Stool",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LACK_OF_GROWTH",
+    "display_name": "Lack Of Growth",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EMOTIONAL_SYMPTOMS",
+    "display_name": "Emotional Symptoms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ELBOW_WEAKNESS",
+    "display_name": "Elbow Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BACK_WEAKNESS",
+    "display_name": "Back Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PUS_IN_SPUTUM",
+    "display_name": "Pus In Sputum",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SYMPTOMS_OF_THE_SCROTUM_AND_TESTES",
+    "display_name": "Symptoms Of The Scrotum And Testes",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SWELLING_OF_SCROTUM",
+    "display_name": "Swelling Of Scrotum",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PAIN_IN_TESTICLES",
+    "display_name": "Pain In Testicles",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FLATULENCE",
+    "display_name": "Flatulence",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PUS_DRAINING_FROM_EAR",
+    "display_name": "Pus Draining From Ear",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_JAUNDICE",
+    "display_name": "Jaundice",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MASS_IN_SCROTUM",
+    "display_name": "Mass In Scrotum",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_WHITE_DISCHARGE_FROM_EYE",
+    "display_name": "White Discharge From Eye",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_IRRITABLE_INFANT",
+    "display_name": "Irritable Infant",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ABUSING_ALCOHOL",
+    "display_name": "Abusing Alcohol",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FAINTING",
+    "display_name": "Fainting",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HOSTILE_BEHAVIOR",
+    "display_name": "Hostile Behavior",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DRUG_ABUSE",
+    "display_name": "Drug Abuse",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SHARP_ABDOMINAL_PAIN",
+    "display_name": "Sharp Abdominal Pain",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FEELING_ILL",
+    "display_name": "Feeling Ill",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_VOMITING",
+    "display_name": "Vomiting",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HEADACHE",
+    "display_name": "Headache",
+    "category": "Neurological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NAUSEA",
+    "display_name": "Nausea",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DIARRHEA",
+    "display_name": "Diarrhea",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_VAGINAL_ITCHING",
+    "display_name": "Vaginal Itching",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_VAGINAL_DRYNESS",
+    "display_name": "Vaginal Dryness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PAINFUL_URINATION",
+    "display_name": "Painful Urination",
+    "category": "Metabolic",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_INVOLUNTARY_URINATION",
+    "display_name": "Involuntary Urination",
+    "category": "Metabolic",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PAIN_DURING_INTERCOURSE",
+    "display_name": "Pain During Intercourse",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FREQUENT_URINATION",
+    "display_name": "Frequent Urination",
+    "category": "Metabolic",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LOWER_ABDOMINAL_PAIN",
+    "display_name": "Lower Abdominal Pain",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_VAGINAL_DISCHARGE",
+    "display_name": "Vaginal Discharge",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BLOOD_IN_URINE",
+    "display_name": "Blood In Urine",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HOT_FLASHES",
+    "display_name": "Hot Flashes",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_INTERMENSTRUAL_BLEEDING",
+    "display_name": "Intermenstrual Bleeding",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HAND_OR_FINGER_PAIN",
+    "display_name": "Hand Or Finger Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_WRIST_PAIN",
+    "display_name": "Wrist Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HAND_OR_FINGER_SWELLING",
+    "display_name": "Hand Or Finger Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ARM_PAIN",
+    "display_name": "Arm Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_WRIST_SWELLING",
+    "display_name": "Wrist Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ARM_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Arm Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ARM_SWELLING",
+    "display_name": "Arm Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HAND_OR_FINGER_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Hand Or Finger Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_WRIST_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Wrist Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LIP_SWELLING",
+    "display_name": "Lip Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_TOOTHACHE",
+    "display_name": "Toothache",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ABNORMAL_APPEARING_SKIN",
+    "display_name": "Abnormal Appearing Skin",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_LESION",
+    "display_name": "Skin Lesion",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ACNE_OR_PIMPLES",
+    "display_name": "Acne Or Pimples",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DRY_LIPS",
+    "display_name": "Dry Lips",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FACIAL_PAIN",
+    "display_name": "Facial Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MOUTH_ULCER",
+    "display_name": "Mouth Ulcer",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_GROWTH",
+    "display_name": "Skin Growth",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EYE_DEVIATION",
+    "display_name": "Eye Deviation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DIMINISHED_VISION",
+    "display_name": "Diminished Vision",
+    "category": "Neurological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DOUBLE_VISION",
+    "display_name": "Double Vision",
+    "category": "Neurological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_CROSS_EYED",
+    "display_name": "Cross Eyed",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SYMPTOMS_OF_EYE",
+    "display_name": "Symptoms Of Eye",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PAIN_IN_EYE",
+    "display_name": "Pain In Eye",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EYE_MOVES_ABNORMALLY",
+    "display_name": "Eye Moves Abnormally",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ABNORMAL_MOVEMENT_OF_EYELID",
+    "display_name": "Abnormal Movement Of Eyelid",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FOREIGN_BODY_SENSATION_IN_EYE",
+    "display_name": "Foreign Body Sensation In Eye",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_IRREGULAR_APPEARING_SCALP",
+    "display_name": "Irregular Appearing Scalp",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SWOLLEN_LYMPH_NODES",
+    "display_name": "Swollen Lymph Nodes",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BACK_PAIN",
+    "display_name": "Back Pain",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NECK_PAIN",
+    "display_name": "Neck Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LOW_BACK_PAIN",
+    "display_name": "Low Back Pain",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PAIN_OF_THE_ANUS",
+    "display_name": "Pain Of The Anus",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PAIN_DURING_PREGNANCY",
+    "display_name": "Pain During Pregnancy",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PELVIC_PAIN",
+    "display_name": "Pelvic Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_IMPOTENCE",
+    "display_name": "Impotence",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_INFANT_SPITTING_UP",
+    "display_name": "Infant Spitting Up",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_VOMITING_BLOOD",
+    "display_name": "Vomiting Blood",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_REGURGITATION",
+    "display_name": "Regurgitation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BURNING_ABDOMINAL_PAIN",
+    "display_name": "Burning Abdominal Pain",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_RESTLESSNESS",
+    "display_name": "Restlessness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SYMPTOMS_OF_INFANTS",
+    "display_name": "Symptoms Of Infants",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_WHEEZING",
+    "display_name": "Wheezing",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PERIPHERAL_EDEMA",
+    "display_name": "Peripheral Edema",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NECK_MASS",
+    "display_name": "Neck Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EAR_PAIN",
+    "display_name": "Ear Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_JAW_SWELLING",
+    "display_name": "Jaw Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MOUTH_DRYNESS",
+    "display_name": "Mouth Dryness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NECK_SWELLING",
+    "display_name": "Neck Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_KNEE_PAIN",
+    "display_name": "Knee Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FOOT_OR_TOE_PAIN",
+    "display_name": "Foot Or Toe Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BOWLEGGED_OR_KNOCK_KNEED",
+    "display_name": "Bowlegged Or Knock Kneed",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ANKLE_PAIN",
+    "display_name": "Ankle Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BONES_ARE_PAINFUL",
+    "display_name": "Bones Are Painful",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_KNEE_WEAKNESS",
+    "display_name": "Knee Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ELBOW_PAIN",
+    "display_name": "Elbow Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_KNEE_SWELLING",
+    "display_name": "Knee Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_MOLES",
+    "display_name": "Skin Moles",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_KNEE_LUMP_OR_MASS",
+    "display_name": "Knee Lump Or Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_WEIGHT_GAIN",
+    "display_name": "Weight Gain",
+    "category": "Metabolic",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PROBLEMS_WITH_MOVEMENT",
+    "display_name": "Problems With Movement",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_KNEE_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Knee Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LEG_SWELLING",
+    "display_name": "Leg Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FOOT_OR_TOE_SWELLING",
+    "display_name": "Foot Or Toe Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HEARTBURN",
+    "display_name": "Heartburn",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SMOKING_PROBLEMS",
+    "display_name": "Smoking Problems",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MUSCLE_PAIN",
+    "display_name": "Muscle Pain",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_INFANT_FEEDING_PROBLEM",
+    "display_name": "Infant Feeding Problem",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_RECENT_WEIGHT_LOSS",
+    "display_name": "Recent Weight Loss",
+    "category": "Metabolic",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PROBLEMS_WITH_SHAPE_OR_SIZE_OF_BREAST",
+    "display_name": "Problems With Shape Or Size Of Breast",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_UNDERWEIGHT",
+    "display_name": "Underweight",
+    "category": "Metabolic",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DIFFICULTY_EATING",
+    "display_name": "Difficulty Eating",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SCANTY_MENSTRUAL_FLOW",
+    "display_name": "Scanty Menstrual Flow",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_VAGINAL_PAIN",
+    "display_name": "Vaginal Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_VAGINAL_REDNESS",
+    "display_name": "Vaginal Redness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_VULVAR_IRRITATION",
+    "display_name": "Vulvar Irritation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_WEAKNESS",
+    "display_name": "Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DECREASED_HEART_RATE",
+    "display_name": "Decreased Heart Rate",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_INCREASED_HEART_RATE",
+    "display_name": "Increased Heart Rate",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BLEEDING_OR_DISCHARGE_FROM_NIPPLE",
+    "display_name": "Bleeding Or Discharge From Nipple",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_RINGING_IN_EAR",
+    "display_name": "Ringing In Ear",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PLUGGED_FEELING_IN_EAR",
+    "display_name": "Plugged Feeling In Ear",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ITCHY_EAR_S",
+    "display_name": "Itchy Ear(s)",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FRONTAL_HEADACHE",
+    "display_name": "Frontal Headache",
+    "category": "Neurological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FLUID_IN_EAR",
+    "display_name": "Fluid In Ear",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NECK_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Neck Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SPOTS_OR_CLOUDS_IN_VISION",
+    "display_name": "Spots Or Clouds In Vision",
+    "category": "Neurological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EYE_REDNESS",
+    "display_name": "Eye Redness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LACRIMATION",
+    "display_name": "Lacrimation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ITCHINESS_OF_EYE",
+    "display_name": "Itchiness Of Eye",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BLINDNESS",
+    "display_name": "Blindness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EYE_BURNS_OR_STINGS",
+    "display_name": "Eye Burns Or Stings",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ITCHY_EYELID",
+    "display_name": "Itchy Eyelid",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FEELING_COLD",
+    "display_name": "Feeling Cold",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DECREASED_APPETITE",
+    "display_name": "Decreased Appetite",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EXCESSIVE_APPETITE",
+    "display_name": "Excessive Appetite",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EXCESSIVE_ANGER",
+    "display_name": "Excessive Anger",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LOSS_OF_SENSATION",
+    "display_name": "Loss Of Sensation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FOCAL_WEAKNESS",
+    "display_name": "Focal Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SLURRING_WORDS",
+    "display_name": "Slurring Words",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SYMPTOMS_OF_THE_FACE",
+    "display_name": "Symptoms Of The Face",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DISTURBANCE_OF_MEMORY",
+    "display_name": "Disturbance Of Memory",
+    "category": "Neurological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PARESTHESIA",
+    "display_name": "Paresthesia",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SIDE_PAIN",
+    "display_name": "Side Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FEVER",
+    "display_name": "Fever",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SHOULDER_PAIN",
+    "display_name": "Shoulder Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SHOULDER_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Shoulder Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SHOULDER_WEAKNESS",
+    "display_name": "Shoulder Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ARM_CRAMPS_OR_SPASMS",
+    "display_name": "Arm Cramps Or Spasms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SHOULDER_SWELLING",
+    "display_name": "Shoulder Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_TONGUE_LESIONS",
+    "display_name": "Tongue Lesions",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LEG_CRAMPS_OR_SPASMS",
+    "display_name": "Leg Cramps Or Spasms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ABNORMAL_APPEARING_TONGUE",
+    "display_name": "Abnormal Appearing Tongue",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ACHE_ALL_OVER",
+    "display_name": "Ache All Over",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LOWER_BODY_PAIN",
+    "display_name": "Lower Body Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PROBLEMS_DURING_PREGNANCY",
+    "display_name": "Problems During Pregnancy",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SPOTTING_OR_BLEEDING_DURING_PREGNANCY",
+    "display_name": "Spotting Or Bleeding During Pregnancy",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_CRAMPS_AND_SPASMS",
+    "display_name": "Cramps And Spasms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_UPPER_ABDOMINAL_PAIN",
+    "display_name": "Upper Abdominal Pain",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_STOMACH_BLOATING",
+    "display_name": "Stomach Bloating",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_CHANGES_IN_STOOL_APPEARANCE",
+    "display_name": "Changes In Stool Appearance",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_UNUSUAL_COLOR_OR_ODOR_TO_URINE",
+    "display_name": "Unusual Color Or Odor To Urine",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_KIDNEY_MASS",
+    "display_name": "Kidney Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SWOLLEN_ABDOMEN",
+    "display_name": "Swollen Abdomen",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SYMPTOMS_OF_PROSTATE",
+    "display_name": "Symptoms Of Prostate",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LEG_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Leg Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DIFFICULTY_BREATHING",
+    "display_name": "Difficulty Breathing",
+    "category": "Respiratory",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_RIB_PAIN",
+    "display_name": "Rib Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_JOINT_PAIN",
+    "display_name": "Joint Pain",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MUSCLE_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Muscle Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PALLOR",
+    "display_name": "Pallor",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HAND_OR_FINGER_LUMP_OR_MASS",
+    "display_name": "Hand Or Finger Lump Or Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_CHILLS",
+    "display_name": "Chills",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_GROIN_PAIN",
+    "display_name": "Groin Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FATIGUE",
+    "display_name": "Fatigue",
+    "category": "Metabolic",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ABDOMINAL_DISTENTION",
+    "display_name": "Abdominal Distention",
+    "category": "Gastrointestinal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_REGURGITATION_1",
+    "display_name": "Regurgitation.1",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SYMPTOMS_OF_THE_KIDNEYS",
+    "display_name": "Symptoms Of The Kidneys",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MELENA",
+    "display_name": "Melena",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FLUSHING",
+    "display_name": "Flushing",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_COUGHING_UP_SPUTUM",
+    "display_name": "Coughing Up Sputum",
+    "category": "Respiratory",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SEIZURES",
+    "display_name": "Seizures",
+    "category": "Neurological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DELUSIONS_OR_HALLUCINATIONS",
+    "display_name": "Delusions Or Hallucinations",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SHOULDER_CRAMPS_OR_SPASMS",
+    "display_name": "Shoulder Cramps Or Spasms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_JOINT_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Joint Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PAIN_OR_SORENESS_OF_BREAST",
+    "display_name": "Pain Or Soreness Of Breast",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EXCESSIVE_URINATION_AT_NIGHT",
+    "display_name": "Excessive Urination At Night",
+    "category": "Metabolic",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BLEEDING_FROM_EYE",
+    "display_name": "Bleeding From Eye",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_RECTAL_BLEEDING",
+    "display_name": "Rectal Bleeding",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_CONSTIPATION",
+    "display_name": "Constipation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_TEMPER_PROBLEMS",
+    "display_name": "Temper Problems",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_CORYZA",
+    "display_name": "Coryza",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_WRIST_WEAKNESS",
+    "display_name": "Wrist Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EYE_STRAIN",
+    "display_name": "Eye Strain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HEMOPTYSIS",
+    "display_name": "Hemoptysis",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LYMPHEDEMA",
+    "display_name": "Lymphedema",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_ON_LEG_OR_FOOT_LOOKS_INFECTED",
+    "display_name": "Skin On Leg Or Foot Looks Infected",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ALLERGIC_REACTION",
+    "display_name": "Allergic Reaction",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_CONGESTION_IN_CHEST",
+    "display_name": "Congestion In Chest",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MUSCLE_SWELLING",
+    "display_name": "Muscle Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PUS_IN_URINE",
+    "display_name": "Pus In Urine",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ABNORMAL_SIZE_OR_SHAPE_OF_EAR",
+    "display_name": "Abnormal Size Or Shape Of Ear",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LOW_BACK_WEAKNESS",
+    "display_name": "Low Back Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SLEEPINESS",
+    "display_name": "Sleepiness",
+    "category": "Psychiatric",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_APNEA",
+    "display_name": "Apnea",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ABNORMAL_BREATHING_SOUNDS",
+    "display_name": "Abnormal Breathing Sounds",
+    "category": "Respiratory",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EXCESSIVE_GROWTH",
+    "display_name": "Excessive Growth",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ELBOW_CRAMPS_OR_SPASMS",
+    "display_name": "Elbow Cramps Or Spasms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FEELING_HOT_AND_COLD",
+    "display_name": "Feeling Hot And Cold",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BLOOD_CLOTS_DURING_MENSTRUAL_PERIODS",
+    "display_name": "Blood Clots During Menstrual Periods",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ABSENCE_OF_MENSTRUATION",
+    "display_name": "Absence Of Menstruation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PULLING_AT_EARS",
+    "display_name": "Pulling At Ears",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_GUM_PAIN",
+    "display_name": "Gum Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_REDNESS_IN_EAR",
+    "display_name": "Redness In Ear",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FLUID_RETENTION",
+    "display_name": "Fluid Retention",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FLU_LIKE_SYNDROME",
+    "display_name": "Flu Like Syndrome",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SINUS_CONGESTION",
+    "display_name": "Sinus Congestion",
+    "category": "Respiratory",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PAINFUL_SINUSES",
+    "display_name": "Painful Sinuses",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FEARS_AND_PHOBIAS",
+    "display_name": "Fears And Phobias",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_RECENT_PREGNANCY",
+    "display_name": "Recent Pregnancy",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_UTERINE_CONTRACTIONS",
+    "display_name": "Uterine Contractions",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BURNING_CHEST_PAIN",
+    "display_name": "Burning Chest Pain",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BACK_CRAMPS_OR_SPASMS",
+    "display_name": "Back Cramps Or Spasms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_STIFFNESS_ALL_OVER",
+    "display_name": "Stiffness All Over",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MUSCLE_CRAMPS_CONTRACTURES_OR_SPASMS",
+    "display_name": "Muscle Cramps, Contractures, Or Spasms",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LOW_BACK_CRAMPS_OR_SPASMS",
+    "display_name": "Low Back Cramps Or Spasms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BACK_MASS_OR_LUMP",
+    "display_name": "Back Mass Or Lump",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NOSEBLEED",
+    "display_name": "Nosebleed",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LONG_MENSTRUAL_PERIODS",
+    "display_name": "Long Menstrual Periods",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HEAVY_MENSTRUAL_FLOW",
+    "display_name": "Heavy Menstrual Flow",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_UNPREDICTABLE_MENSTRUATION",
+    "display_name": "Unpredictable Menstruation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PAINFUL_MENSTRUATION",
+    "display_name": "Painful Menstruation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_INFERTILITY",
+    "display_name": "Infertility",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FREQUENT_MENSTRUATION",
+    "display_name": "Frequent Menstruation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SWEATING",
+    "display_name": "Sweating",
+    "category": "Metabolic",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MASS_ON_EYELID",
+    "display_name": "Mass On Eyelid",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SWOLLEN_EYE",
+    "display_name": "Swollen Eye",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EYELID_SWELLING",
+    "display_name": "Eyelid Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EYELID_LESION_OR_RASH",
+    "display_name": "Eyelid Lesion Or Rash",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_UNWANTED_HAIR",
+    "display_name": "Unwanted Hair",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SYMPTOMS_OF_BLADDER",
+    "display_name": "Symptoms Of Bladder",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_IRREGULAR_APPEARING_NAILS",
+    "display_name": "Irregular Appearing Nails",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ITCHING_OF_SKIN",
+    "display_name": "Itching Of Skin",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HURTS_TO_BREATH",
+    "display_name": "Hurts To Breath",
+    "category": "Respiratory",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NAILBITING",
+    "display_name": "Nailbiting",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_DRYNESS_PEELING_SCALINESS_OR_ROUGHNESS",
+    "display_name": "Skin Dryness, Peeling, Scaliness, Or Roughness",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_ON_ARM_OR_HAND_LOOKS_INFECTED",
+    "display_name": "Skin On Arm Or Hand Looks Infected",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_IRRITATION",
+    "display_name": "Skin Irritation",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ITCHY_SCALP",
+    "display_name": "Itchy Scalp",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HIP_SWELLING",
+    "display_name": "Hip Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_INCONTINENCE_OF_STOOL",
+    "display_name": "Incontinence Of Stool",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FOOT_OR_TOE_CRAMPS_OR_SPASMS",
+    "display_name": "Foot Or Toe Cramps Or Spasms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_WARTS",
+    "display_name": "Warts",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BUMPS_ON_PENIS",
+    "display_name": "Bumps On Penis",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_TOO_LITTLE_HAIR",
+    "display_name": "Too Little Hair",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FOOT_OR_TOE_LUMP_OR_MASS",
+    "display_name": "Foot Or Toe Lump Or Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_RASH",
+    "display_name": "Skin Rash",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MASS_OR_SWELLING_AROUND_THE_ANUS",
+    "display_name": "Mass Or Swelling Around The Anus",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LOW_BACK_SWELLING",
+    "display_name": "Low Back Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ANKLE_SWELLING",
+    "display_name": "Ankle Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HIP_LUMP_OR_MASS",
+    "display_name": "Hip Lump Or Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DRAINAGE_IN_THROAT",
+    "display_name": "Drainage In Throat",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DRY_OR_FLAKY_SCALP",
+    "display_name": "Dry Or Flaky Scalp",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PREMENSTRUAL_TENSION_OR_IRRITABILITY",
+    "display_name": "Premenstrual Tension Or Irritability",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FEELING_HOT",
+    "display_name": "Feeling Hot",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FEET_TURNED_IN",
+    "display_name": "Feet Turned In",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FOOT_OR_TOE_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Foot Or Toe Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PELVIC_PRESSURE",
+    "display_name": "Pelvic Pressure",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ELBOW_SWELLING",
+    "display_name": "Elbow Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ELBOW_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Elbow Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EARLY_OR_LATE_ONSET_OF_MENOPAUSE",
+    "display_name": "Early Or Late Onset Of Menopause",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MASS_ON_EAR",
+    "display_name": "Mass On Ear",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BLEEDING_FROM_EAR",
+    "display_name": "Bleeding From Ear",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HAND_OR_FINGER_WEAKNESS",
+    "display_name": "Hand Or Finger Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LOW_SELF_ESTEEM",
+    "display_name": "Low Self Esteem",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_THROAT_IRRITATION",
+    "display_name": "Throat Irritation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ITCHING_OF_THE_ANUS",
+    "display_name": "Itching Of The Anus",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SWOLLEN_OR_RED_TONSILS",
+    "display_name": "Swollen Or Red Tonsils",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_IRREGULAR_BELLY_BUTTON",
+    "display_name": "Irregular Belly Button",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SWOLLEN_TONGUE",
+    "display_name": "Swollen Tongue",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LIP_SORE",
+    "display_name": "Lip Sore",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_VULVAR_SORE",
+    "display_name": "Vulvar Sore",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HIP_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Hip Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MOUTH_PAIN",
+    "display_name": "Mouth Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ARM_WEAKNESS",
+    "display_name": "Arm Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LEG_LUMP_OR_MASS",
+    "display_name": "Leg Lump Or Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DISTURBANCE_OF_SMELL_OR_TASTE",
+    "display_name": "Disturbance Of Smell Or Taste",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DISCHARGE_IN_STOOLS",
+    "display_name": "Discharge In Stools",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PENIS_PAIN",
+    "display_name": "Penis Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LOSS_OF_SEX_DRIVE",
+    "display_name": "Loss Of Sex Drive",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_OBSESSIONS_AND_COMPULSIONS",
+    "display_name": "Obsessions And Compulsions",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ANTISOCIAL_BEHAVIOR",
+    "display_name": "Antisocial Behavior",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NECK_CRAMPS_OR_SPASMS",
+    "display_name": "Neck Cramps Or Spasms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PUPILS_UNEQUAL",
+    "display_name": "Pupils Unequal",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_POOR_CIRCULATION",
+    "display_name": "Poor Circulation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_THIRST",
+    "display_name": "Thirst",
+    "category": "Metabolic",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SLEEPWALKING",
+    "display_name": "Sleepwalking",
+    "category": "Psychiatric",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_OILINESS",
+    "display_name": "Skin Oiliness",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SNEEZING",
+    "display_name": "Sneezing",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BLADDER_MASS",
+    "display_name": "Bladder Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_KNEE_CRAMPS_OR_SPASMS",
+    "display_name": "Knee Cramps Or Spasms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PREMATURE_EJACULATION",
+    "display_name": "Premature Ejaculation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LEG_WEAKNESS",
+    "display_name": "Leg Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_POSTURE_PROBLEMS",
+    "display_name": "Posture Problems",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BLEEDING_IN_MOUTH",
+    "display_name": "Bleeding In Mouth",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_TONGUE_BLEEDING",
+    "display_name": "Tongue Bleeding",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_CHANGE_IN_SKIN_MOLE_SIZE_OR_COLOR",
+    "display_name": "Change In Skin Mole Size Or Color",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PENIS_REDNESS",
+    "display_name": "Penis Redness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PENILE_DISCHARGE",
+    "display_name": "Penile Discharge",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SHOULDER_LUMP_OR_MASS",
+    "display_name": "Shoulder Lump Or Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_POLYURIA",
+    "display_name": "Polyuria",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_CLOUDY_EYE",
+    "display_name": "Cloudy Eye",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HYSTERICAL_BEHAVIOR",
+    "display_name": "Hysterical Behavior",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ARM_LUMP_OR_MASS",
+    "display_name": "Arm Lump Or Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NIGHTMARES",
+    "display_name": "Nightmares",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BLEEDING_GUMS",
+    "display_name": "Bleeding Gums",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PAIN_IN_GUMS",
+    "display_name": "Pain In Gums",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BEDWETTING",
+    "display_name": "Bedwetting",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_DIAPER_RASH",
+    "display_name": "Diaper Rash",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LUMP_OR_MASS_OF_BREAST",
+    "display_name": "Lump Or Mass Of Breast",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_VAGINAL_BLEEDING_AFTER_MENOPAUSE",
+    "display_name": "Vaginal Bleeding After Menopause",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_INFREQUENT_MENSTRUATION",
+    "display_name": "Infrequent Menstruation",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MASS_ON_VULVA",
+    "display_name": "Mass On Vulva",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_JAW_PAIN",
+    "display_name": "Jaw Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ITCHING_OF_SCROTUM",
+    "display_name": "Itching Of Scrotum",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_POSTPARTUM_PROBLEMS_OF_THE_BREAST",
+    "display_name": "Postpartum Problems Of The Breast",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_EYELID_RETRACTED",
+    "display_name": "Eyelid Retracted",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HESITANCY",
+    "display_name": "Hesitancy",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ELBOW_LUMP_OR_MASS",
+    "display_name": "Elbow Lump Or Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_MUSCLE_WEAKNESS",
+    "display_name": "Muscle Weakness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_THROAT_REDNESS",
+    "display_name": "Throat Redness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_JOINT_SWELLING",
+    "display_name": "Joint Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_TONGUE_PAIN",
+    "display_name": "Tongue Pain",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_REDNESS_IN_OR_AROUND_NOSE",
+    "display_name": "Redness In Or Around Nose",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_WRINKLES_ON_SKIN",
+    "display_name": "Wrinkles On Skin",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_FOOT_OR_TOE_WEAKNESS",
+    "display_name": "Foot Or Toe Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HAND_OR_FINGER_CRAMPS_OR_SPASMS",
+    "display_name": "Hand Or Finger Cramps Or Spasms",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BACK_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Back Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_WRIST_LUMP_OR_MASS",
+    "display_name": "Wrist Lump Or Mass",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_PAIN",
+    "display_name": "Skin Pain",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LOW_BACK_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Low Back Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LOW_URINE_OUTPUT",
+    "display_name": "Low Urine Output",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SKIN_ON_HEAD_OR_NECK_LOOKS_INFECTED",
+    "display_name": "Skin On Head Or Neck Looks Infected",
+    "category": "Dermatological",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_STUTTERING_OR_STAMMERING",
+    "display_name": "Stuttering Or Stammering",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_PROBLEMS_WITH_ORGASM",
+    "display_name": "Problems With Orgasm",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NOSE_DEFORMITY",
+    "display_name": "Nose Deformity",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_LUMP_OVER_JAW",
+    "display_name": "Lump Over Jaw",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_SORE_IN_NOSE",
+    "display_name": "Sore In Nose",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_HIP_WEAKNESS",
+    "display_name": "Hip Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_BACK_SWELLING",
+    "display_name": "Back Swelling",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ANKLE_STIFFNESS_OR_TIGHTNESS",
+    "display_name": "Ankle Stiffness Or Tightness",
+    "category": "Musculoskeletal",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_ANKLE_WEAKNESS",
+    "display_name": "Ankle Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  },
+  {
+    "code": "SYM_NECK_WEAKNESS",
+    "display_name": "Neck Weakness",
+    "category": "General",
+    "synonyms": [],
+    "description": null
+  }
+]

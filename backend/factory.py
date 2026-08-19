@@ -235,6 +235,15 @@ def create_app() -> Flask:
         os.makedirs(upload_dir, exist_ok=True)
     app.config["UPLOAD_FOLDER"] = upload_dir
 
+    # Configure generated-reports (PDF) folder
+    reports_dir = os.path.join(static_dir, "reports")
+    try:
+        os.makedirs(reports_dir, exist_ok=True)
+    except OSError:
+        reports_dir = os.path.join("/tmp", "smarthealth_reports")
+        os.makedirs(reports_dir, exist_ok=True)
+    app.config["REPORTS_FOLDER"] = reports_dir
+
     # Track startup health for /api/health
     app.config["_STARTUP_DB_OK"] = False
     app.config["_STARTUP_ERROR"] = None
