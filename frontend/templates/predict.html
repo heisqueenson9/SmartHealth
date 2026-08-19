@@ -3,19 +3,60 @@
 {% block dashboard_content %}
 <section class="predict-main">
   <div class="container-fluid px-0">
-    <form id="predictionForm" novalidate>
 
-      <!-- Patient Association -->
-      <div class="form-section-header">
-        <span class="form-section-number">00</span>
-        <h3 class="form-section-title">Patient Identification</h3>
+    <!-- 6-Step Clinical Decision Support Stepper Bar -->
+    <div class="workflow-stepper-container mb-4" style="background:rgba(255,255,255,0.01); border:1px solid rgba(197,231,16,0.15); border-radius:var(--radius-md); padding:16px;">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 text-center" id="stepperBar">
+        <div class="step-badge active" id="stepBadge1" onclick="navigateToStep(1)" style="cursor:pointer; flex:1; min-width:120px; padding:10px; border-radius:var(--radius-sm); border:1px solid var(--cyan-primary); background:rgba(197,231,16,0.1); color:var(--cyan-primary);">
+          <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700;">STEP 01</div>
+          <div style="font-size:0.85rem; font-weight:600;">Patient Case</div>
+        </div>
+        <div class="step-badge" id="stepBadge2" onclick="navigateToStep(2)" style="cursor:pointer; flex:1; min-width:120px; padding:10px; border-radius:var(--radius-sm); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary);">
+          <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700;">STEP 02</div>
+          <div style="font-size:0.85rem; font-weight:600;">Symptoms</div>
+        </div>
+        <div class="step-badge" id="stepBadge3" onclick="navigateToStep(3)" style="cursor:pointer; flex:1; min-width:120px; padding:10px; border-radius:var(--radius-sm); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary);">
+          <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700;">STEP 03</div>
+          <div style="font-size:0.85rem; font-weight:600;">Pre-Assessment</div>
+        </div>
+        <div class="step-badge" id="stepBadge4" onclick="navigateToStep(4)" style="cursor:pointer; flex:1; min-width:120px; padding:10px; border-radius:var(--radius-sm); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary);">
+          <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700;">STEP 04</div>
+          <div style="font-size:0.85rem; font-weight:600;">Investigations</div>
+        </div>
+        <div class="step-badge" id="stepBadge5" onclick="navigateToStep(5)" style="cursor:pointer; flex:1; min-width:120px; padding:10px; border-radius:var(--radius-sm); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary);">
+          <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700;">STEP 05</div>
+          <div style="font-size:0.85rem; font-weight:600;">Lab Results</div>
+        </div>
+        <div class="step-badge" id="stepBadge6" onclick="navigateToStep(6)" style="cursor:pointer; flex:1; min-width:120px; padding:10px; border-radius:var(--radius-sm); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary);">
+          <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700;">STEP 06</div>
+          <div style="font-size:0.85rem; font-weight:600;">Prediction &amp; Report</div>
+        </div>
       </div>
-      <div class="row g-3 mb-4 stagger-children">
+    </div>
+
+    <!-- Hidden Inputs for State Management -->
+    <input type="hidden" id="currentCaseId" value="">
+    <input type="hidden" id="currentCaseStatus" value="Draft Case">
+    <input type="hidden" id="selectedModel" value="random_forest">
+
+    <!-- ========================================================================= -->
+    <!-- STEP 1: PATIENT CASE IDENTIFICATION                                       -->
+    <!-- ========================================================================= -->
+    <div class="workflow-step-card" id="stepContainer1">
+      <div class="form-section-header">
+        <span class="form-section-number">01</span>
+        <h3 class="form-section-title">Patient Case Selection</h3>
+      </div>
+      <p style="color:var(--text-secondary); font-size:0.88rem; margin-bottom:20px;">
+        Select an existing patient profile or create a new case reference for this diagnostic workflow session.
+      </p>
+
+      <div class="row g-3 mb-4">
         <div class="col-12 col-md-6">
-          <div class="reveal">
-            <label class="auth-label">Patient Name</label>
+          <div class="auth-form-group">
+            <label class="auth-label">Select Patient Profile *</label>
             <select id="linkPatientSelect" class="auth-input" {% if selected_patient_id %}disabled{% endif %}>
-              <option value="">-- Select a patient to enable diagnosis --</option>
+              <option value="">-- Select Patient Case --</option>
               {% if active_patients %}
                 {% for p in active_patients %}
                   <option value="{{ p.id }}" data-name="{{ p.full_name }}" data-uuid="{{ p.patient_uuid }}" {% if selected_patient_id|string == p.id|string %}selected{% endif %}>
@@ -25,571 +66,348 @@
               {% endif %}
             </select>
             <div class="auth-field-hint mt-2">
-              Select a patient case to link this diagnosis session to their history. {% if selected_patient_id %}(Locked to current context){% endif %}
+              Select a patient from your connected medical records.
             </div>
           </div>
         </div>
         <div class="col-12 col-md-6">
-          <div class="reveal">
-            <label class="auth-label">Patient ID</label>
-            <input type="text" id="patientReferenceInput" class="auth-input" placeholder="Generating unique Patient ID..." readonly>
+          <div class="auth-form-group">
+            <label class="auth-label">Case Reference ID</label>
+            <input type="text" id="patientReferenceInput" class="auth-input" placeholder="Auto-generated Case ID..." readonly>
             <div class="auth-field-hint mt-2" id="referencePreview">
-              Preview: PAT-...
+              Preview: SHS-GEN-...
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Hidden Classifier selection locked to random_forest -->
-      <input type="hidden" name="model" id="selectedModel" value="random_forest">
-
-      <!-- 01 — Disease Selection Category -->
-      <div class="form-section-header">
-        <span class="form-section-number">01</span>
-        <h3 class="form-section-title">Select Disease Prediction Category</h3>
+      <div class="d-flex justify-content-end mt-4">
+        <button type="button" class="submit-btn" id="btnStep1Next" onclick="proceedToStep2()" style="max-width:280px;">
+          Save &amp; Continue to Symptoms &rarr;
+        </button>
       </div>
-      <div class="auth-form-group mb-4 reveal">
-        <select id="diseaseCategorySelect" class="auth-input" style="font-size:1.1rem; font-weight:600; border-color:var(--cyan-primary);">
-          <option value="all">-- Show All Biomarker Fields (Full Panel) --</option>
-          <option value="diabetes">Diabetes Prediction</option>
-          <option value="cardiovascular">Cardiovascular Disease Prediction</option>
-          <option value="anemia">Anemia Prediction</option>
-          <option value="typhoid">Typhoid Prediction</option>
-        </select>
-        <div class="auth-field-hint mt-2">
-          Selecting a category dynamically customizes the form to show only the required clinical biomarker inputs.
-        </div>
-      </div>
+    </div>
 
-      <div class="normalization-notice reveal">
-        <span><i class="fa-solid fa-circle-info"></i></span>
-        <div>
-          Enter values as <strong>normalised biomarker scores (0.00–1.00)</strong>, where 0.00 represents the
-          clinical minimum and 1.00 the clinical maximum for each marker. Clinical reference ranges are shown
-          below each field for guidance.
-        </div>
-      </div>
 
-      <!-- 02 — Biomarkers -->
+    <!-- ========================================================================= -->
+    <!-- STEP 2: SYMPTOM CAPTURE                                                  -->
+    <!-- ========================================================================= -->
+    <div class="workflow-step-card" id="stepContainer2" style="display:none;">
       <div class="form-section-header">
         <span class="form-section-number">02</span>
-        <h3 class="form-section-title">Clinical Biomarkers</h3>
+        <h3 class="form-section-title">Presenting Symptoms Capture</h3>
       </div>
-
-      <!-- Metabolic Indices -->
-      <div class="biomarker-group-title reveal">Metabolic Indices</div>
-      <div class="row g-3 mb-4 stagger-children">
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Fasting Glucose</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">mg/dL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-Glucose"
-                   data-feature="Glucose" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal fasting: 70–100 mg/dL · Normal ≈ 0.05–0.14</div>
-            <div class="field-error-msg" id="err-Glucose">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Insulin</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">µIU/mL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-Insulin"
-                   data-feature="Insulin" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Fasting normal: 2–25 µIU/mL · Normal ≈ 0.05–0.20</div>
-            <div class="field-error-msg" id="err-Insulin">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">BMI</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">kg/m² · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-BMI"
-                   data-feature="BMI" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Healthy: 18.5–24.9 kg/m² · Normal ≈ 0.14–0.25</div>
-            <div class="field-error-msg" id="err-BMI">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">HbA1c</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">% · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-HbA1c"
-                   data-feature="HbA1c" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: &lt;5.7% · Pre-diabetic: 5.7–6.4%</div>
-            <div class="field-error-msg" id="err-HbA1c">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-      </div><!-- /Metabolic -->
-
-      <!-- Cardiovascular Metrics -->
-      <div class="biomarker-group-title reveal">Cardiovascular Metrics</div>
-      <div class="row g-3 mb-4 stagger-children">
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Total Cholesterol</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">mg/dL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-Cholesterol"
-                   data-feature="Cholesterol" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Desirable: &lt;200 mg/dL · Borderline: 200–239</div>
-            <div class="field-error-msg" id="err-Cholesterol">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">LDL Cholesterol</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">mg/dL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-LDL"
-                   data-feature="LDL Cholesterol" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Optimal: &lt;100 mg/dL · High: &gt;160 mg/dL</div>
-            <div class="field-error-msg" id="err-LDL">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">HDL Cholesterol</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">mg/dL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-HDL"
-                   data-feature="HDL Cholesterol" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Low risk: &gt;60 mg/dL · Low: &lt;40 mg/dL (M)</div>
-            <div class="field-error-msg" id="err-HDL">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Triglycerides</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">mg/dL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-Triglycerides"
-                   data-feature="Triglycerides" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: &lt;150 mg/dL · High: 200–499 mg/dL</div>
-            <div class="field-error-msg" id="err-Triglycerides">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Systolic BP</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">mmHg · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-SBP"
-                   data-feature="Systolic Blood Pressure" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: &lt;120 mmHg · Stage 2 HTN: ≥140 mmHg</div>
-            <div class="field-error-msg" id="err-SBP">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Diastolic BP</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">mmHg · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-DBP"
-                   data-feature="Diastolic Blood Pressure" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: &lt;80 mmHg · Stage 2 HTN: ≥90 mmHg</div>
-            <div class="field-error-msg" id="err-DBP">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Heart Rate</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">bpm · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-HR"
-                   data-feature="Heart Rate" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal resting: 60–100 bpm</div>
-            <div class="field-error-msg" id="err-HR">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Troponin</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">ng/mL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-Troponin"
-                   data-feature="Troponin" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: &lt;0.04 ng/mL · Elevated suggests MI</div>
-            <div class="field-error-msg" id="err-Troponin">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-      </div><!-- /Cardiovascular -->
-
-      <!-- Hematology -->
-      <div class="biomarker-group-title reveal">Hematology</div>
-      <div class="row g-3 mb-4 stagger-children">
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Haemoglobin</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">g/dL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-Hemoglobin"
-                   data-feature="Hemoglobin" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: 12.0–17.5 g/dL · Anaemia: &lt;12 (F), &lt;13.5 (M)</div>
-            <div class="field-error-msg" id="err-Hemoglobin">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Platelets</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">×10³/µL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-Platelets"
-                   data-feature="Platelets" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: 150–400 ×10³/µL · Thrombocytopenia: &lt;150</div>
-            <div class="field-error-msg" id="err-Platelets">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">White Blood Cells</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">×10³/µL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-WBC"
-                   data-feature="White Blood Cells" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: 4.5–11.0 ×10³/µL</div>
-            <div class="field-error-msg" id="err-WBC">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Red Blood Cells</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">×10⁶/µL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-RBC"
-                   data-feature="Red Blood Cells" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: 4.1–5.9 ×10⁶/µL</div>
-            <div class="field-error-msg" id="err-RBC">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Haematocrit</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">% · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-Hematocrit"
-                   data-feature="Hematocrit" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: 35.5–48.6%</div>
-            <div class="field-error-msg" id="err-Hematocrit">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">MCV</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">fL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-MCV"
-                   data-feature="Mean Corpuscular Volume" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: 80–100 fL · Low MCV suggests iron deficiency</div>
-            <div class="field-error-msg" id="err-MCV">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">MCH</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">pg · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-MCH"
-                   data-feature="Mean Corpuscular Hemoglobin" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: 27–33 pg</div>
-            <div class="field-error-msg" id="err-MCH">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">MCHC</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">g/dL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-MCHC"
-                   data-feature="Mean Corpuscular Hemoglobin Concentration" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: 32–36 g/dL</div>
-            <div class="field-error-msg" id="err-MCHC">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-      </div><!-- /Hematology -->
-
-      <!-- Liver & Kidney -->
-      <div class="biomarker-group-title reveal">Liver &amp; Kidney Function</div>
-      <div class="row g-3 mb-4 stagger-children">
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">ALT</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">U/L · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-ALT"
-                   data-feature="ALT" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: 7–56 U/L</div>
-            <div class="field-error-msg" id="err-ALT">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">AST</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">U/L · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-AST"
-                   data-feature="AST" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: 10–40 U/L</div>
-            <div class="field-error-msg" id="err-AST">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Creatinine</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">mg/dL · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-Creatinine"
-                   data-feature="Creatinine" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: 0.5–1.2 mg/dL</div>
-            <div class="field-error-msg" id="err-Creatinine">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">CRP</span>
-              <span class="input-range-hint">0.0–1.0</span>
-            </label>
-            <div class="input-unit-badge">mg/L · normalised score</div>
-            <input type="number" step="0.01" class="biomarker-input" id="f-CRP"
-                   data-feature="C-reactive Protein" value="0.5" min="0" max="1" required>
-            <div class="clinical-ref-range">Normal: &lt;10 mg/L · High risk: &gt;3.0 mg/L (cardiac)</div>
-            <div class="field-error-msg" id="err-CRP">Enter a value between 0.0 and 1.0</div>
-          </div>
-        </div>
-
-      </div><!-- /Liver & Kidney -->
-
-      <!-- Typhoid Specific Titers -->
-      <div class="biomarker-group-title reveal typhoid-only-group" style="display:none;">Typhoid Specific Titers</div>
-      <div class="row g-3 mb-4 stagger-children typhoid-only-group" style="display:none;">
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Widal O Titer</span>
-              <span class="input-range-hint">0.0–1.0 (or raw titer)</span>
-            </label>
-            <div class="input-unit-badge">score · normalised</div>
-            <input type="number" step="any" class="biomarker-input" id="f-WidalO"
-                   data-feature="Widal O Titer" value="0.5" min="0" required>
-            <div class="clinical-ref-range">Normal: &lt;0.5 (or &lt;80) · Elevated: &gt;0.55 (or &gt;=80)</div>
-            <div class="field-error-msg" id="err-WidalO">Enter a valid positive score or raw titer (e.g. 80, 160)</div>
-          </div>
-        </div>
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="reveal">
-            <label class="input-label">
-              <span class="bm-clinical-name">Widal H Titer</span>
-              <span class="input-range-hint">0.0–1.0 (or raw titer)</span>
-            </label>
-            <div class="input-unit-badge">score · normalised</div>
-            <input type="number" step="any" class="biomarker-input" id="f-WidalH"
-                   data-feature="Widal H Titer" value="0.5" min="0" required>
-            <div class="clinical-ref-range">Normal: &lt;0.5 (or &lt;160) · Elevated: &gt;0.55 (or &gt;=160)</div>
-            <div class="field-error-msg" id="err-WidalH">Enter a valid positive score or raw titer (e.g. 80, 160)</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Typhoid Clinical Symptoms Checklist (Only visible for Typhoid Prediction) -->
-      <div class="biomarker-group-title reveal typhoid-only-group" style="display:none; margin-top:20px;">Clinical Symptoms (Typhoid Only)</div>
-      <div class="row g-3 mb-4 stagger-children typhoid-only-group" style="display:none;">
-        <div class="col-12">
-          <p class="auth-field-hint" style="margin-top:-10px; margin-bottom:15px;">
-            Select all active clinical symptoms reported by the patient:
-          </p>
-          <div class="d-flex flex-wrap gap-4 p-3" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:var(--radius-md);">
-            <label class="d-flex align-items-center gap-2" style="font-size:0.9rem; cursor:pointer; color:var(--text-primary);">
-              <input type="checkbox" id="symp-fever" class="typhoid-symptom-input" value="fever" style="accent-color:var(--cyan-primary); width:16px; height:16px;"> Prolonged High Fever (≥39°C / 102°F)
-            </label>
-            <label class="d-flex align-items-center gap-2" style="font-size:0.9rem; cursor:pointer; color:var(--text-primary);">
-              <input type="checkbox" id="symp-pain" class="typhoid-symptom-input" value="abdominal_pain" style="accent-color:var(--cyan-primary); width:16px; height:16px;"> Abdominal Pain / Cramps
-            </label>
-            <label class="d-flex align-items-center gap-2" style="font-size:0.9rem; cursor:pointer; color:var(--text-primary);">
-              <input type="checkbox" id="symp-headache" class="typhoid-symptom-input" value="headache" style="accent-color:var(--cyan-primary); width:16px; height:16px;"> Severe Headache
-            </label>
-            <label class="d-flex align-items-center gap-2" style="font-size:0.9rem; cursor:pointer; color:var(--text-primary);">
-              <input type="checkbox" id="symp-diarrhea" class="typhoid-symptom-input" value="diarrhea_constipation" style="accent-color:var(--cyan-primary); width:16px; height:16px;"> Diarrhea or Constipation
-            </label>
-            <label class="d-flex align-items-center gap-2" style="font-size:0.9rem; cursor:pointer; color:var(--text-primary);">
-              <input type="checkbox" id="symp-fatigue" class="typhoid-symptom-input" value="fatigue" style="accent-color:var(--cyan-primary); width:16px; height:16px;"> Severe Fatigue & Weakness
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- 03 — Additional Biomarkers Search -->
-      <div class="additional-biomarkers-section mb-5 reveal" id="additionalBiomarkersSection" style="display:none;">
-        <div class="form-section-header">
-          <span class="form-section-number">03</span>
-          <h3 class="form-section-title">Add Additional Biomarkers</h3>
-        </div>
-        <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:15px;">
-          Search and add any remaining laboratory biomarkers from the panel that are not shown by default for the selected category.
-        </p>
-        <div class="auth-form-group position-relative" style="max-width:500px; margin:0 auto 20px auto;">
-          <label class="auth-label">Search Biomarkers</label>
-          <input type="text" id="biomarkerSearchInput" class="auth-input" placeholder="Type biomarker name (e.g. Insulin, Troponin)..." autocomplete="off">
-          <ul id="biomarkerSuggestionsList" class="dropdown-menu w-100" style="display:none; position:absolute; max-height:220px; overflow-y:auto; z-index:1050; background:var(--bg-surface, #1e1e1e); border:1px solid var(--bg-border, #333); color:var(--text-primary, #fff); list-style:none; padding:0; margin:4px 0 0 0; border-radius: var(--radius-sm);">
-          </ul>
-        </div>
-      </div>
-
-
-      <div class="submit-btn-wrap d-flex gap-3 justify-content-center flex-wrap">
-        <button type="submit" class="submit-btn" id="submitBtn" disabled style="flex: 1; max-width: 320px;">
-          <span class="btn-spinner"></span>
-          <span class="btn-text">Run Clinical Diagnosis Engine</span>
-        </button>
-        <button type="button" class="btn-outline" id="clearFormBtn" style="padding: 12px 24px; border-radius: var(--radius-sm); border: 1px solid var(--red-critical); color: var(--red-critical); background: transparent;">
-          <i class="fa-solid fa-eraser"></i> Clear Form
-        </button>
-      </div>
-    </form>
-
-    <!-- Result Panel -->
-    <div class="result-panel" id="resultsPanel" style="display:none;">
-
-      <!-- Diagnosis + Confidence (A3/B1) -->
-      <div class="result-header">
-        <div>
-          <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Predicted Diagnosis</div>
-          <div class="result-diagnosis" id="diagnosisName">—</div>
-        </div>
-        <div style="text-align:right;">
-          <div class="confidence-value-large" id="confidenceLarge">—</div>
-          <div class="confidence-label-small">Confidence Score</div>
-          <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);margin-top:3px;" id="modelUsedLabel"></div>
-        </div>
-      </div>
-
-      <div class="confidence-bar">
-        <div class="confidence-fill" id="confidenceBar"></div>
-      </div>
-
-      <p class="result-description" id="diagnosisDescription"
-         style="color:var(--text-secondary);margin-bottom:20px;line-height:1.6;font-size:0.9rem;">
-        Clinical analysis will appear here.
+      <p style="color:var(--text-secondary); font-size:0.88rem; margin-bottom:20px;">
+        Search and select presenting clinical symptoms, or enter custom doctor notes/symptoms directly.
       </p>
 
-      <!-- Why This Prediction Was Made (Clinical Explanations) -->
-      <div id="explanationSection" style="margin-top:15px; margin-bottom:20px; display:none;">
-        <h4 style="font-family:var(--font-mono); font-size:0.75rem; color:var(--cyan-primary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;">Why This Prediction Was Made</h4>
-        <ul id="clinicalExplanations" style="color:var(--text-secondary); font-size:0.88rem; padding-left:20px; line-height:1.75; margin-bottom:0;"></ul>
-      </div>
-
-      <!-- Feature Importance Chart (A4/C1) -->
-      <div class="feature-importance-section" id="featureImportanceSection" style="display:none;">
-        <div class="fi-title">Top Predictive Biomarkers — Feature Importance</div>
-        <div id="fiChartContainer"></div>
-      </div>
-
-      <!-- Probability Table -->
-      <div class="form-section-header" style="margin-top:24px;">
-        <h3 class="form-section-title" style="font-size:0.8rem;">Weighted Class Probabilities</h3>
-      </div>
-      <table class="prob-table" id="probTable"></table>
-
-      <!-- Clinical Advice -->
-      <div class="form-section-header" style="margin-top:28px;">
-        <h3 class="form-section-title" style="font-size:0.8rem;">Clinical Recommendations</h3>
-      </div>
-      <ul id="clinicalAdvice" style="color:var(--text-secondary);font-size:0.85rem;padding-left:20px;line-height:1.8;"></ul>
-
-      <!-- Disclaimer (B3) -->
-      <div class="result-disclaimer">
-        <div class="result-disclaimer-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <div>
-          <strong>Research Prototype — Not for Clinical Use</strong>
-          This output is generated by an academic machine learning prototype developed for a final-year
-          Computer Science dissertation at the University of Ghana. It must not be used as the basis for
-          any clinical decision, diagnosis, or treatment without evaluation by a qualified healthcare
-          professional. Always consult a licensed medical practitioner for formal medical advice.
+      <!-- Searchable Multi-Select Input -->
+      <div class="auth-form-group position-relative mb-3">
+        <label class="auth-label"><i class="fa-solid fa-magnifying-glass" style="color:var(--cyan-primary); margin-right:6px;"></i> Search Symptom Catalog</label>
+        <input type="text" id="symptomSearchInput" class="auth-input" placeholder="Type symptom name (e.g., Fatigue, High Fever, Chest Pain, Dizziness)..." autocomplete="off">
+        <div id="symptomDropdownMenu" class="dropdown-menu w-100" style="display:none; position:absolute; max-height:240px; overflow-y:auto; z-index:1050; background:var(--bg-surface); border:1px solid var(--bg-border); color:var(--text-primary); padding:0; margin-top:4px; border-radius:var(--radius-sm);">
         </div>
       </div>
 
-      <!-- Review Diagnosis Draft Button -->
-      <button class="print-result-btn" id="reviewDraftBtn" style="background:var(--cyan-primary); color:#111; display:flex; justify-content:center; align-items:center; gap:8px;">
-        <i class="fa-solid fa-file-signature"></i> Review Diagnosis Draft
-      </button>
+      <!-- Active Symptom Chips -->
+      <div class="mb-4">
+        <label class="auth-label">Recorded Symptoms (<span id="symptomCountBadge">0</span>)</label>
+        <div id="symptomChipsContainer" class="d-flex flex-wrap gap-2 p-3" style="min-height:60px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-md);">
+          <span class="text-muted" id="noSymptomsPlaceholder" style="font-size:0.85rem; italic;">No symptoms added yet. Use the search bar above or custom entry below.</span>
+        </div>
+      </div>
 
-    </div><!-- /result-panel -->
+      <!-- Custom Free-Text Symptom Entry -->
+      <div class="portal-card mb-4" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.05);">
+        <h5 style="color:var(--text-primary); font-size:0.9rem; margin-bottom:12px;"><i class="fa-solid fa-pen-to-square" style="color:var(--cyan-primary); margin-right:6px;"></i> Add Custom / Typed Symptom</h5>
+        <div class="row g-2">
+          <div class="col-12 col-md-5">
+            <input type="text" id="customSymptomText" class="auth-input" placeholder="Enter symptom description (e.g. Sharp calf cramping on exertion)...">
+          </div>
+          <div class="col-6 col-md-2">
+            <select id="customSymptomSeverity" class="auth-input">
+              <option value="Mild">Mild</option>
+              <option value="Moderate" selected>Moderate</option>
+              <option value="Severe">Severe</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3 d-flex gap-1">
+            <input type="number" id="customSymptomDurationVal" class="auth-input" placeholder="Duration" min="1" value="3" style="width:70px;">
+            <select id="customSymptomDurationUnit" class="auth-input">
+              <option value="days" selected>days</option>
+              <option value="weeks">weeks</option>
+              <option value="months">months</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-2">
+            <button type="button" class="btn-outline w-100" onclick="addCustomSymptom()" style="height:100%; border-color:var(--cyan-primary); color:var(--cyan-primary);">
+              <i class="fa-solid fa-plus"></i> Add
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn-outline" onclick="navigateToStep(1)">&larr; Back</button>
+        <button type="button" class="submit-btn" id="btnStep2Next" onclick="proceedToStep3()" style="max-width:300px;">
+          Run Preliminary Assessment &rarr;
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- STEP 3: PRELIMINARY ASSESSMENT SCREEN                                     -->
+    <!-- ========================================================================= -->
+    <div class="workflow-step-card" id="stepContainer3" style="display:none;">
+      <div class="form-section-header">
+        <span class="form-section-number">03</span>
+        <h3 class="form-section-title">Preliminary Assessment — Clinical Considerations</h3>
+      </div>
+      
+      <!-- Explicit Preliminary Disclaimer -->
+      <div class="result-disclaimer mb-4" style="background:rgba(244,223,107,0.08); border-color:rgba(244,223,107,0.3);">
+        <div class="result-disclaimer-icon" style="color:var(--amber-warn);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div>
+          <strong style="color:var(--amber-warn);">Preliminary Clinical Consideration Notice</strong><br>
+          The candidates listed below represent potential differential considerations based on reported presenting symptoms. This is a preliminary assessment and <strong>is not a confirmed diagnosis</strong>.
+        </div>
+      </div>
+
+      <div id="preliminaryCandidatesContainer" class="row g-3 mb-4">
+        <div class="col-12 text-center p-4">
+          <span class="btn-spinner" style="display:inline-block; width:24px; height:24px;"></span>
+          <p class="text-muted mt-2">Evaluating symptom presentation and clinical rules...</p>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn-outline" onclick="navigateToStep(2)">&larr; Back to Symptoms</button>
+        <button type="button" class="submit-btn" id="btnStep3Next" onclick="proceedToStep4()" style="max-width:320px;">
+          View Recommended Investigations &rarr;
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- STEP 4: INVESTIGATION RECOMMENDATION & SELECTION                         -->
+    <!-- ========================================================================= -->
+    <div class="workflow-step-card" id="stepContainer4" style="display:none;">
+      <div class="form-section-header">
+        <span class="form-section-number">04</span>
+        <h3 class="form-section-title">Recommended Clinical Investigations</h3>
+      </div>
+      <p style="color:var(--text-secondary); font-size:0.88rem; margin-bottom:20px;">
+        The system recommends targeted diagnostic tests based on preliminary considerations. Select the investigations to perform.
+      </p>
+
+      <div id="investigationsListContainer" class="row g-3 mb-4">
+        <div class="col-12 text-center p-4">
+          <span class="btn-spinner" style="display:inline-block; width:24px; height:24px;"></span>
+          <p class="text-muted mt-2">Loading recommended investigation panels...</p>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn-outline" onclick="navigateToStep(3)">&larr; Back to Assessment</button>
+        <button type="button" class="submit-btn" id="btnStep4Next" onclick="proceedToStep5()" style="max-width:320px;">
+          Proceed to Lab Results Entry &rarr;
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- STEP 5: LAB RESULTS ENTRY & BIOMARKER REFLOW                              -->
+    <!-- ========================================================================= -->
+    <div class="workflow-step-card" id="stepContainer5" style="display:none;">
+      <div class="form-section-header">
+        <span class="form-section-number">05</span>
+        <h3 class="form-section-title">Laboratory Results &amp; Biomarker Entry</h3>
+      </div>
+      <p style="color:var(--text-secondary); font-size:0.88rem; margin-bottom:20px;">
+        Enter normalized biomarker test results (0.00–1.00 score) for the selected investigations.
+      </p>
+
+      <div class="normalization-notice mb-4">
+        <span><i class="fa-solid fa-circle-info"></i></span>
+        <div>
+          Enter clinical test values as <strong>normalised biomarker scores (0.00–1.00)</strong> matching standard reference ranges.
+        </div>
+      </div>
+
+      <!-- Reflowed Biomarker Groups Container -->
+      <div id="dynamicBiomarkerGroupsContainer">
+        <!-- Will be populated dynamically by JS based on selected investigations -->
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn-outline" onclick="navigateToStep(4)">&larr; Back to Investigations</button>
+        <button type="button" class="submit-btn" id="btnStep5Next" onclick="proceedToStep6()" style="max-width:340px;">
+          Run Biomarker Model Prediction &rarr;
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- STEP 6: PREDICTED DIAGNOSIS, AI SUMMARY & REPORT BUILDER                   -->
+    <!-- ========================================================================= -->
+    <div class="workflow-step-card" id="stepContainer6" style="display:none;">
+      <div class="form-section-header">
+        <span class="form-section-number">06</span>
+        <h3 class="form-section-title">Predicted Diagnosis &amp; Clinical Report Builder</h3>
+      </div>
+
+      <!-- ML Prediction Verdict Panel -->
+      <div class="result-panel mb-4" id="resultsPanel" style="display:block;">
+        <div class="result-header">
+          <div>
+            <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">
+              ML Verdict
+            </div>
+            <!-- Standardized ML Output Label: Predicted Diagnosis -->
+            <div class="result-diagnosis" id="diagnosisName" style="color:var(--cyan-primary);">Predicted Diagnosis</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="confidence-value-large" id="confidenceLarge">—</div>
+            <div class="confidence-label-small">Confidence Score</div>
+            <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);margin-top:3px;" id="modelUsedLabel"></div>
+          </div>
+        </div>
+
+        <div class="confidence-bar mb-3">
+          <div class="confidence-fill" id="confidenceBar" style="width:0%;"></div>
+        </div>
+
+        <p class="result-description" id="diagnosisDescription" style="color:var(--text-secondary); margin-bottom:20px; font-size:0.9rem;">
+          Evaluating biomarker features...
+        </p>
+
+        <!-- Preview Classifier Models -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <label class="auth-label mb-0" style="font-size:0.8rem;">Classifier Model:</label>
+          <select id="previewModelSelect" class="auth-input" style="width:auto; padding:4px 10px; font-size:0.85rem;" onchange="switchClassifierModel(this.value)">
+            <option value="random_forest" selected>Random Forest (Default)</option>
+            <option value="decision_tree">Decision Tree</option>
+            <option value="svm">Support Vector Machine (SVM)</option>
+            <option value="logistic_regression">Logistic Regression</option>
+          </select>
+        </div>
+
+        <!-- Weighted Probabilities -->
+        <div class="form-section-header" style="margin-top:16px;">
+          <h3 class="form-section-title" style="font-size:0.8rem;">Class Probability Breakdown</h3>
+        </div>
+        <table class="prob-table" id="probTable"></table>
+      </div>
+
+      <!-- Expanded AI Clinical Summary Card -->
+      <div class="portal-card mb-4" style="background:rgba(197, 231, 16, 0.02); border:1px solid rgba(197, 231, 16, 0.2);">
+        <div class="portal-section-title d-flex justify-content-between align-items-center">
+          <span style="color:var(--cyan-primary);"><i class="fa-solid fa-brain"></i> Whole-Case AI Clinical Summary</span>
+          <button class="btn-outline btn-sm" style="border-color:var(--cyan-primary); color:var(--cyan-primary);" onclick="refreshAISummary()">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh Summary
+          </button>
+        </div>
+        <p style="color:var(--text-secondary); font-size:0.82rem; margin-bottom:12px;">
+          Synthesizes presenting symptoms, pre-assessment findings, ordered investigations, lab results, and ML predicted diagnosis.
+        </p>
+        <div class="auth-form-group">
+          <textarea id="caseAISummaryText" class="auth-input" rows="6" placeholder="AI clinical summary will generate here..."></textarea>
+        </div>
+      </div>
+
+      <!-- Doctor Notes & Signature -->
+      <div class="portal-card mb-4" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.05);">
+        <div class="portal-section-title"><i class="fa-solid fa-signature"></i> Doctor Clinical Remarks &amp; Signature</div>
+        <div class="row g-3 mt-1">
+          <div class="col-12 col-md-6">
+            <div class="auth-form-group">
+              <label class="auth-label">Clinical Remarks &amp; Observations</label>
+              <textarea id="doctorClinicalNotes" class="auth-input" rows="3" placeholder="Enter clinical observations, patient counseling, or follow-up plans..."></textarea>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="auth-form-group">
+              <label class="auth-label">Doctor Signature / Identification</label>
+              <input type="text" id="doctorSignatureInput" class="auth-input" value="Dr. {{ session.get('full_name', 'Physician') }}" placeholder="Dr. Full Name, MD">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom PDF Report Builder Section Toggles -->
+      <div class="portal-card mb-4" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.05);">
+        <div class="portal-section-title"><i class="fa-solid fa-sliders"></i> PDF Report Builder Section Selection</div>
+        <p style="color:var(--text-secondary); font-size:0.82rem; margin-bottom:15px;">
+          Select which clinical sections to include in the generated patient PDF report:
+        </p>
+        <div class="row g-2 text-start" id="reportSectionsCheckboxes">
+          <div class="col-12 col-sm-6 col-md-4">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
+              <input type="checkbox" class="report-sec-cb" value="Patient Details" checked> Patient Information
+            </label>
+          </div>
+          <div class="col-12 col-sm-6 col-md-4">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
+              <input type="checkbox" class="report-sec-cb" value="Presenting Symptoms" checked> Presenting Symptoms
+            </label>
+          </div>
+          <div class="col-12 col-sm-6 col-md-4">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
+              <input type="checkbox" class="report-sec-cb" value="Preliminary Assessment" checked> Preliminary Assessment
+            </label>
+          </div>
+          <div class="col-12 col-sm-6 col-md-4">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
+              <input type="checkbox" class="report-sec-cb" value="Recommended Investigations" checked> Recommended Tests
+            </label>
+          </div>
+          <div class="col-12 col-sm-6 col-md-4">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
+              <input type="checkbox" class="report-sec-cb" value="Investigations Performed" checked> Performed Tests
+            </label>
+          </div>
+          <div class="col-12 col-sm-6 col-md-4">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
+              <input type="checkbox" class="report-sec-cb" value="Results/Biomarkers" checked> Lab Results / Biomarkers
+            </label>
+          </div>
+          <div class="col-12 col-sm-6 col-md-4">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
+              <input type="checkbox" class="report-sec-cb" value="Predicted Diagnosis" checked> Predicted Diagnosis
+            </label>
+          </div>
+          <div class="col-12 col-sm-6 col-md-4">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
+              <input type="checkbox" class="report-sec-cb" value="AI Clinical Summary" checked> AI Whole-Case Summary
+            </label>
+          </div>
+          <div class="col-12 col-sm-6 col-md-4">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
+              <input type="checkbox" class="report-sec-cb" value="Doctor Notes" checked> Doctor's Remarks
+            </label>
+          </div>
+          <div class="col-12 col-sm-6 col-md-4">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
+              <input type="checkbox" class="report-sec-cb" value="Doctor Identity/Signature" checked> Doctor Signature
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4">
+        <button type="button" class="btn-outline" onclick="navigateToStep(5)">&larr; Back to Lab Results</button>
+        <div class="d-flex gap-2">
+          <button type="button" class="submit-btn" onclick="finalizeAndBuildReport()" style="max-width:280px; background:var(--cyan-primary); color:#111;">
+            <i class="fa-solid fa-file-export"></i> Generate &amp; Save Report
+          </button>
+        </div>
+      </div>
+    </div>
 
   </div>
 </section>

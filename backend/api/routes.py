@@ -2112,20 +2112,13 @@ def generate_case_ai_summary(case_id):
     prediction_narrative = f"Algorithmic ML prediction yields a Predicted Diagnosis of {pred_label} with {confidence:.1f}% confidence."
     
     summary_text = (
-        f"CLINICAL WORKFLOW SUMMARY:
-"
-        f"1. Presentation: {symptoms_narrative}
-"
-        f"2. Pre-Assessment: {assessment_narrative}
-"
-        f"3. Investigations: {results_narrative}
-"
-        f"4. ML Inference: {prediction_narrative}
-"
-        f"5. Doctor Remarks: {doc_notes if doc_notes else 'No additional clinical remarks.'}
-
-"
-        f"Disclaimer: Smart Health Sync provides decision support tools; diagnosis remains the responsibility of the attending physician."
+        "CLINICAL WORKFLOW SUMMARY:\n"
+        f"1. Presentation: {symptoms_narrative}\n"
+        f"2. Pre-Assessment: {assessment_narrative}\n"
+        f"3. Investigations: {results_narrative}\n"
+        f"4. ML Inference: {prediction_narrative}\n"
+        f"5. Doctor Remarks: {doc_notes if doc_notes else 'No additional clinical remarks.'}\n\n"
+        "Disclaimer: Smart Health Sync provides decision support tools; diagnosis remains the responsibility of the attending physician."
     )
 
     ais = AISummary(

@@ -56,14 +56,13 @@ class Config:
     # CORS
     CORS_ORIGINS     = os.environ.get("CORS_ORIGINS", "*")
 
-    # Database — DATABASE_URL is required; no SQLite fallback to prevent silent data loss
-    _db_url = os.environ.get("DATABASE_URL")
-    if not _db_url:
-        raise RuntimeError(
-            "DATABASE_URL is not set. "
-            "Provide a valid PostgreSQL connection string in your environment or .env file."
-        )
-    if _db_url.startswith("postgres://"):
+    # Database — DATABASE_URL is used when provided; SQLite fallback for local development
+    _db_url = os.environ.get("DATABASE_URL", "")
+    if not _db_url or _db_url == "your-database-url":
+        instance_dir = BASE_DIR / "instance"
+        instance_dir.mkdir(exist_ok=True)
+        _db_url = f"sqlite:///{instance_dir / 'smarthealth.db'}"
+    elif _db_url.startswith("postgres://"):
         _db_url = _db_url.replace("postgres://", "postgresql://", 1)
     SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False

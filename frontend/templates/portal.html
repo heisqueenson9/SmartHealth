@@ -107,7 +107,7 @@
   <input type="hidden" id="modalSelectModel" value="random_forest">
 
   <div class="auth-form-group mt-3">
-    <label class="auth-label">Final Diagnosis Label *</label>
+    <label class="auth-label">Predicted Diagnosis Label *</label>
     <input type="text" id="finalDiagnosisLabel" class="auth-input" value="{{ record.prediction_label }}" placeholder="e.g. Type 2 Diabetes Mellitus" required>
   </div>
 
@@ -176,7 +176,7 @@
       </div>
       <div class="col-12 col-sm-6 col-md-4">
         <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
-          <input type="checkbox" id="pdfSec_final_diag" class="pdf-section-toggle" checked> Final Diagnosis
+          <input type="checkbox" id="pdfSec_final_diag" class="pdf-section-toggle" checked> Predicted Diagnosis
         </label>
       </div>
       <div class="col-12 col-sm-6 col-md-4">
@@ -343,7 +343,7 @@
     </div>
 
     <div id="reportSection_final_diag" class="mb-4">
-      <h5 style="color:var(--cyan-primary); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px; font-size:0.95rem; margin-bottom:10px;"><i class="fa-solid fa-signature"></i> Final Diagnosis</h5>
+      <h5 style="color:var(--cyan-primary); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px; font-size:0.95rem; margin-bottom:10px;"><i class="fa-solid fa-signature"></i> Predicted Diagnosis</h5>
       <p style="font-size:1.1rem; font-weight:600; color:var(--text-primary); margin:5px 0 0 0;">{{ record.final_diagnosis or record.prediction_label }}</p>
     </div>
 
@@ -1690,7 +1690,7 @@
       if (selectedSections.includes('final_diag')) {
           html += `
               <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
-                <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:5px; font-weight: bold;">Final Diagnosis</h5>
+                <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:5px; font-weight: bold;">Predicted Diagnosis</h5>
                 <p style="font-size:1.1rem; font-weight:600; color:#111111; margin:0;">${record.final_diagnosis || record.prediction}</p>
               </div>
           `;
