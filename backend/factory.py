@@ -205,7 +205,8 @@ def create_app() -> Flask:
             db.create_all()
             _ensure_diagnostic_schema()
             _ensure_patient_schema()
-            log.info("[SmartHealth] Database tables synchronised.")
+            from backend.database.seed import seed_clinical_catalogs
+            seed_clinical_catalogs()
 
             from backend.database.models import User
             admin = User.query.filter_by(role='admin').first()
