@@ -1678,44 +1678,53 @@ def create_case():
     if role == "doctor" and status != "approved":
         return jsonify({"error": "Approved doctor account required."}), 403
 
-    data = request.get_json(force=True, silent=True) or {}
-    patient_id = data.get("patient_id")
-    patient_reference = str(data.get("patient_reference", "")).strip() or None
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+        patient_id = data.get("patient_id")
+        patient_reference = str(data.get("patient_reference", "")).strip() or None
 
-    patient = None
-    if patient_id is not None:
-        try:
-            patient_id = int(patient_id)
-        except (TypeError, ValueError):
-            return jsonify({"error": "Invalid patient_id."}), 400
-        patient = Patient.query.get(patient_id)
-        if not patient:
-            return jsonify({"error": "Patient profile not found."}), 404
-        if role == "doctor" and patient.doctor_id != user_id and patient.user_id != user_id:
-            return jsonify({"error": "Access denied to this patient profile."}), 403
+        patient = None
+        if patient_id is not None:
+            try:
+                patient_id = int(patient_id)
+            except (TypeError, ValueError):
+                return jsonify({"error": "Invalid patient_id."}), 400
+            patient = Patient.query.get(patient_id)
+            if not patient:
+                return jsonify({"error": "Patient profile not found."}), 404
+            if role == "doctor" and patient.doctor_id != user_id and patient.user_id != user_id:
+                return jsonify({"error": "Access denied to this patient profile."}), 403
 
-    if not patient_reference:
-        import uuid
-        patient_reference = f"SHS-GEN-{uuid.uuid4().hex[:6].upper()}"
+        if not patient_reference:
+            import uuid
+            patient_reference = f"SHS-GEN-{uuid.uuid4().hex[:6].upper()}"
 
-    record = DiagnosticRecord(
-        user_id=user_id,
-        patient_id=patient.id if patient else None,
-        patient_reference=patient_reference,
-        biomarkers_json=json.dumps({}),
-        result_json=json.dumps({}),
-        prediction_label="Pending Assessment",
-        confidence_score=0.0,
-        status="draft",
-        case_status="Draft Case",
-    )
-    db.session.add(record)
-    db.session.commit()
+        record = DiagnosticRecord(
+            user_id=user_id,
+            patient_id=patient.id if patient else None,
+            patient_reference=patient_reference,
+            biomarkers_json=json.dumps({}),
+            result_json=json.dumps({}),
+            prediction_label="Pending Assessment",
+            confidence_score=0.0,
+            status="draft",
+            case_status="Draft Case",
+        )
+        db.session.add(record)
+        db.session.commit()
 
-    return jsonify({
-        "status": "success",
-        "case": record.to_dict()
-    }), 201
+        return jsonify({
+            "status": "success",
+            "case": record.to_dict()
+        }), 201
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in create_case: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
 
 
 @api_bp.route("/cases/<int:case_id>/symptoms", methods=["POST"])
@@ -1723,73 +1732,84 @@ def capture_case_symptoms(case_id):
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
-        
-    data = request.get_json(force=True, silent=True) or {}
-    symptoms_list = data.get("symptoms", [])
-    if not isinstance(symptoms_list, list):
-        return jsonify({"error": "'symptoms' must be a list."}), 400
-        
-    from backend.database.models import PatientCaseSymptom, SymptomCatalog
-    
-    if data.get("replace", False):
-        PatientCaseSymptom.query.filter_by(case_id=case_id).delete()
-        
-    added_symptoms = []
-    catalog_items = SymptomCatalog.query.all()
-    
-    for item in symptoms_list:
-        raw_text = str(item.get("raw_text", "")).strip() or str(item.get("display_name", "")).strip()
-        if not raw_text:
-            continue
+
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+        symptoms_list = data.get("symptoms", [])
+        if not isinstance(symptoms_list, list):
+            return jsonify({"error": "'symptoms' must be a list."}), 400
             
-        display_name = item.get("display_name", raw_text).strip()
-        source = item.get("source", "selected") # selected | typed | other
-        duration_val = item.get("duration_value")
-        duration_unit = item.get("duration_unit", "days")
-        severity = item.get("severity", "Moderate")
-        notes = item.get("notes", "")
+        from backend.database.models import PatientCaseSymptom, SymptomCatalog
         
-        matched_catalog = None
-        standard_symptom_id = item.get("standard_symptom_id")
+        if data.get("replace", False):
+            PatientCaseSymptom.query.filter_by(case_id=case_id).delete()
+            
+        added_symptoms = []
+        catalog_items = SymptomCatalog.query.all()
         
-        if standard_symptom_id:
-            matched_catalog = SymptomCatalog.query.get(standard_symptom_id)
-        else:
-            raw_lower = raw_text.lower()
-            for cat in catalog_items:
-                if cat.display_name.lower() == raw_lower or cat.code.lower() == raw_lower:
-                    matched_catalog = cat
-                    break
-                syns = cat.to_dict().get("synonyms", [])
-                if any(syn.lower() == raw_lower for syn in syns):
-                    matched_catalog = cat
-                    break
-                    
-        pcs = PatientCaseSymptom(
-            case_id=case_id,
-            standard_symptom_id=matched_catalog.id if matched_catalog else None,
-            display_name=matched_catalog.display_name if matched_catalog else display_name,
-            raw_text=raw_text,
-            source=source,
-            duration_value=int(duration_val) if duration_val is not None else None,
-            duration_unit=duration_unit,
-            severity=severity,
-            notes=notes,
-            mapping_confidence=1.0 if matched_catalog else 0.5,
-            created_by=session.get("user_id")
-        )
-        db.session.add(pcs)
-        added_symptoms.append(pcs)
+        for item in symptoms_list:
+            if not isinstance(item, dict):
+                continue
+            raw_text = str(item.get("raw_text", "")).strip() or str(item.get("display_name", "")).strip()
+            if not raw_text:
+                continue
+                
+            display_name = item.get("display_name", raw_text).strip()
+            source = item.get("source", "selected") # selected | typed | other
+            duration_val = item.get("duration_value")
+            duration_unit = item.get("duration_unit", "days")
+            severity = item.get("severity", "Moderate")
+            notes = item.get("notes", "")
+            
+            matched_catalog = None
+            standard_symptom_id = item.get("standard_symptom_id")
+            
+            if standard_symptom_id:
+                matched_catalog = SymptomCatalog.query.get(standard_symptom_id)
+            else:
+                raw_lower = raw_text.lower()
+                for cat in catalog_items:
+                    if cat.display_name.lower() == raw_lower or cat.code.lower() == raw_lower:
+                        matched_catalog = cat
+                        break
+                    syns = cat.to_dict().get("synonyms", [])
+                    if any(syn.lower() == raw_lower for syn in syns):
+                        matched_catalog = cat
+                        break
+                        
+            pcs = PatientCaseSymptom(
+                case_id=case_id,
+                standard_symptom_id=matched_catalog.id if matched_catalog else None,
+                display_name=matched_catalog.display_name if matched_catalog else display_name,
+                raw_text=raw_text,
+                source=source,
+                duration_value=int(duration_val) if duration_val is not None else None,
+                duration_unit=duration_unit,
+                severity=severity,
+                notes=notes,
+                mapping_confidence=1.0 if matched_catalog else 0.5,
+                created_by=session.get("user_id")
+            )
+            db.session.add(pcs)
+            added_symptoms.append(pcs)
+            
+        record.case_status = "Symptoms Captured"
+        db.session.commit()
         
-    record.case_status = "Symptoms Captured"
-    db.session.commit()
-    
-    return jsonify({
-        "status": "success",
-        "message": f"Successfully captured {len(added_symptoms)} symptoms for case.",
-        "case_status": record.case_status,
-        "symptoms": [s.to_dict() for s in PatientCaseSymptom.query.filter_by(case_id=case_id).all()]
-    }), 201
+        return jsonify({
+            "status": "success",
+            "message": f"Successfully captured {len(added_symptoms)} symptoms for case.",
+            "case_status": record.case_status,
+            "symptoms": [s.to_dict() for s in PatientCaseSymptom.query.filter_by(case_id=case_id).all()]
+        }), 201
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in capture_case_symptoms: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
 
 
 @api_bp.route("/cases/<int:case_id>/symptoms/<int:symptom_id>", methods=["PATCH"])
@@ -1797,20 +1817,29 @@ def update_case_symptom(case_id, symptom_id):
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
+
+    try:
+        from backend.database.models import PatientCaseSymptom
+        pcs = PatientCaseSymptom.query.filter_by(id=symptom_id, case_id=case_id).first()
+        if not pcs:
+            return jsonify({"error": "Symptom entry not found."}), 404
+            
+        data = request.get_json(force=True, silent=True) or {}
+        if "duration_value" in data: pcs.duration_value = data["duration_value"]
+        if "duration_unit" in data: pcs.duration_unit = data["duration_unit"]
+        if "severity" in data: pcs.severity = data["severity"]
+        if "notes" in data: pcs.notes = data["notes"]
         
-    from backend.database.models import PatientCaseSymptom
-    pcs = PatientCaseSymptom.query.filter_by(id=symptom_id, case_id=case_id).first()
-    if not pcs:
-        return jsonify({"error": "Symptom entry not found."}), 404
-        
-    data = request.get_json(force=True, silent=True) or {}
-    if "duration_value" in data: pcs.duration_value = data["duration_value"]
-    if "duration_unit" in data: pcs.duration_unit = data["duration_unit"]
-    if "severity" in data: pcs.severity = data["severity"]
-    if "notes" in data: pcs.notes = data["notes"]
-    
-    db.session.commit()
-    return jsonify({"status": "success", "symptom": pcs.to_dict()}), 200
+        db.session.commit()
+        return jsonify({"status": "success", "symptom": pcs.to_dict()}), 200
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in update_case_symptom: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
 
 
 @api_bp.route("/cases/<int:case_id>/pre-assessment", methods=["POST"])
@@ -1818,125 +1847,134 @@ def run_pre_assessment(case_id):
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
+
+    try:
+        from backend.database.models import PatientCaseSymptom, PreliminaryAssessment, AssessmentCandidate
         
-    from backend.database.models import PatientCaseSymptom, PreliminaryAssessment, AssessmentCandidate
-    
-    symptoms = PatientCaseSymptom.query.filter_by(case_id=case_id).all()
-    symptom_names = [s.display_name.lower() for s in symptoms]
-    symptom_texts = [s.raw_text.lower() for s in symptoms]
-    all_sym_strings = set(symptom_names + symptom_texts)
-    
-    candidates_scores = []
-    
-    # 1. Anemia
-    anemia_matches = [s for s in all_sym_strings if any(t in s for t in ["fatigue", "pallor", "dizziness", "breath", "pale"])]
-    if anemia_matches:
-        score = round(40.0 + len(anemia_matches) * 20.0, 1)
-        score = min(92.0, score)
-        candidates_scores.append({
-            "condition_name": "Anemia",
-            "score": score,
-            "rationale": f"Reported symptoms ({', '.join(set(anemia_matches))}) suggest reduced oxygen-carrying capacity or microcytic/macrocytic anemia.",
-            "supported_by_biomarker_model": True
-        })
+        symptoms = PatientCaseSymptom.query.filter_by(case_id=case_id).all()
+        symptom_names = [s.display_name.lower() for s in symptoms]
+        symptom_texts = [s.raw_text.lower() for s in symptoms]
+        all_sym_strings = set(symptom_names + symptom_texts)
+        
+        candidates_scores = []
+        
+        # 1. Anemia
+        anemia_matches = [s for s in all_sym_strings if any(t in s for t in ["fatigue", "pallor", "dizziness", "breath", "pale"])]
+        if anemia_matches:
+            score = round(40.0 + len(anemia_matches) * 20.0, 1)
+            score = min(92.0, score)
+            candidates_scores.append({
+                "condition_name": "Anemia",
+                "score": score,
+                "rationale": f"Reported symptoms ({', '.join(set(anemia_matches))}) suggest reduced oxygen-carrying capacity or microcytic/macrocytic anemia.",
+                "supported_by_biomarker_model": True
+            })
 
-    # 2. Diabetes
-    diabetes_matches = [s for s in all_sym_strings if any(t in s for t in ["thirst", "urination", "weight loss", "polyuria", "polydipsia"])]
-    if diabetes_matches:
-        score = round(50.0 + len(diabetes_matches) * 20.0, 1)
-        score = min(94.0, score)
-        candidates_scores.append({
-            "condition_name": "Diabetes",
-            "score": score,
-            "rationale": f"Presentation of osmotic symptoms ({', '.join(set(diabetes_matches))}) indicates potential chronic metabolic glycemic dysregulation.",
-            "supported_by_biomarker_model": True
-        })
+        # 2. Diabetes
+        diabetes_matches = [s for s in all_sym_strings if any(t in s for t in ["thirst", "urination", "weight loss", "polyuria", "polydipsia"])]
+        if diabetes_matches:
+            score = round(50.0 + len(diabetes_matches) * 20.0, 1)
+            score = min(94.0, score)
+            candidates_scores.append({
+                "condition_name": "Diabetes",
+                "score": score,
+                "rationale": f"Presentation of osmotic symptoms ({', '.join(set(diabetes_matches))}) indicates potential chronic metabolic glycemic dysregulation.",
+                "supported_by_biomarker_model": True
+            })
 
-    # 3. Heart Disease
-    heart_matches = [s for s in all_sym_strings if any(t in s for t in ["chest", "pain", "palpitations", "pulse", "breath", "angina"])]
-    if heart_matches:
-        score = round(45.0 + len(heart_matches) * 22.0, 1)
-        score = min(90.0, score)
-        candidates_scores.append({
-            "condition_name": "Heart Disease",
-            "score": score,
-            "rationale": f"Thoracic and cardiac indicators ({', '.join(set(heart_matches))}) warrant immediate cardiovascular risk evaluation.",
-            "supported_by_biomarker_model": True
-        })
+        # 3. Heart Disease
+        heart_matches = [s for s in all_sym_strings if any(t in s for t in ["chest", "pain", "palpitations", "pulse", "breath", "angina"])]
+        if heart_matches:
+            score = round(45.0 + len(heart_matches) * 22.0, 1)
+            score = min(90.0, score)
+            candidates_scores.append({
+                "condition_name": "Heart Disease",
+                "score": score,
+                "rationale": f"Thoracic and cardiac indicators ({', '.join(set(heart_matches))}) warrant immediate cardiovascular risk evaluation.",
+                "supported_by_biomarker_model": True
+            })
 
-    # 4. Thrombocytopenia
-    thromb_matches = [s for s in all_sym_strings if any(t in s for t in ["bruising", "bleeding", "petechiae", "purpura", "gums", "nosebleed"])]
-    if thromb_matches:
-        score = round(55.0 + len(thromb_matches) * 20.0, 1)
-        score = min(92.0, score)
-        candidates_scores.append({
-            "condition_name": "Thrombocytopenia",
-            "score": score,
-            "rationale": f"Hemorrhagic and mucosal bleeding signs ({', '.join(set(thromb_matches))}) suggest platelet depletion or clotting dysfunction.",
-            "supported_by_biomarker_model": True
-        })
+        # 4. Thrombocytopenia
+        thromb_matches = [s for s in all_sym_strings if any(t in s for t in ["bruising", "bleeding", "petechiae", "purpura", "gums", "nosebleed"])]
+        if thromb_matches:
+            score = round(55.0 + len(thromb_matches) * 20.0, 1)
+            score = min(92.0, score)
+            candidates_scores.append({
+                "condition_name": "Thrombocytopenia",
+                "score": score,
+                "rationale": f"Hemorrhagic and mucosal bleeding signs ({', '.join(set(thromb_matches))}) suggest platelet depletion or clotting dysfunction.",
+                "supported_by_biomarker_model": True
+            })
 
-    # 5. Thalassemia
-    thal_matches = [s for s in all_sym_strings if any(t in s for t in ["fatigue", "pallor", "jaundice", "yellow"])]
-    if len(thal_matches) >= 2:
-        score = round(35.0 + len(thal_matches) * 15.0, 1)
-        candidates_scores.append({
-            "condition_name": "Thalassemia",
-            "score": score,
-            "rationale": f"Chronic anemia signs with possible hemolytic presentation suggest hereditary hemoglobinopathy.",
-            "supported_by_biomarker_model": True
-        })
+        # 5. Thalassemia
+        thal_matches = [s for s in all_sym_strings if any(t in s for t in ["fatigue", "pallor", "jaundice", "yellow"])]
+        if len(thal_matches) >= 2:
+            score = round(35.0 + len(thal_matches) * 15.0, 1)
+            candidates_scores.append({
+                "condition_name": "Thalassemia",
+                "score": score,
+                "rationale": f"Chronic anemia signs with possible hemolytic presentation suggest hereditary hemoglobinopathy.",
+                "supported_by_biomarker_model": True
+            })
 
-    # 6. Typhoid Fever (Not supported by biomarker classifier model)
-    typhoid_matches = [s for s in all_sym_strings if any(t in s for t in ["fever", "abdominal", "headache", "diarrhea", "cramps"])]
-    if any("fever" in m for m in typhoid_matches) and len(typhoid_matches) >= 2:
-        score = round(50.0 + len(typhoid_matches) * 15.0, 1)
-        score = min(93.0, score)
-        candidates_scores.append({
-            "condition_name": "Typhoid Fever",
-            "score": score,
-            "rationale": f"Febrile gastroenteritis cluster ({', '.join(set(typhoid_matches))}) indicates possible systemic Salmonella enterica infection.",
-            "supported_by_biomarker_model": False
-        })
+        # 6. Typhoid Fever (Not supported by biomarker classifier model)
+        typhoid_matches = [s for s in all_sym_strings if any(t in s for t in ["fever", "abdominal", "headache", "diarrhea", "cramps"])]
+        if any("fever" in m for m in typhoid_matches) and len(typhoid_matches) >= 2:
+            score = round(50.0 + len(typhoid_matches) * 15.0, 1)
+            score = min(93.0, score)
+            candidates_scores.append({
+                "condition_name": "Typhoid Fever",
+                "score": score,
+                "rationale": f"Febrile gastroenteritis cluster ({', '.join(set(typhoid_matches))}) indicates possible systemic Salmonella enterica infection.",
+                "supported_by_biomarker_model": False
+            })
 
-    if not candidates_scores and symptoms:
-        candidates_scores.append({
-            "condition_name": "Anemia",
-            "score": 40.0,
-            "rationale": "General constitutional symptoms reported; baseline hematological screening recommended.",
-            "supported_by_biomarker_model": True
-        })
+        if not candidates_scores and symptoms:
+            candidates_scores.append({
+                "condition_name": "Anemia",
+                "score": 40.0,
+                "rationale": "General constitutional symptoms reported; baseline hematological screening recommended.",
+                "supported_by_biomarker_model": True
+            })
 
-    candidates_scores.sort(key=lambda x: x["score"], reverse=True)
+        candidates_scores.sort(key=lambda x: x["score"], reverse=True)
 
-    pa = PreliminaryAssessment(
-        case_id=case_id,
-        status="completed",
-        summary_text=f"Preliminary consideration identified {len(candidates_scores)} possible condition(s) for investigation based on {len(symptoms)} reported symptoms."
-    )
-    db.session.add(pa)
-    db.session.flush()
-
-    for idx, c in enumerate(candidates_scores, 1):
-        ac = AssessmentCandidate(
-            assessment_id=pa.id,
-            condition_name=c["condition_name"],
-            rank=idx,
-            score=c["score"],
-            rationale=c["rationale"],
-            supported_by_biomarker_model=c["supported_by_biomarker_model"],
-            unsupported_note=None if c["supported_by_biomarker_model"] else "No biomarker prediction model available in current system"
+        pa = PreliminaryAssessment(
+            case_id=case_id,
+            status="completed",
+            summary_text=f"Preliminary consideration identified {len(candidates_scores)} possible condition(s) for investigation based on {len(symptoms)} reported symptoms."
         )
-        db.session.add(ac)
+        db.session.add(pa)
+        db.session.flush()
 
-    record.case_status = "Pre-Assessment Ready"
-    db.session.commit()
+        for idx, c in enumerate(candidates_scores, 1):
+            ac = AssessmentCandidate(
+                assessment_id=pa.id,
+                condition_name=c["condition_name"],
+                rank=idx,
+                score=c["score"],
+                rationale=c["rationale"],
+                supported_by_biomarker_model=c["supported_by_biomarker_model"],
+                unsupported_note=None if c["supported_by_biomarker_model"] else "No biomarker prediction model available in current system"
+            )
+            db.session.add(ac)
 
-    return jsonify({
-        "status": "success",
-        "case_status": record.case_status,
-        "preliminary_assessment": pa.to_dict()
-    }), 200
+        record.case_status = "Pre-Assessment Ready"
+        db.session.commit()
+
+        return jsonify({
+            "status": "success",
+            "case_status": record.case_status,
+            "preliminary_assessment": pa.to_dict()
+        }), 200
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in run_pre_assessment: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
 
 
 @api_bp.route("/cases/<int:case_id>/investigation-recommendations", methods=["GET"])
@@ -1944,61 +1982,70 @@ def get_investigation_recommendations(case_id):
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
+
+    try:
+        from backend.database.models import PreliminaryAssessment, InvestigationRule, InvestigationCatalog
         
-    from backend.database.models import PreliminaryAssessment, InvestigationRule, InvestigationCatalog
-    
-    pa = PreliminaryAssessment.query.filter_by(case_id=case_id).order_by(PreliminaryAssessment.created_at.desc()).first()
-    if not pa:
-        catalogs = InvestigationCatalog.query.all()
+        pa = PreliminaryAssessment.query.filter_by(case_id=case_id).order_by(PreliminaryAssessment.created_at.desc()).first()
+        if not pa:
+            catalogs = InvestigationCatalog.query.all()
+            return jsonify({
+                "status": "success",
+                "recommendations": [{
+                    "investigation_id": cat.id,
+                    "investigation": cat.to_dict(),
+                    "priority": "Medium",
+                    "reason": "Standard clinical laboratory panel.",
+                    "doctor_selected": True,
+                    "required_for_model": True
+                } for cat in catalogs]
+            }), 200
+
+        candidates = pa.candidates.all()
+        cond_names = [c.condition_name for c in candidates]
+
+        rules = InvestigationRule.query.filter(InvestigationRule.condition_name.in_(cond_names)).all()
+        
+        recs = []
+        seen_inv_ids = set()
+        for r in rules:
+            if r.recommended_investigation_id not in seen_inv_ids:
+                seen_inv_ids.add(r.recommended_investigation_id)
+                recs.append({
+                    "investigation_id": r.recommended_investigation_id,
+                    "investigation": r.recommended_investigation.to_dict(),
+                    "priority": r.priority,
+                    "reason": r.reason,
+                    "source_rule_id": r.id,
+                    "doctor_selected": True,
+                    "required_for_model": True
+                })
+                
+        all_catalogs = InvestigationCatalog.query.all()
+        for cat in all_catalogs:
+            if cat.id not in seen_inv_ids:
+                seen_inv_ids.add(cat.id)
+                recs.append({
+                    "investigation_id": cat.id,
+                    "investigation": cat.to_dict(),
+                    "priority": "Low",
+                    "reason": "Optional secondary screening test.",
+                    "doctor_selected": False,
+                    "required_for_model": False
+                })
+
         return jsonify({
             "status": "success",
-            "recommendations": [{
-                "investigation_id": cat.id,
-                "investigation": cat.to_dict(),
-                "priority": "Medium",
-                "reason": "Standard clinical laboratory panel.",
-                "doctor_selected": True,
-                "required_for_model": True
-            } for cat in catalogs]
+            "recommendations": recs
         }), 200
-
-    candidates = pa.candidates.all()
-    cond_names = [c.condition_name for c in candidates]
-
-    rules = InvestigationRule.query.filter(InvestigationRule.condition_name.in_(cond_names)).all()
-    
-    recs = []
-    seen_inv_ids = set()
-    for r in rules:
-        if r.recommended_investigation_id not in seen_inv_ids:
-            seen_inv_ids.add(r.recommended_investigation_id)
-            recs.append({
-                "investigation_id": r.recommended_investigation_id,
-                "investigation": r.recommended_investigation.to_dict(),
-                "priority": r.priority,
-                "reason": r.reason,
-                "source_rule_id": r.id,
-                "doctor_selected": True,
-                "required_for_model": True
-            })
-            
-    all_catalogs = InvestigationCatalog.query.all()
-    for cat in all_catalogs:
-        if cat.id not in seen_inv_ids:
-            seen_inv_ids.add(cat.id)
-            recs.append({
-                "investigation_id": cat.id,
-                "investigation": cat.to_dict(),
-                "priority": "Low",
-                "reason": "Optional secondary screening test.",
-                "doctor_selected": False,
-                "required_for_model": False
-            })
-
-    return jsonify({
-        "status": "success",
-        "recommendations": recs
-    }), 200
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in get_investigation_recommendations: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
 
 
 @api_bp.route("/cases/<int:case_id>/investigations", methods=["POST"])
@@ -2006,44 +2053,55 @@ def select_case_investigations(case_id):
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
+
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+        selections = data.get("investigations", [])
+        if not isinstance(selections, list):
+            return jsonify({"error": "'investigations' must be a list."}), 400
+            
+        from backend.database.models import CaseInvestigation, InvestigationCatalog
         
-    data = request.get_json(force=True, silent=True) or {}
-    selections = data.get("investigations", [])
-    if not isinstance(selections, list):
-        return jsonify({"error": "'investigations' must be a list."}), 400
+        CaseInvestigation.query.filter_by(case_id=case_id).delete()
         
-    from backend.database.models import CaseInvestigation, InvestigationCatalog
-    
-    CaseInvestigation.query.filter_by(case_id=case_id).delete()
-    
-    created = []
-    for item in selections:
-        inv_id = item.get("investigation_id")
-        if not inv_id: continue
+        created = []
+        for item in selections:
+            if not isinstance(item, dict):
+                continue
+            inv_id = item.get("investigation_id")
+            if not inv_id: continue
+            
+            ci = CaseInvestigation(
+                case_id=case_id,
+                investigation_id=inv_id,
+                priority=item.get("priority", "High"),
+                reason=item.get("reason", "Doctor selected investigation"),
+                source_rule_id=item.get("source_rule_id"),
+                doctor_selected=item.get("doctor_selected", True),
+                status="selected",
+                result_type=item.get("result_type", "numeric"),
+                required_for_model=item.get("required_for_model", True)
+            )
+            db.session.add(ci)
+            created.append(ci)
+            
+        record.case_status = "Investigations Selected"
+        db.session.commit()
         
-        ci = CaseInvestigation(
-            case_id=case_id,
-            investigation_id=inv_id,
-            priority=item.get("priority", "High"),
-            reason=item.get("reason", "Doctor selected investigation"),
-            source_rule_id=item.get("source_rule_id"),
-            doctor_selected=item.get("doctor_selected", True),
-            status="selected",
-            result_type=item.get("result_type", "numeric"),
-            required_for_model=item.get("required_for_model", True)
-        )
-        db.session.add(ci)
-        created.append(ci)
-        
-    record.case_status = "Investigations Selected"
-    db.session.commit()
-    
-    return jsonify({
-        "status": "success",
-        "message": f"Successfully selected {len(created)} investigation(s).",
-        "case_status": record.case_status,
-        "investigations": [c.to_dict() for c in CaseInvestigation.query.filter_by(case_id=case_id).all()]
-    }), 201
+        return jsonify({
+            "status": "success",
+            "message": f"Successfully selected {len(created)} investigation(s).",
+            "case_status": record.case_status,
+            "investigations": [c.to_dict() for c in CaseInvestigation.query.filter_by(case_id=case_id).all()]
+        }), 201
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in select_case_investigations: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
 
 
 @api_bp.route("/cases/<int:case_id>/investigations/<int:inv_id>/status", methods=["PATCH"])
@@ -2051,18 +2109,27 @@ def update_investigation_status(case_id, inv_id):
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
+
+    try:
+        from backend.database.models import CaseInvestigation
+        ci = CaseInvestigation.query.filter_by(id=inv_id, case_id=case_id).first()
+        if not ci:
+            return jsonify({"error": "Case investigation not found."}), 404
+            
+        data = request.get_json(force=True, silent=True) or {}
+        if "status" in data: ci.status = data["status"]
+        if "doctor_selected" in data: ci.doctor_selected = bool(data["doctor_selected"])
         
-    from backend.database.models import CaseInvestigation
-    ci = CaseInvestigation.query.filter_by(id=inv_id, case_id=case_id).first()
-    if not ci:
-        return jsonify({"error": "Case investigation not found."}), 404
-        
-    data = request.get_json(force=True, silent=True) or {}
-    if "status" in data: ci.status = data["status"]
-    if "doctor_selected" in data: ci.doctor_selected = bool(data["doctor_selected"])
-    
-    db.session.commit()
-    return jsonify({"status": "success", "investigation": ci.to_dict()}), 200
+        db.session.commit()
+        return jsonify({"status": "success", "investigation": ci.to_dict()}), 200
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in update_investigation_status: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
 
 
 @api_bp.route("/cases/<int:case_id>/investigations/<int:inv_id>/results", methods=["POST"])
@@ -2070,51 +2137,60 @@ def enter_investigation_results(case_id, inv_id):
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
-        
-    from backend.database.models import CaseInvestigation, InvestigationResult
-    ci = CaseInvestigation.query.filter_by(id=inv_id, case_id=case_id).first()
-    if not ci:
-        return jsonify({"error": "Case investigation not found."}), 404
-        
-    data = request.get_json(force=True, silent=True) or {}
-    results_dict = data.get("results", {})
-    if not isinstance(results_dict, dict):
-        return jsonify({"error": "'results' must be a JSON dictionary of biomarker key-values."}), 400
-        
-    InvestigationResult.query.filter_by(case_investigation_id=ci.id).delete()
-    
-    added_results = []
-    current_biomarkers = json.loads(record.biomarkers_json) if record.biomarkers_json else {}
-    
-    for key, val in results_dict.items():
-        try:
-            val_f = float(val)
-        except (ValueError, TypeError):
-            continue
+
+    try:
+        from backend.database.models import CaseInvestigation, InvestigationResult
+        ci = CaseInvestigation.query.filter_by(id=inv_id, case_id=case_id).first()
+        if not ci:
+            return jsonify({"error": "Case investigation not found."}), 404
             
-        ir = InvestigationResult(
-            case_investigation_id=ci.id,
-            biomarker_key=key,
-            raw_value=val_f,
-            normalized_value=None,
-            unit=data.get("units", {}).get(key, "")
-        )
-        db.session.add(ir)
-        added_results.append(ir)
-        current_biomarkers[key] = val_f
+        data = request.get_json(force=True, silent=True) or {}
+        results_dict = data.get("results", {})
+        if not isinstance(results_dict, dict):
+            return jsonify({"error": "'results' must be a JSON dictionary of biomarker key-values."}), 400
+            
+        InvestigationResult.query.filter_by(case_investigation_id=ci.id).delete()
+        
+        added_results = []
+        current_biomarkers = json.loads(record.biomarkers_json) if record.biomarkers_json else {}
+        
+        for key, val in results_dict.items():
+            try:
+                val_f = float(val)
+            except (ValueError, TypeError):
+                continue
+                
+            ir = InvestigationResult(
+                case_investigation_id=ci.id,
+                biomarker_key=key,
+                raw_value=val_f,
+                normalized_value=None,
+                unit=data.get("units", {}).get(key, "")
+            )
+            db.session.add(ir)
+            added_results.append(ir)
+            current_biomarkers[key] = val_f
 
-    ci.status = "completed"
-    record.biomarkers_json = json.dumps(current_biomarkers)
-    record.case_status = "Results Available"
-    db.session.commit()
+        ci.status = "completed"
+        record.biomarkers_json = json.dumps(current_biomarkers)
+        record.case_status = "Results Available"
+        db.session.commit()
 
-    return jsonify({
-        "status": "success",
-        "message": f"Successfully recorded {len(added_results)} result(s).",
-        "case_status": record.case_status,
-        "investigation": ci.to_dict(),
-        "biomarkers": current_biomarkers
-    }), 201
+        return jsonify({
+            "status": "success",
+            "message": f"Successfully recorded {len(added_results)} result(s).",
+            "case_status": record.case_status,
+            "investigation": ci.to_dict(),
+            "biomarkers": current_biomarkers
+        }), 201
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in enter_investigation_results: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
 
 
 @api_bp.route("/cases/<int:case_id>/predictions", methods=["POST"])
@@ -2122,66 +2198,72 @@ def run_case_prediction(case_id):
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
-        
-    data = request.get_json(force=True, silent=True) or {}
-    model_key = data.get("model", "random_forest")
-    
-    biomarkers = data.get("features")
-    if not biomarkers:
-        biomarkers = json.loads(record.biomarkers_json) if record.biomarkers_json else {}
-        
-    if not biomarkers:
-        return jsonify({"error": "No biomarker investigation results available to run prediction."}), 400
-        
-    HEALTHY_BASELINE = {
-        "Glucose": 0.12, "Cholesterol": 0.15, "Hemoglobin": 0.65,
-        "Platelets": 0.55, "White Blood Cells": 0.45, "Red Blood Cells": 0.60,
-        "Hematocrit": 0.58, "Mean Corpuscular Volume": 0.52,
-        "Mean Corpuscular Hemoglobin": 0.55, "Mean Corpuscular Hemoglobin Concentration": 0.50,
-        "Insulin": 0.15, "BMI": 0.22, "Systolic Blood Pressure": 0.65,
-        "Diastolic Blood Pressure": 0.45, "Triglycerides": 0.18,
-        "HbA1c": 0.10, "LDL Cholesterol": 0.14, "HDL Cholesterol": 0.65,
-        "ALT": 0.15, "AST": 0.14, "Heart Rate": 0.18, "Creatinine": 0.15,
-        "Troponin": 0.05, "C-reactive Protein": 0.08,
-    }
-
-    normalized_inputs = normalize_input(biomarkers)
-    full_features = HEALTHY_BASELINE.copy()
-    for k, v in normalized_inputs.items():
-        full_features[k] = v
 
     try:
-        res = model_manager.predict(full_features, model_key)
-    except Exception as exc:
-        return jsonify({"error": f"Prediction error: {str(exc)}"}), 500
+        data = request.get_json(force=True, silent=True) or {}
+        model_key = data.get("model", "random_forest")
+        
+        biomarkers = data.get("features")
+        if not biomarkers:
+            biomarkers = json.loads(record.biomarkers_json) if record.biomarkers_json else {}
+            
+        if not biomarkers:
+            return jsonify({"error": "No biomarker investigation results available to run prediction."}), 400
+            
+        HEALTHY_BASELINE = {
+            "Glucose": 0.12, "Cholesterol": 0.15, "Hemoglobin": 0.65,
+            "Platelets": 0.55, "White Blood Cells": 0.45, "Red Blood Cells": 0.60,
+            "Hematocrit": 0.58, "Mean Corpuscular Volume": 0.52,
+            "Mean Corpuscular Hemoglobin": 0.55, "Mean Corpuscular Hemoglobin Concentration": 0.50,
+            "Insulin": 0.15, "BMI": 0.22, "Systolic Blood Pressure": 0.65,
+            "Diastolic Blood Pressure": 0.45, "Triglycerides": 0.18,
+            "HbA1c": 0.10, "LDL Cholesterol": 0.14, "HDL Cholesterol": 0.65,
+            "ALT": 0.15, "AST": 0.14, "Heart Rate": 0.18, "Creatinine": 0.15,
+            "Troponin": 0.05, "C-reactive Protein": 0.08,
+        }
 
-    from backend.database.models import ModelPrediction
-    mp = ModelPrediction(
-        case_id=case_id,
-        model_name=res.get("model_used", model_key),
-        model_version="v2.0.0-clean",
-        predicted_diagnosis=res["prediction"],
-        probability=res["confidence"],
-        probability_scores_json=json.dumps(res.get("probabilities", {})),
-        feature_importance_json=json.dumps(res.get("feature_importance", {}))
-    )
-    db.session.add(mp)
-    
-    record.prediction_label = res["prediction"]
-    record.confidence_score = res["confidence"]
-    record.model_version = res.get("model_used")
-    record.result_json = json.dumps(res)
-    record.case_status = "Prediction Available"
-    
-    db.session.commit()
-    
-    return jsonify({
-        "status": "success",
-        "predicted_diagnosis": res["prediction"],
-        "confidence": res["confidence"],
-        "case_status": record.case_status,
-        "prediction_details": res
-    }), 200
+        normalized_inputs = normalize_input(biomarkers)
+        full_features = HEALTHY_BASELINE.copy()
+        for k, v in normalized_inputs.items():
+            full_features[k] = v
+
+        res = model_manager.predict(full_features, model_key)
+
+        from backend.database.models import ModelPrediction
+        mp = ModelPrediction(
+            case_id=case_id,
+            model_name=res.get("model_used", model_key),
+            model_version="v2.0.0-clean",
+            predicted_diagnosis=res["prediction"],
+            probability=res["confidence"],
+            probability_scores_json=json.dumps(res.get("probabilities", {})),
+            feature_importance_json=json.dumps(res.get("feature_importance", {}))
+        )
+        db.session.add(mp)
+        
+        record.prediction_label = res["prediction"]
+        record.confidence_score = res["confidence"]
+        record.model_version = res.get("model_used")
+        record.result_json = json.dumps(res)
+        record.case_status = "Prediction Available"
+        
+        db.session.commit()
+        
+        return jsonify({
+            "status": "success",
+            "predicted_diagnosis": res["prediction"],
+            "confidence": res["confidence"],
+            "case_status": record.case_status,
+            "prediction_details": res
+        }), 200
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in run_case_prediction: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
 
 
 @api_bp.route("/cases/<int:case_id>/ai-summary", methods=["POST"])
@@ -2189,57 +2271,66 @@ def generate_case_ai_summary(case_id):
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
+
+    try:
+        from backend.database.models import PatientCaseSymptom, PreliminaryAssessment, CaseInvestigation, AISummary
         
-    from backend.database.models import PatientCaseSymptom, PreliminaryAssessment, CaseInvestigation, AISummary
-    
-    symptoms = PatientCaseSymptom.query.filter_by(case_id=case_id).all()
-    sym_str = ", ".join([f"{s.display_name} ({s.severity})" for s in symptoms]) if symptoms else "None reported"
-    
-    pa = PreliminaryAssessment.query.filter_by(case_id=case_id).order_by(PreliminaryAssessment.created_at.desc()).first()
-    cand_str = ", ".join([f"{c.condition_name} ({c.score}%)" for c in pa.candidates.all()]) if pa else "None"
-    
-    invs = CaseInvestigation.query.filter_by(case_id=case_id).all()
-    inv_str = ", ".join([ci.investigation.name for ci in invs if ci.investigation]) if invs else "None selected"
-    
-    pred_label = record.prediction_label or "Pending"
-    confidence = record.confidence_score or 0.0
-    
-    data = request.get_json(force=True, silent=True) or {}
-    doc_notes = data.get("doctor_notes", record.doctor_remarks or "")
-    
-    symptoms_narrative = f"Patient presented with key symptoms: {sym_str}."
-    assessment_narrative = f"Preliminary clinical considerations identified potential differential conditions: {cand_str}."
-    results_narrative = f"Targeted investigations ordered/completed: {inv_str}."
-    prediction_narrative = f"Algorithmic ML prediction yields a Predicted Diagnosis of {pred_label} with {confidence:.1f}% confidence."
-    
-    summary_text = (
-        "CLINICAL WORKFLOW SUMMARY:\n"
-        f"1. Presentation: {symptoms_narrative}\n"
-        f"2. Pre-Assessment: {assessment_narrative}\n"
-        f"3. Investigations: {results_narrative}\n"
-        f"4. ML Inference: {prediction_narrative}\n"
-        f"5. Doctor Remarks: {doc_notes if doc_notes else 'No additional clinical remarks.'}\n\n"
-        "Disclaimer: Smart Health Sync provides decision support tools; diagnosis remains the responsibility of the attending physician."
-    )
+        symptoms = PatientCaseSymptom.query.filter_by(case_id=case_id).all()
+        sym_str = ", ".join([f"{s.display_name} ({s.severity})" for s in symptoms]) if symptoms else "None reported"
+        
+        pa = PreliminaryAssessment.query.filter_by(case_id=case_id).order_by(PreliminaryAssessment.created_at.desc()).first()
+        cand_str = ", ".join([f"{c.condition_name} ({c.score}%)" for c in pa.candidates.all()]) if pa else "None"
+        
+        invs = CaseInvestigation.query.filter_by(case_id=case_id).all()
+        inv_str = ", ".join([ci.investigation.name for ci in invs if ci.investigation]) if invs else "None selected"
+        
+        pred_label = record.prediction_label or "Pending"
+        confidence = record.confidence_score or 0.0
+        
+        data = request.get_json(force=True, silent=True) or {}
+        doc_notes = data.get("doctor_notes", record.doctor_remarks or "")
+        
+        symptoms_narrative = f"Patient presented with key symptoms: {sym_str}."
+        assessment_narrative = f"Preliminary clinical considerations identified potential differential conditions: {cand_str}."
+        results_narrative = f"Targeted investigations ordered/completed: {inv_str}."
+        prediction_narrative = f"Algorithmic ML prediction yields a Predicted Diagnosis of {pred_label} with {confidence:.1f}% confidence."
+        
+        summary_text = (
+            "CLINICAL WORKFLOW SUMMARY:\n"
+            f"1. Presentation: {symptoms_narrative}\n"
+            f"2. Pre-Assessment: {assessment_narrative}\n"
+            f"3. Investigations: {results_narrative}\n"
+            f"4. ML Inference: {prediction_narrative}\n"
+            f"5. Doctor Remarks: {doc_notes if doc_notes else 'No additional clinical remarks.'}\n\n"
+            "Disclaimer: Smart Health Sync provides decision support tools; diagnosis remains the responsibility of the attending physician."
+        )
 
-    ais = AISummary(
-        case_id=case_id,
-        summary_text=summary_text,
-        symptoms_narrative=symptoms_narrative,
-        assessment_narrative=assessment_narrative,
-        results_narrative=results_narrative,
-        prediction_narrative=prediction_narrative,
-        doctor_notes=doc_notes
-    )
-    db.session.add(ais)
-    record.case_status = "Case Reviewed"
-    db.session.commit()
+        ais = AISummary(
+            case_id=case_id,
+            summary_text=summary_text,
+            symptoms_narrative=symptoms_narrative,
+            assessment_narrative=assessment_narrative,
+            results_narrative=results_narrative,
+            prediction_narrative=prediction_narrative,
+            doctor_notes=doc_notes
+        )
+        db.session.add(ais)
+        record.case_status = "Case Reviewed"
+        db.session.commit()
 
-    return jsonify({
-        "status": "success",
-        "case_status": record.case_status,
-        "ai_summary": ais.to_dict()
-    }), 200
+        return jsonify({
+            "status": "success",
+            "case_status": record.case_status,
+            "ai_summary": ais.to_dict()
+        }), 200
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in generate_case_ai_summary: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
 
 
 @api_bp.route("/cases/<int:case_id>/reports", methods=["POST"])
@@ -2247,38 +2338,47 @@ def build_case_report(case_id):
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
+
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+        sections = data.get("sections", [
+            "Patient Details", "Presenting Symptoms", "Preliminary Assessment",
+            "Recommended Investigations", "Investigations Performed", "Results/Biomarkers",
+            "Predicted Diagnosis", "AI Clinical Summary", "Doctor Notes", "Doctor Identity/Signature"
+        ])
+        signature = data.get("doctor_signature", f"Dr. User #{session.get('user_id')}")
         
-    data = request.get_json(force=True, silent=True) or {}
-    sections = data.get("sections", [
-        "Patient Details", "Presenting Symptoms", "Preliminary Assessment",
-        "Recommended Investigations", "Investigations Performed", "Results/Biomarkers",
-        "Predicted Diagnosis", "AI Clinical Summary", "Doctor Notes", "Doctor Identity/Signature"
-    ])
-    signature = data.get("doctor_signature", f"Dr. User #{session.get('user_id')}")
-    
-    import uuid
-    report_uuid = f"REP-{uuid.uuid4().hex[:8].upper()}"
-    
-    from backend.database.models import GeneratedReport
-    gr = GeneratedReport(
-        case_id=case_id,
-        report_uuid=report_uuid,
-        selected_sections_json=json.dumps(sections),
-        doctor_signature=signature,
-        pdf_filename=f"Report_{report_uuid}.pdf"
-    )
-    db.session.add(gr)
-    
-    record.report_sections = json.dumps(sections)
-    record.doctor_signature = signature
-    record.status = "approved"
-    record.case_status = "Reported/Archived"
-    
-    db.session.commit()
-    
-    return jsonify({
-        "status": "success",
-        "message": "Report generated successfully.",
-        "case_status": record.case_status,
-        "report": gr.to_dict()
-    }), 201
+        import uuid
+        report_uuid = f"REP-{uuid.uuid4().hex[:8].upper()}"
+        
+        from backend.database.models import GeneratedReport
+        gr = GeneratedReport(
+            case_id=case_id,
+            report_uuid=report_uuid,
+            selected_sections_json=json.dumps(sections),
+            doctor_signature=signature,
+            pdf_filename=f"Report_{report_uuid}.pdf"
+        )
+        db.session.add(gr)
+        
+        record.report_sections = json.dumps(sections)
+        record.doctor_signature = signature
+        record.status = "approved"
+        record.case_status = "Reported/Archived"
+        
+        db.session.commit()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Report generated successfully.",
+            "case_status": record.case_status,
+            "report": gr.to_dict()
+        }), 201
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in build_case_report: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
