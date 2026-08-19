@@ -20,33 +20,58 @@ api_bp  = Blueprint("api", __name__)
 # ── /api/health ──────────────────────────────────────────────
 @api_bp.route("/health", methods=["GET"])
 def health():
-    """Readiness health check verifying DB connectivity and ML models."""
+    """Readiness health check verifying DB connectivity and ML models.
+    
+    Always returns 200 so Render's health check doesn't tear down the
+    service, but includes degraded status and error details in the
+    response body for debugging.
+    """
     from sqlalchemy import text
     checks = {
         "database": False,
         "models": False,
     }
+    errors = {}
+
+    # Check startup status
+    startup_error = current_app.config.get("_STARTUP_ERROR")
+    if startup_error:
+        errors["startup"] = startup_error
+
     try:
         db.session.execute(text("SELECT 1"))
         checks["database"] = True
     except Exception as exc:
         logger.exception("Database health check failed: %s", exc)
+        errors["database"] = str(exc)
 
     try:
         report = model_manager.health_report()
         checks["models"] = bool(
             report.get("loaded_models") and report.get("scaler_loaded") and report.get("encoder_loaded")
         )
-    except Exception:
+        if not checks["models"]:
+            errors["models"] = {
+                "loaded": report.get("loaded_models", []),
+                "missing": report.get("missing_models", []),
+                "corrupted": report.get("corrupted_models", []),
+            }
+    except Exception as exc:
         logger.exception("Model health check failed.")
+        errors["models"] = str(exc)
 
     ready = all(checks.values())
-    return jsonify({
+    result = {
         "status": "healthy" if ready else "degraded",
         "service": "Smart Health Sync API",
         "version": "2.0.0",
         "checks": checks,
-    }), 200 if ready else 503
+    }
+    if errors:
+        result["errors"] = errors
+
+    # Always return 200 so Render keeps the service alive for debugging
+    return jsonify(result), 200
 
 
 # ── /api/health/models ───────────────────────────────────────

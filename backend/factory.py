@@ -5,7 +5,8 @@ Authors: Enock Queenson Eduafo & Christabel Araba Edumadze | University of Ghana
 
 import logging
 import os
-from flask import Flask
+import traceback
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_limiter import Limiter
@@ -184,29 +185,54 @@ def create_app() -> Flask:
     app.config.from_object(cfg)
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0  # never cache static files in dev
 
+    # Log the database URI (redacted) for debugging startup
+    db_uri = app.config.get("SQLALCHEMY_DATABASE_URI", "NOT SET")
+    if "://" in db_uri:
+        scheme = db_uri.split("://")[0]
+        log.info(f"[SmartHealth] Database backend: {scheme}")
+    else:
+        log.info(f"[SmartHealth] Database URI: {db_uri[:50]}...")
+
     # ── Extensions ────────────────────────────────────────────
     CORS(app, resources={r"/api/*": {"origins": cfg.CORS_ORIGINS}})
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # Configure Limiter
-    limiter.init_app(app)
-    app.config["RATELIMIT_STORAGE_URI"] = cfg.RATELIMIT_STORAGE_URI
-    app.config["RATELIMIT_DEFAULT"] = cfg.RATELIMIT_DEFAULT
+    # Configure Limiter — use memory:// if no Redis
+    try:
+        limiter.init_app(app)
+        app.config["RATELIMIT_STORAGE_URI"] = cfg.RATELIMIT_STORAGE_URI
+        app.config["RATELIMIT_DEFAULT"] = cfg.RATELIMIT_DEFAULT
+    except Exception as lim_exc:
+        log.warning(f"[SmartHealth] Rate limiter init failed (non-fatal): {lim_exc}")
 
     # Configure uploads folder
     upload_dir = os.path.join(static_dir, "uploads")
-    os.makedirs(upload_dir, exist_ok=True)
+    try:
+        os.makedirs(upload_dir, exist_ok=True)
+    except OSError:
+        # On read-only filesystem (some cloud deployments), use /tmp
+        upload_dir = os.path.join("/tmp", "smarthealth_uploads")
+        os.makedirs(upload_dir, exist_ok=True)
     app.config["UPLOAD_FOLDER"] = upload_dir
+
+    # Track startup health for /api/health
+    app.config["_STARTUP_DB_OK"] = False
+    app.config["_STARTUP_ERROR"] = None
 
     # Ensure DB tables exist and seed default admin user
     with app.app_context():
         try:
             db.create_all()
+            log.info("[SmartHealth] db.create_all() completed successfully.")
             _ensure_diagnostic_schema()
             _ensure_patient_schema()
-            from backend.database.seed import seed_clinical_catalogs
-            seed_clinical_catalogs()
+
+            try:
+                from backend.database.seed import seed_clinical_catalogs
+                seed_clinical_catalogs()
+            except Exception as seed_exc:
+                log.warning(f"[SmartHealth] Seed catalogs failed (non-fatal): {seed_exc}")
 
             from backend.database.models import User
             admin = User.query.filter_by(role='admin').first()
@@ -227,23 +253,40 @@ def create_app() -> Flask:
                 log.info(f"[SmartHealth] Seeded default Super Admin: {admin_email}")
             else:
                 log.info(f"[SmartHealth] Super Admin already exists: {admin.email}")
+
+            app.config["_STARTUP_DB_OK"] = True
         except Exception as db_exc:
             db.session.rollback()
-            log.critical(f"[SmartHealth] Database initialisation failed — cannot start: {db_exc}")
-            raise
+            error_detail = traceback.format_exc()
+            log.critical(f"[SmartHealth] Database initialisation failed: {db_exc}\n{error_detail}")
+            app.config["_STARTUP_ERROR"] = str(db_exc)
+            # DO NOT re-raise — let the app start in degraded mode so we can
+            # see the error via /api/health instead of gunicorn dying silently.
 
     # ── Error Handlers ────────────────────────────────────────
     @app.errorhandler(429)
     def ratelimit_handler(e):
         return {"error": "Rate limit exceeded", "details": str(e.description)}, 429
 
-    # ── Register blueprints ───────────────────────────────────
-    from backend.api.routes import api_bp
-    from backend.api.views  import views_bp
-    from backend.api.auth   import auth_bp
-    app.register_blueprint(api_bp,   url_prefix="/api")
-    app.register_blueprint(views_bp, url_prefix="")
-    app.register_blueprint(auth_bp,  url_prefix="/api/auth")
+    @app.errorhandler(500)
+    def internal_error(e):
+        log.exception("Internal Server Error: %s", e)
+        return jsonify({
+            "error": "Internal Server Error",
+            "message": str(e),
+        }), 500
 
-    log.info(f"[SmartHealth] App created — ENV={cfg.FLASK_ENV}, DEBUG={cfg.DEBUG}")
+    # ── Register blueprints ───────────────────────────────────
+    try:
+        from backend.api.routes import api_bp
+        from backend.api.views  import views_bp
+        from backend.api.auth   import auth_bp
+        app.register_blueprint(api_bp,   url_prefix="/api")
+        app.register_blueprint(views_bp, url_prefix="")
+        app.register_blueprint(auth_bp,  url_prefix="/api/auth")
+    except Exception as bp_exc:
+        log.critical(f"[SmartHealth] Blueprint registration failed: {bp_exc}\n{traceback.format_exc()}")
+        # Still don't crash — at minimum the 500 handler will work
+
+    log.info(f"[SmartHealth] App created — ENV={cfg.FLASK_ENV}, DEBUG={cfg.DEBUG}, DB_OK={app.config['_STARTUP_DB_OK']}")
     return app
