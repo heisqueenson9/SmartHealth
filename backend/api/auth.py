@@ -179,27 +179,37 @@ def _register_patient(email, full_name, password):
 @auth_bp.route("/login", methods=["POST"])
 def login():
     try:
-        data = request.get_json(force=True, silent=True) or {}
-        email = data.get("email", "").strip().lower()
+        data = request.get_json(force=True, silent=True) or request.form or {}
+        email = (data.get("email") or data.get("username") or "").strip().lower()
         password = data.get("password", "")
 
         if not email or not password:
             return jsonify({"error": "Email and password are required."}), 400
 
-        if not EMAIL_REGEX.match(email):
-            return jsonify({"error": "Please enter a valid email address."}), 400
+        user = None
+        if EMAIL_REGEX.match(email):
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                user = User.query.filter_by(username=email).first()
+        else:
+            user = User.query.filter_by(username=email).first()
+            if not user:
+                return jsonify({"error": "Please enter a valid email address."}), 400
 
-        user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
             return jsonify({"error": "Invalid email address or password."}), 401
 
         patient_profile = None
         if user.role == "patient":
-            patient_profile = Patient.query.filter_by(user_id=user.id).first()
+            try:
+                patient_profile = Patient.query.filter_by(user_id=user.id).first()
+            except Exception as pe:
+                db.session.rollback()
+                logger.warning(f"[Auth] Patient profile lookup warning for {user.id}: {pe}")
 
         _set_user_session(user, patient_profile)
 
-        logger.info(f"[Auth] User logged in: {email} (role: {user.role})")
+        logger.info(f"[Auth] User logged in: {user.email} (role: {user.role})")
         return jsonify({
             "status": "success",
             "message": "Login successful.",
@@ -213,8 +223,9 @@ def login():
         }), 200
 
     except Exception as e:
+        db.session.rollback()
         logger.exception(f"[Auth] Error during login: {e}")
-        return jsonify({"error": "Internal server error during login."}), 500
+        return jsonify({"error": f"Internal server error during login: {str(e)}"}), 500
 
 
 # ── GET/POST /logout ─────────────────────────────────────────

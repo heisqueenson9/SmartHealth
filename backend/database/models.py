@@ -38,7 +38,14 @@ class User(db.Model):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        if not self.password_hash or not password:
+            return False
+        try:
+            return check_password_hash(self.password_hash, password)
+        except Exception as exc:
+            import logging
+            logging.getLogger("smarthealth.auth").warning(f"[Auth] Password verification exception for user {self.email}: {exc}")
+            return False
 
 
 class Patient(db.Model):

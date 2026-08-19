@@ -62,10 +62,7 @@ def _rebuild_diagnostic_records_table(col_info):
 
 
 def _ensure_diagnostic_schema():
-    """Migrate diagnostic_records schema on existing SQLite databases."""
-    if db.engine.name != 'sqlite':
-        return
-
+    """Migrate diagnostic_records schema across PostgreSQL and SQLite databases."""
     from sqlalchemy import inspect, text
 
     log = logging.getLogger("smarthealth.factory")
@@ -74,14 +71,13 @@ def _ensure_diagnostic_schema():
         if "diagnostic_records" not in insp.get_table_names():
             return
 
-        pragma_rows = db.session.execute(text("PRAGMA table_info(diagnostic_records)")).fetchall()
-        col_info = {row[1]: row for row in pragma_rows}
-
+        diag_cols = {c["name"] for c in insp.get_columns("diagnostic_records")}
         additions = {
             "patient_reference": "VARCHAR(64)",
             "biomarkers_json": "TEXT",
             "result_json": "TEXT",
-            "status": "VARCHAR(20) DEFAULT 'draft'",
+            "status": "VARCHAR(32) DEFAULT 'draft'",
+            "case_status": "VARCHAR(64) DEFAULT 'Draft Case'",
             "doctor_remarks": "TEXT",
             "final_diagnosis": "VARCHAR(120)",
             "observations": "TEXT",
@@ -91,66 +87,67 @@ def _ensure_diagnostic_schema():
             "doctor_signature": "VARCHAR(120)",
         }
         for name, col_type in additions.items():
-            if name not in col_info:
+            if name not in diag_cols:
+                log.info(f"[SmartHealth] Adding diagnostic_records.{name} column.")
                 db.session.execute(
                     text(f"ALTER TABLE diagnostic_records ADD COLUMN {name} {col_type}")
                 )
-        db.session.commit()
-
-        patient_row = col_info.get("patient_id")
-        if patient_row and patient_row[3] == 1:
-            log.info("[SmartHealth] Migrating diagnostic_records (patient_id → nullable).")
-            _rebuild_diagnostic_records_table(col_info)
+                db.session.commit()
     except Exception as exc:
         db.session.rollback()
-        log.error(f"[SmartHealth] Schema migration error: {exc}")
+        log.error(f"[SmartHealth] Diagnostic schema migration error: {exc}")
 
 
 def _ensure_patient_schema():
-    """Add new columns to patients and users tables if missing."""
-    if db.engine.name != 'sqlite':
-        return
-
+    """Add missing columns to patients and users tables across PostgreSQL and SQLite."""
     from sqlalchemy import inspect, text
 
     log = logging.getLogger("smarthealth.factory")
     try:
         insp = inspect(db.engine)
+        tables = insp.get_table_names()
         
-        # 1. Update users table (license_number)
-        if "users" in insp.get_table_names():
+        # 1. Update users table columns
+        if "users" in tables:
             user_cols = {c["name"] for c in insp.get_columns("users")}
-            if "license_number" not in user_cols:
-                log.info("[SmartHealth] Adding users.license_number column.")
-                db.session.execute(text("ALTER TABLE users ADD COLUMN license_number VARCHAR(64)"))
-                db.session.commit()
+            user_additions = {
+                "license_number": "VARCHAR(64)",
+                "proof_filename": "VARCHAR(256)",
+                "hospital": "VARCHAR(120)",
+                "specialization": "VARCHAR(120)",
+                "status": "VARCHAR(20) DEFAULT 'pending'",
+                "full_name": "VARCHAR(120)",
+            }
+            for name, col_type in user_additions.items():
+                if name not in user_cols:
+                    log.info(f"[SmartHealth] Adding users.{name} column.")
+                    db.session.execute(text(f"ALTER TABLE users ADD COLUMN {name} {col_type}"))
+                    db.session.commit()
 
-        # 2. Update patients table
-        if "patients" not in insp.get_table_names():
-            return
-        cols = {c["name"] for c in insp.get_columns("patients")}
-        if "user_id" not in cols:
-            log.info("[SmartHealth] Adding patients.user_id column.")
-            db.session.execute(text("ALTER TABLE patients ADD COLUMN user_id INTEGER"))
-            db.session.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_patients_user_id ON patients (user_id)"))
-            db.session.commit()
-            
-        additions = {
-            "full_name": "VARCHAR(120)",
-            "age": "INTEGER",
-            "clinical_notes": "TEXT",
-            "is_archived": "BOOLEAN DEFAULT 0",
-            "doctor_id": "INTEGER"
-        }
-        for name, col_type in additions.items():
-            if name not in cols:
-                log.info(f"[SmartHealth] Adding patients.{name} column.")
-                db.session.execute(text(f"ALTER TABLE patients ADD COLUMN {name} {col_type}"))
+        # 2. Update patients table columns
+        if "patients" in tables:
+            cols = {c["name"] for c in insp.get_columns("patients")}
+            if "user_id" not in cols:
+                log.info("[SmartHealth] Adding patients.user_id column.")
+                db.session.execute(text("ALTER TABLE patients ADD COLUMN user_id INTEGER"))
                 db.session.commit()
                 
+            additions = {
+                "full_name": "VARCHAR(120)",
+                "age": "INTEGER",
+                "clinical_notes": "TEXT",
+                "is_archived": "BOOLEAN DEFAULT FALSE",
+                "doctor_id": "INTEGER"
+            }
+            for name, col_type in additions.items():
+                if name not in cols:
+                    log.info(f"[SmartHealth] Adding patients.{name} column.")
+                    db.session.execute(text(f"ALTER TABLE patients ADD COLUMN {name} {col_type}"))
+                    db.session.commit()
+                    
     except Exception as exc:
         db.session.rollback()
-        log.warning(f"Schema migration skipped: {exc}")
+        log.warning(f"[SmartHealth] Patient schema migration skipped: {exc}")
 
 
 def configure_logging(level: str = "INFO"):

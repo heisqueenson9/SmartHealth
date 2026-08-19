@@ -9,14 +9,17 @@ wiring real credentials.
 import logging
 import os
 
-import resend
+try:
+    import resend
+except ImportError:
+    resend = None
 
 logger = logging.getLogger("smarthealth.mail")
 
 
 def _is_mail_configured() -> bool:
-    """Return True only when RESEND_API_KEY is set in the environment."""
-    return bool(os.environ.get("RESEND_API_KEY", "").strip())
+    """Return True only when resend is installed and RESEND_API_KEY is set in environment."""
+    return resend is not None and bool(os.environ.get("RESEND_API_KEY", "").strip())
 
 
 def _sender() -> str:
