@@ -9,8 +9,6 @@ wiring real credentials.
 import logging
 import os
 
-import resend
-
 logger = logging.getLogger("smarthealth.mail")
 
 
@@ -28,7 +26,6 @@ def _login_url() -> str:
     """Best-effort absolute login URL; falls back to /login."""
     try:
         from flask import url_for
-
         return url_for("views.login_page", _external=True)
     except Exception:
         return "/login"
@@ -48,14 +45,20 @@ def notify_doctor_status_change(doctor, action: str) -> None:
     if not _is_mail_configured():
         logger.info(
             "[Mail] RESEND_API_KEY not configured — skipping status email to %s",
-            doctor.email,
+            getattr(doctor, "email", "unknown"),
         )
+        return
+
+    try:
+        import resend
+    except ImportError:
+        logger.warning("[Mail] resend package is not installed; skipping email notification.")
         return
 
     if action == "approve":
         subject = "Smart Health Sync — Account Approved"
         body = (
-            f"Dear {doctor.full_name},\n\n"
+            f"Dear {getattr(doctor, 'full_name', 'Doctor')},\n\n"
             "We are pleased to inform you that your doctor account at Smart Health Sync "
             "has been approved and is now active.\n\n"
             "You can now log in to the portal and start using our clinical diagnosis tools.\n\n"
@@ -64,11 +67,9 @@ def notify_doctor_status_change(doctor, action: str) -> None:
             "The Smart Health Sync Team"
         )
     else:
-        # Both "reject" and "reupload" share the rejection wording — the doctor
-        # needs to know they can submit a fresh credential document.
         subject = "Smart Health Sync — Account Registration Status"
         body = (
-            f"Dear {doctor.full_name},\n\n"
+            f"Dear {getattr(doctor, 'full_name', 'Doctor')},\n\n"
             "Thank you for registering with Smart Health Sync.\n\n"
             "Unfortunately, your doctor registration request was not approved at this time. "
             "Reason: Your uploaded document was rejected or did not meet our verification criteria.\n\n"
@@ -96,8 +97,6 @@ def notify_doctor_status_change(doctor, action: str) -> None:
     except Exception as exc:
         logger.exception(
             "[Mail] Resend failed to send status email to %s: %s",
-            doctor.email,
+            getattr(doctor, "email", "unknown"),
             exc,
         )
-        # Do not re-raise — the doctor's status has already been committed and
-        # a mail failure must not roll back the database write.

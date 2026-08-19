@@ -22,10 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
 // ── 1. Step Navigation & Stepper Bar ─────────────────────────────────
 function navigateToStep(stepNum) {
     if (stepNum > 1 && !currentCaseId) {
-        if (!initOrCreateCase()) {
-            showToast("Please select a patient case first.", "warning");
-            return;
-        }
+        showToast("Please complete Patient Case initialization first.", "warning");
+        return;
     }
     
     currentStep = stepNum;
@@ -56,7 +54,7 @@ function initStepNavigation() {
     navigateToStep(1);
 }
 
-// ── 2. Patient Case Selection ─────────────────────────────────────────
+// ── 2. Patient Case Selection (Dedicated API: POST /api/cases) ────────
 function initPatientSelector() {
     const select = document.getElementById("linkPatientSelect");
     const refInput = document.getElementById("patientReferenceInput");
@@ -83,47 +81,48 @@ function initPatientSelector() {
     }
 }
 
-function initOrCreateCase() {
+async function initOrCreateCase() {
+    if (currentCaseId) return currentCaseId;
+    
     const select = document.getElementById("linkPatientSelect");
     const refInput = document.getElementById("patientReferenceInput");
-    const patientId = select ? select.value : null;
     
-    if (currentCaseId) return true;
+    const patientId = select && select.value ? parseInt(select.value, 10) : null;
+    let patientReference = refInput ? refInput.value.trim() : null;
     
-    // Auto-generate reference if unassigned
-    let ref = refInput ? refInput.value.trim() : "";
-    if (!ref) {
-        const randHex = Math.random().toString(16).substring(2, 8).toUpperCase();
-        ref = `SHS-GEN-${randHex}`;
-        if (refInput) refInput.value = ref;
-    }
-    
-    // Call backend to initialize case record
-    fetch("/api/predict", {
+    const response = await fetch("/api/cases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            patient_id: patientId ? parseInt(patientId) : null,
-            patient_reference: ref,
-            features: { "Glucose": 0.5 } // baseline init
+            patient_id: patientId,
+            patient_reference: patientReference
         })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.record_id) {
-            currentCaseId = data.record_id;
-            document.getElementById("currentCaseId").value = currentCaseId;
-            logger("Case initialized ID: " + currentCaseId);
-        }
-    })
-    .catch(err => console.error("Error creating case:", err));
+    });
     
-    return true;
+    const data = await response.json();
+    if (!response.ok || data.status !== "success") {
+        throw new Error(data.error || "Unable to create patient case.");
+    }
+    
+    currentCaseId = data.case.id;
+    const hidden = document.getElementById("currentCaseId");
+    if (hidden) hidden.value = currentCaseId;
+    
+    if (refInput && data.case.patient_reference) {
+        refInput.value = data.case.patient_reference;
+    }
+    
+    logger(`Case initialized ID: ${currentCaseId}`);
+    return currentCaseId;
 }
 
-function proceedToStep2() {
-    if (initOrCreateCase()) {
+async function proceedToStep2() {
+    try {
+        await initOrCreateCase();
         navigateToStep(2);
+    } catch (error) {
+        console.error(error);
+        showToast(error.message, "error");
     }
 }
 
@@ -180,8 +179,8 @@ function initSymptomSearch() {
 }
 
 function addSymptomChip(name, catalogId = null, source = "selected", severity = "Moderate", durVal = 3, durUnit = "days") {
-    // Prevent duplicate entries
-    if (recordedSymptoms.some(s => s.display_name.lower === name.toLowerCase())) {
+    // Fixed s.display_name.lower bug -> String(s.display_name || "").toLowerCase()
+    if (recordedSymptoms.some(s => String(s.display_name || "").toLowerCase() === name.toLowerCase())) {
         showToast(`Symptom "${name}" is already added.`, "info");
         return;
     }
@@ -217,7 +216,7 @@ function addCustomSymptom() {
         null,
         "typed",
         sevSelect ? sevSelect.value : "Moderate",
-        durInput ? parseInt(durInput.value) || 3 : 3,
+        durInput ? parseInt(durInput.value, 10) || 3 : 3,
         durUnitSelect ? durUnitSelect.value : "days"
     );
     
@@ -268,32 +267,33 @@ function renderSymptomChips() {
     });
 }
 
-function proceedToStep3() {
+async function proceedToStep3() {
     if (recordedSymptoms.length === 0) {
         showToast("Please add at least one presenting symptom before continuing.", "warning");
         return;
     }
     
-    if (!currentCaseId) initOrCreateCase();
-    
-    // Save captured symptoms to backend
-    fetch(`/api/cases/${currentCaseId}/symptoms`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            replace: true,
-            symptoms: recordedSymptoms
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === "success") {
-            runPreliminaryAssessmentBackend();
-        } else {
-            showToast("Failed to save symptoms: " + (data.error || "Unknown error"), "error");
+    try {
+        await initOrCreateCase();
+        const response = await fetch(`/api/cases/${currentCaseId}/symptoms`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                replace: true,
+                symptoms: recordedSymptoms
+            })
+        });
+        
+        const data = await response.json();
+        if (!response.ok || data.status !== "success") {
+            throw new Error(data.error || "Failed to save symptoms.");
         }
-    })
-    .catch(err => console.error("Error saving symptoms:", err));
+        
+        runPreliminaryAssessmentBackend();
+    } catch (error) {
+        console.error(error);
+        showToast(error.message, "error");
+    }
 }
 
 // ── 4. Preliminary Assessment Engine ────────────────────────────────
@@ -418,7 +418,7 @@ function renderInvestigationRecommendations(recs) {
               <p style="color:var(--text-secondary); font-size:0.82rem; line-height:1.5; margin-bottom:8px;">
                 ${escapeHtml(rec.reason)}
               </p>
-              <div style="font-size:0.75rem; color:var(--text-muted);">Category: ${escapeHtml(inv.category)} · Biomarkers: ${inv.biomarker_keys.length} markers</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Category: ${escapeHtml(inv.category)} · Biomarkers: ${inv.biomarker_keys ? inv.biomarker_keys.length : 0} markers</div>
             </div>
         `;
         container.appendChild(col);
@@ -432,31 +432,32 @@ function toggleInvestigationSelection(invId, isSelected) {
     }
 }
 
-function proceedToStep5() {
+async function proceedToStep5() {
     const activeSelection = selectedInvestigations.filter(r => r.doctor_selected);
     if (activeSelection.length === 0) {
         showToast("Please select at least one investigation panel.", "warning");
         return;
     }
     
-    // Save selected investigations
-    fetch(`/api/cases/${currentCaseId}/investigations`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            investigations: activeSelection
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === "success") {
-            navigateToStep(5);
-            buildDynamicBiomarkerForm(activeSelection);
-        } else {
-            showToast("Failed to save selected investigations.", "error");
+    try {
+        const response = await fetch(`/api/cases/${currentCaseId}/investigations`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                investigations: activeSelection
+            })
+        });
+        const data = await response.json();
+        if (!response.ok || data.status !== "success") {
+            throw new Error(data.error || "Failed to save selected investigations.");
         }
-    })
-    .catch(err => console.error("Error saving investigations:", err));
+        
+        navigateToStep(5);
+        buildDynamicBiomarkerForm(activeSelection);
+    } catch (error) {
+        console.error(error);
+        showToast(error.message, "error");
+    }
 }
 
 // ── 6. Dynamic Lab Results Entry Form ───────────────────────────────
@@ -465,7 +466,6 @@ function buildDynamicBiomarkerForm(activeInvestigations) {
     if (!container) return;
     container.innerHTML = "";
     
-    // Collect all unique biomarker keys implied by selected investigations
     const requiredKeys = new Set();
     activeInvestigations.forEach(inv => {
         const keys = inv.investigation ? inv.investigation.biomarker_keys : [];
@@ -473,7 +473,6 @@ function buildDynamicBiomarkerForm(activeInvestigations) {
     });
 
     if (requiredKeys.size === 0) {
-        // Default to baseline FBC + Glucose keys
         ["Glucose", "Hemoglobin", "Platelets", "White Blood Cells", "Red Blood Cells", "HbA1c", "Cholesterol"].forEach(k => requiredKeys.add(k));
     }
     
@@ -518,8 +517,8 @@ function buildDynamicBiomarkerForm(activeInvestigations) {
     });
 }
 
-function proceedToStep6() {
-    // Gather all entered biomarker values
+// Fixed: Post results to actual selected investigation IDs instead of hardcoded /investigations/1/results
+async function proceedToStep6() {
     const inputs = document.querySelectorAll(".biomarker-input");
     const enteredBiomarkers = {};
     
@@ -527,7 +526,7 @@ function proceedToStep6() {
         const key = inp.dataset.biomarkerKey;
         if (key) {
             const val = parseFloat(inp.value);
-            if (!isNaN(val)) {
+            if (!Number.isNaN(val)) {
                 enteredBiomarkers[key] = val;
                 biomarkerValues[key] = val;
             }
@@ -539,20 +538,49 @@ function proceedToStep6() {
         return;
     }
 
-    // Submit investigation results to backend
-    fetch(`/api/cases/${currentCaseId}/investigations/1/results`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            results: enteredBiomarkers
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+        const activeInvestigations = selectedInvestigations.filter(item => item.doctor_selected);
+        if (activeInvestigations.length === 0) {
+            throw new Error("No investigation selected.");
+        }
+
+        for (const item of activeInvestigations) {
+            const investigation = item.investigation;
+            const allowedKeys = investigation?.biomarker_keys || [];
+            const investigationResults = {};
+
+            allowedKeys.forEach(key => {
+                if (Object.prototype.hasOwnProperty.call(enteredBiomarkers, key)) {
+                    investigationResults[key] = enteredBiomarkers[key];
+                }
+            });
+
+            if (Object.keys(investigationResults).length === 0) {
+                // If test has general biomarkers, pass entered biomarkers
+                Object.assign(investigationResults, enteredBiomarkers);
+            }
+
+            const response = await fetch(
+                `/api/cases/${currentCaseId}/investigations/${item.investigation_id}/results`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ results: investigationResults })
+                }
+            );
+
+            const data = await response.json();
+            if (!response.ok || data.status !== "success") {
+                throw new Error(data.error || `Failed to save ${investigation ? investigation.name : 'investigation results'}`);
+            }
+        }
+
         navigateToStep(6);
         runBiomarkerPredictionBackend(enteredBiomarkers);
-    })
-    .catch(err => console.error("Error submitting results:", err));
+    } catch (error) {
+        console.error(error);
+        showToast(error.message, "error");
+    }
 }
 
 // ── 7. Predicted Diagnosis, AI Summary & Report Builder ──────────────
@@ -591,7 +619,6 @@ function renderPredictionResults(data) {
     const modelLbl = document.getElementById("modelUsedLabel");
     const probTable = document.getElementById("probTable");
 
-    // Enforce Standardized Output Label: Predicted Diagnosis
     if (diagName) diagName.textContent = data.predicted_diagnosis || "Healthy";
     if (confLarge) confLarge.textContent = `${data.confidence || 0}%`;
     if (confBar) confBar.style.width = `${data.confidence || 0}%`;
@@ -601,7 +628,6 @@ function renderPredictionResults(data) {
         desc.textContent = data.prediction_details?.description || "Algorithmic inference completed based on normalised biomarker profile.";
     }
     
-    // Render weighted probabilities table
     if (probTable && data.prediction_details?.probabilities) {
         probTable.innerHTML = "";
         const probs = data.prediction_details.probabilities;
@@ -662,8 +688,9 @@ function finalizeAndBuildReport() {
     .then(data => {
         if (data.status === "success") {
             showToast("Report generated and case saved to history successfully!", "success");
+            // Fixed query parameter name from &id= to &record_id=
             setTimeout(() => {
-                window.location.href = `/portal?section=view_record&id=${currentCaseId}`;
+                window.location.href = `/portal?section=view_record&record_id=${currentCaseId}`;
             }, 1200);
         } else {
             showToast("Failed to generate report.", "error");

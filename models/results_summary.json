@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "trained_at": "2026-08-18T23:22:25.132932",
+    "trained_at": "2026-08-19T12:50:39.611978",
     "author": "Enock Queenson Eduafo & Christabel Araba Edumadze",
     "features": [
       "Glucose",
@@ -30,68 +30,68 @@
     ],
     "preprocessing": "StandardScaler",
     "dataset_clean": true,
-    "deduplicated": true,
     "train_samples": 440,
-    "test_samples": 111
+    "test_samples": 111,
+    "leakage_free": true
   },
   "best_model": "Decision Tree",
   "best_model_key": "decision_tree",
   "models": [
     {
-      "name": "Logistic Regression",
-      "key": "logistic_regression",
-      "accuracy": 0.5586,
-      "precision": 0.687,
-      "recall": 0.5586,
-      "f1_score": 0.5808,
-      "cv_mean": 0.45,
+      "name": "Random Forest",
+      "key": "random_forest",
+      "accuracy": 0.7297,
+      "precision": 0.7972,
+      "recall": 0.7297,
+      "f1_score": 0.6941,
+      "cv_mean": 0.6455,
       "confusion_matrix": [
         [
-          13,
-          2,
+          11,
+          9,
           0,
-          2,
-          2,
-          1
-        ],
-        [
-          10,
-          32,
-          5,
-          8,
-          5,
-          2
-        ],
-        [
-          2,
-          1,
-          1,
           0,
           0,
           0
         ],
         [
           0,
+          61,
           0,
+          0,
+          0,
+          1
+        ],
+        [
+          1,
+          2,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
           0,
           6,
-          1,
-          1
-        ],
-        [
-          4,
           0,
+          2,
           0,
-          1,
-          8,
           0
         ],
         [
           0,
+          9,
           0,
           0,
+          4,
+          0
+        ],
+        [
           0,
           2,
+          0,
+          0,
+          0,
           2
         ]
       ]
@@ -156,65 +156,6 @@
       ]
     },
     {
-      "name": "Random Forest",
-      "key": "random_forest",
-      "accuracy": 0.7297,
-      "precision": 0.7972,
-      "recall": 0.7297,
-      "f1_score": 0.6941,
-      "cv_mean": 0.6455,
-      "confusion_matrix": [
-        [
-          11,
-          9,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          61,
-          0,
-          0,
-          0,
-          1
-        ],
-        [
-          1,
-          2,
-          1,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          6,
-          0,
-          2,
-          0,
-          0
-        ],
-        [
-          0,
-          9,
-          0,
-          0,
-          4,
-          0
-        ],
-        [
-          0,
-          2,
-          0,
-          0,
-          0,
-          2
-        ]
-      ]
-    },
-    {
       "name": "Svm",
       "key": "svm",
       "accuracy": 0.6577,
@@ -269,6 +210,65 @@
           1,
           0,
           1,
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Logistic Regression",
+      "key": "logistic_regression",
+      "accuracy": 0.5586,
+      "precision": 0.687,
+      "recall": 0.5586,
+      "f1_score": 0.5808,
+      "cv_mean": 0.45,
+      "confusion_matrix": [
+        [
+          13,
+          2,
+          0,
+          2,
+          2,
+          1
+        ],
+        [
+          10,
+          32,
+          5,
+          8,
+          5,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          6,
+          1,
+          1
+        ],
+        [
+          4,
+          0,
+          0,
+          1,
+          8,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          2,
           2
         ]
       ]

@@ -2,24 +2,13 @@
 
 **AI-Powered Clinical Diagnostic Platform**
 
-> A production-grade, portfolio-quality healthcare AI system using ensemble machine learning to detect six chronic conditions from 24 standardised blood biomarkers — achieving **95.1% accuracy** with a Random Forest classifier.
+> A production-grade clinical decision support web application using machine learning to detect chronic conditions from 24 standardized blood biomarkers alongside a 6-step symptom-driven diagnostic workflow.
 
 ---
 
 ## Overview
 
-Smart Health Sync is a final-year Computer Science research project at the **University of Ghana** (2026). It is designed as a scalable, enterprise-quality proof-of-concept demonstrating how supervised machine learning can augment clinical decision support in resource-constrained healthcare environments.
-
-### Detectable Conditions
-
-| Condition | Key Biomarkers | F1-Score |
-|---|---|---|
-| Healthy Reference | Baseline values | 0.985 |
-| Type 2 Diabetes | HbA1c, Glucose | 0.942 |
-| Clinical Anemia | Hemoglobin, RBC | 0.958 |
-| Ischemic Heart Disease | Troponin, Lipids | 0.931 |
-| Thalassemia | MCV, MCH | 0.967 |
-| Thrombocytopenia | Platelets | 0.948 |
+Smart Health Sync is a final-year Computer Science research project at the **University of Ghana** (2026). It is designed as a scalable, enterprise-quality proof-of-concept demonstrating how supervised machine learning and clinical decision rules can augment diagnostic support in resource-constrained healthcare environments.
 
 ---
 
@@ -64,13 +53,13 @@ The system implements a production-grade relational schema for clinical data man
 - **Users**: Authentication and RBAC (Admin/Provider roles).
 - **Patients**: Encrypted patient metadata and clinical history.
 - **DiagnosticRecords**: Immutable logs of AI predictions with biomarker snapshots.
-- **ModelAuditLogs**: Traceability for model usage and performance drift.
+- **Symptom & Investigation Catalogs**: Decision support workflow tables.
 
 ---
 
 ## Security & Reliability
 
-- **Rate Limiting**: Integrated `Flask-Limiter` with Redis/Memory support (200/day, 10/min).
+- **Rate Limiting**: Integrated `Flask-Limiter` with Redis/Memory support.
 - **Environment Isolation**: Secure config management via `pathlib` and environment variables.
 - **Model Fallback**: Cascade system ensures diagnostic availability even if primary models are corrupt.
 - **CORS**: Strict origin-based access control.
@@ -79,18 +68,18 @@ The system implements a production-grade relational schema for clinical data man
 
 ## ML Models
 
-| Model | Test Accuracy | CV Mean | Status |
-|---|---|---|---|
-| **Random Forest** ⭐ | **95.1%** | 94.1% | Production |
-| SVM (RBF Kernel) | 94.9% | 93.8% | Valid |
-| Decision Tree | 92.6% | 91.7% | Valid |
-| Logistic Regression | 81.9% | 82.2% | Baseline |
+| Model | Test Accuracy | Test F1-Score | CV Mean | Status |
+|---|---|---|---|---|
+| **Decision Tree** ⭐ | **76.6%** | **0.7704** | 62.1% | Active Best |
+| Random Forest | 73.0% | 0.6941 | 64.6% | Valid |
+| SVM (RBF Kernel) | 65.8% | 0.6325 | 63.0% | Valid |
+| Logistic Regression | 55.9% | 0.5808 | 45.0% | Baseline |
 
 Training details:
 - **24 biomarkers** (metabolic, cardiovascular, hematological, hepatic/renal)
-- **3,700+ training samples** balanced with **SMOTE**
+- **440 clean training samples** and **111 clean test samples** (strictly separated without leakage)
 - **Stratified 5-Fold Cross-Validation**
-- **StandardScaler** preprocessing
+- **StandardScaler** feature normalization
 
 ---
 

@@ -350,3 +350,26 @@ def get_verified_doctors():
         "doctors": [{"id": d.id, "full_name": d.full_name, "specialization": d.specialization, "hospital": d.hospital} for d in doctors]
     }), 200
 
+
+# ── GET /admin/doctors/<doctor_id>/proof ─────────────────────
+@auth_bp.route("/admin/doctors/<int:doctor_id>/proof", methods=["GET"])
+def download_doctor_proof(doctor_id):
+    """Super Admin: download uploaded proof document for doctor verification."""
+    from flask import send_from_directory
+    if session.get("role") != "admin":
+        return jsonify({"error": "Admin access required."}), 403
+
+    user = User.query.get(doctor_id)
+    if not user or user.role != "doctor":
+        return jsonify({"error": "Doctor account not found."}), 404
+
+    if not user.proof_filename:
+        return jsonify({"error": "No proof document uploaded for this doctor."}), 404
+
+    upload_folder = current_app.config.get("UPLOAD_FOLDER")
+    if not upload_folder or not os.path.exists(os.path.join(upload_folder, user.proof_filename)):
+        return jsonify({"error": "Proof file not found on server storage."}), 404
+
+    return send_from_directory(upload_folder, user.proof_filename, as_attachment=True)
+
+

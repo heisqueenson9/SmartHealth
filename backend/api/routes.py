@@ -20,12 +20,33 @@ api_bp  = Blueprint("api", __name__)
 # ── /api/health ──────────────────────────────────────────────
 @api_bp.route("/health", methods=["GET"])
 def health():
-    """General system health check."""
+    """Readiness health check verifying DB connectivity and ML models."""
+    from sqlalchemy import text
+    checks = {
+        "database": False,
+        "models": False,
+    }
+    try:
+        db.session.execute(text("SELECT 1"))
+        checks["database"] = True
+    except Exception as exc:
+        logger.exception("Database health check failed: %s", exc)
+
+    try:
+        report = model_manager.health_report()
+        checks["models"] = bool(
+            report.get("loaded_models") and report.get("scaler_loaded") and report.get("encoder_loaded")
+        )
+    except Exception:
+        logger.exception("Model health check failed.")
+
+    ready = all(checks.values())
     return jsonify({
-        "status":  "online",
+        "status": "healthy" if ready else "degraded",
         "service": "Smart Health Sync API",
         "version": "2.0.0",
-    }), 200
+        "checks": checks,
+    }), 200 if ready else 503
 
 
 # ── /api/health/models ───────────────────────────────────────
@@ -1587,16 +1608,96 @@ def search_symptoms():
     }), 200
 
 
-@api_bp.route("/cases/<int:case_id>/symptoms", methods=["POST"])
-def capture_case_symptoms(case_id):
+def get_authorized_case(case_id, allow_admin=True):
+    """
+    Authorization helper to enforce patient/case security.
+    Verifies authentication, role, approval status, case existence, and doctor ownership.
+    """
     user_id = session.get("user_id")
     role = session.get("role")
-    if not user_id or role not in ("doctor", "admin", "technician"):
-        return jsonify({"error": "Unauthorized."}), 403
-        
+    status = session.get("status")
+    if not user_id:
+        return None, (jsonify({"error": "Authentication required."}), 401)
+    if role == "doctor":
+        if status != "approved":
+            return None, (jsonify({"error": "Approved doctor account required."}), 403)
+    elif role == "admin":
+        if not allow_admin:
+            return None, (jsonify({"error": "Admin access not permitted."}), 403)
+    elif role != "technician":
+        return None, (jsonify({"error": "Doctor or admin access required."}), 403)
+
     record = DiagnosticRecord.query.get(case_id)
     if not record:
-        return jsonify({"error": "Case not found."}), 404
+        return None, (jsonify({"error": "Case not found."}), 404)
+
+    if role == "doctor" and record.user_id != user_id:
+        return None, (jsonify({"error": "Access denied to this case."}), 403)
+
+    return record, None
+
+
+@api_bp.route("/cases", methods=["POST"])
+def create_case():
+    """
+    Dedicated endpoint to initialize a new clinical case record.
+    Separates case creation from prediction inference per specification.
+    """
+    user_id = session.get("user_id")
+    role = session.get("role")
+    status = session.get("status")
+    if not user_id:
+        return jsonify({"error": "Authentication required."}), 401
+    if role not in ("doctor", "admin"):
+        return jsonify({"error": "Doctor or admin access required."}), 403
+    if role == "doctor" and status != "approved":
+        return jsonify({"error": "Approved doctor account required."}), 403
+
+    data = request.get_json(force=True, silent=True) or {}
+    patient_id = data.get("patient_id")
+    patient_reference = str(data.get("patient_reference", "")).strip() or None
+
+    patient = None
+    if patient_id is not None:
+        try:
+            patient_id = int(patient_id)
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid patient_id."}), 400
+        patient = Patient.query.get(patient_id)
+        if not patient:
+            return jsonify({"error": "Patient profile not found."}), 404
+        if role == "doctor" and patient.doctor_id != user_id and patient.user_id != user_id:
+            return jsonify({"error": "Access denied to this patient profile."}), 403
+
+    if not patient_reference:
+        import uuid
+        patient_reference = f"SHS-GEN-{uuid.uuid4().hex[:6].upper()}"
+
+    record = DiagnosticRecord(
+        user_id=user_id,
+        patient_id=patient.id if patient else None,
+        patient_reference=patient_reference,
+        biomarkers_json=json.dumps({}),
+        result_json=json.dumps({}),
+        prediction_label="Pending Assessment",
+        confidence_score=0.0,
+        status="draft",
+        case_status="Draft Case",
+    )
+    db.session.add(record)
+    db.session.commit()
+
+    return jsonify({
+        "status": "success",
+        "case": record.to_dict()
+    }), 201
+
+
+@api_bp.route("/cases/<int:case_id>/symptoms", methods=["POST"])
+def capture_case_symptoms(case_id):
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
         
     data = request.get_json(force=True, silent=True) or {}
     symptoms_list = data.get("symptoms", [])
@@ -1650,7 +1751,7 @@ def capture_case_symptoms(case_id):
             severity=severity,
             notes=notes,
             mapping_confidence=1.0 if matched_catalog else 0.5,
-            created_by=user_id
+            created_by=session.get("user_id")
         )
         db.session.add(pcs)
         added_symptoms.append(pcs)
@@ -1668,9 +1769,9 @@ def capture_case_symptoms(case_id):
 
 @api_bp.route("/cases/<int:case_id>/symptoms/<int:symptom_id>", methods=["PATCH"])
 def update_case_symptom(case_id, symptom_id):
-    user_id = session.get("user_id")
-    if not user_id:
-        return jsonify({"error": "Unauthorized."}), 401
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
         
     from backend.database.models import PatientCaseSymptom
     pcs = PatientCaseSymptom.query.filter_by(id=symptom_id, case_id=case_id).first()
@@ -1689,14 +1790,9 @@ def update_case_symptom(case_id, symptom_id):
 
 @api_bp.route("/cases/<int:case_id>/pre-assessment", methods=["POST"])
 def run_pre_assessment(case_id):
-    user_id = session.get("user_id")
-    role = session.get("role")
-    if not user_id or role not in ("doctor", "admin"):
-        return jsonify({"error": "Unauthorized. Verified doctor account required."}), 403
-        
-    record = DiagnosticRecord.query.get(case_id)
-    if not record:
-        return jsonify({"error": "Case record not found."}), 404
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
         
     from backend.database.models import PatientCaseSymptom, PreliminaryAssessment, AssessmentCandidate
     
@@ -1766,7 +1862,7 @@ def run_pre_assessment(case_id):
             "supported_by_biomarker_model": True
         })
 
-    # 6. Typhoid Fever
+    # 6. Typhoid Fever (Not supported by biomarker classifier model)
     typhoid_matches = [s for s in all_sym_strings if any(t in s for t in ["fever", "abdominal", "headache", "diarrhea", "cramps"])]
     if any("fever" in m for m in typhoid_matches) and len(typhoid_matches) >= 2:
         score = round(50.0 + len(typhoid_matches) * 15.0, 1)
@@ -1775,7 +1871,7 @@ def run_pre_assessment(case_id):
             "condition_name": "Typhoid Fever",
             "score": score,
             "rationale": f"Febrile gastroenteritis cluster ({', '.join(set(typhoid_matches))}) indicates possible systemic Salmonella enterica infection.",
-            "supported_by_biomarker_model": True
+            "supported_by_biomarker_model": False
         })
 
     if not candidates_scores and symptoms:
@@ -1820,9 +1916,9 @@ def run_pre_assessment(case_id):
 
 @api_bp.route("/cases/<int:case_id>/investigation-recommendations", methods=["GET"])
 def get_investigation_recommendations(case_id):
-    user_id = session.get("user_id")
-    if not user_id:
-        return jsonify({"error": "Unauthorized."}), 401
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
         
     from backend.database.models import PreliminaryAssessment, InvestigationRule, InvestigationCatalog
     
@@ -1882,14 +1978,9 @@ def get_investigation_recommendations(case_id):
 
 @api_bp.route("/cases/<int:case_id>/investigations", methods=["POST"])
 def select_case_investigations(case_id):
-    user_id = session.get("user_id")
-    role = session.get("role")
-    if not user_id or role not in ("doctor", "admin"):
-        return jsonify({"error": "Unauthorized."}), 403
-        
-    record = DiagnosticRecord.query.get(case_id)
-    if not record:
-        return jsonify({"error": "Case not found."}), 404
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
         
     data = request.get_json(force=True, silent=True) or {}
     selections = data.get("investigations", [])
@@ -1932,9 +2023,9 @@ def select_case_investigations(case_id):
 
 @api_bp.route("/cases/<int:case_id>/investigations/<int:inv_id>/status", methods=["PATCH"])
 def update_investigation_status(case_id, inv_id):
-    user_id = session.get("user_id")
-    if not user_id:
-        return jsonify({"error": "Unauthorized."}), 401
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
         
     from backend.database.models import CaseInvestigation
     ci = CaseInvestigation.query.filter_by(id=inv_id, case_id=case_id).first()
@@ -1951,14 +2042,9 @@ def update_investigation_status(case_id, inv_id):
 
 @api_bp.route("/cases/<int:case_id>/investigations/<int:inv_id>/results", methods=["POST"])
 def enter_investigation_results(case_id, inv_id):
-    user_id = session.get("user_id")
-    role = session.get("role")
-    if not user_id or role not in ("doctor", "admin", "technician"):
-        return jsonify({"error": "Unauthorized."}), 403
-        
-    record = DiagnosticRecord.query.get(case_id)
-    if not record:
-        return jsonify({"error": "Case not found."}), 404
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
         
     from backend.database.models import CaseInvestigation, InvestigationResult
     ci = CaseInvestigation.query.filter_by(id=inv_id, case_id=case_id).first()
@@ -2008,14 +2094,9 @@ def enter_investigation_results(case_id, inv_id):
 
 @api_bp.route("/cases/<int:case_id>/predictions", methods=["POST"])
 def run_case_prediction(case_id):
-    user_id = session.get("user_id")
-    role = session.get("role")
-    if not user_id or role not in ("doctor", "admin"):
-        return jsonify({"error": "Unauthorized doctor access required."}), 403
-        
-    record = DiagnosticRecord.query.get(case_id)
-    if not record:
-        return jsonify({"error": "Case not found."}), 404
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
         
     data = request.get_json(force=True, silent=True) or {}
     model_key = data.get("model", "random_forest")
@@ -2080,14 +2161,9 @@ def run_case_prediction(case_id):
 
 @api_bp.route("/cases/<int:case_id>/ai-summary", methods=["POST"])
 def generate_case_ai_summary(case_id):
-    user_id = session.get("user_id")
-    role = session.get("role")
-    if not user_id or role not in ("doctor", "admin"):
-        return jsonify({"error": "Unauthorized."}), 403
-        
-    record = DiagnosticRecord.query.get(case_id)
-    if not record:
-        return jsonify({"error": "Case not found."}), 404
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
         
     from backend.database.models import PatientCaseSymptom, PreliminaryAssessment, CaseInvestigation, AISummary
     
@@ -2143,14 +2219,9 @@ def generate_case_ai_summary(case_id):
 
 @api_bp.route("/cases/<int:case_id>/reports", methods=["POST"])
 def build_case_report(case_id):
-    user_id = session.get("user_id")
-    role = session.get("role")
-    if not user_id or role not in ("doctor", "admin"):
-        return jsonify({"error": "Unauthorized."}), 403
-        
-    record = DiagnosticRecord.query.get(case_id)
-    if not record:
-        return jsonify({"error": "Case not found."}), 404
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
         
     data = request.get_json(force=True, silent=True) or {}
     sections = data.get("sections", [
@@ -2158,7 +2229,7 @@ def build_case_report(case_id):
         "Recommended Investigations", "Investigations Performed", "Results/Biomarkers",
         "Predicted Diagnosis", "AI Clinical Summary", "Doctor Notes", "Doctor Identity/Signature"
     ])
-    signature = data.get("doctor_signature", f"Dr. User #{user_id}")
+    signature = data.get("doctor_signature", f"Dr. User #{session.get('user_id')}")
     
     import uuid
     report_uuid = f"REP-{uuid.uuid4().hex[:8].upper()}"
