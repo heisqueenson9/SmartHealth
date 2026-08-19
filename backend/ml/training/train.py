@@ -34,7 +34,8 @@ logger = logging.getLogger("smarthealth.train")
 
 # ── Paths ────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-DATA_DIR = BASE_DIR / "datasets"
+DATA_DIR = BASE_DIR / "data"
+DATASETS_DIR = BASE_DIR / "datasets"
 MODELS_ROOT = BASE_DIR / "models"
 REGISTRY_DIR = BASE_DIR / "backend" / "ml" / "registry" / "models"
 
@@ -53,8 +54,15 @@ FEATURES = [
 ]
 
 DISEASE_LABELS = {
-    'Healthy': 'Healthy', 'Diabetes': 'Diabetes', 'Anemia': 'Anemia',
-    'Thalasse': 'Thalassemia', 'Thromboc': 'Thrombocytopenia', 'Heart Di': 'Heart Disease'
+    'Healthy': 'Healthy',
+    'Diabetes': 'Diabetes',
+    'Anemia': 'Anemia',
+    'Thalasse': 'Thalassemia',
+    'Thalassemia': 'Thalassemia',
+    'Thromboc': 'Thrombocytopenia',
+    'Thrombocytopenia': 'Thrombocytopenia',
+    'Heart Di': 'Heart Disease',
+    'Heart Disease': 'Heart Disease'
 }
 
 # ── Pipeline Class ───────────────────────────────────────────
@@ -72,12 +80,14 @@ class TrainingPipeline:
 
     def load_data(self):
         logger.info("Loading datasets...")
-        train_df = pd.read_csv(DATA_DIR / "train_data.csv")
-        test_df = pd.read_csv(DATA_DIR / "test_data.csv")
+        data_source = DATA_DIR if (DATA_DIR / "train_data.csv").exists() else DATASETS_DIR
+        train_df = pd.read_csv(data_source / "train_data.csv")
+        test_df = pd.read_csv(data_source / "test_data.csv")
         df = pd.concat([train_df, test_df], ignore_index=True)
         
         df['Disease'] = df['Disease'].map(DISEASE_LABELS).fillna(df['Disease'])
-        df = df.dropna()
+        df = df.dropna().drop_duplicates().reset_index(drop=True)
+        logger.info(f"Loaded {len(df)} clean deduplicated samples across {df['Disease'].nunique()} classes.")
         
         X = df[FEATURES].values
         y = self.label_encoder.fit_transform(df['Disease'].values)
@@ -106,22 +116,32 @@ class TrainingPipeline:
             
             # Metrics
             acc = accuracy_score(y_test, y_pred)
-            f1 = f1_score(y_test, y_pred, average='weighted')
+            prec = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+            rec = recall_score(y_test, y_pred, average='weighted', zero_division=0)
+            f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
             cv_scores = cross_val_score(model, X_train_scaled, y_train, cv=cv)
             
             logger.info(f"  {name} Result: Accuracy={acc:.4f}, F1={f1:.4f}, CV={cv_scores.mean():.4f}")
             
             # Save Model
             self._persist_artefact(model, f"{name}.pkl")
+            if name == "svm":
+                self._persist_artefact(model, "support_vector_machine.pkl")
             
             self.results.append({
                 'name': name.replace('_', ' ').title(),
                 'key': name,
                 'accuracy': round(float(acc), 4),
+                'precision': round(float(prec), 4),
+                'recall': round(float(rec), 4),
                 'f1_score': round(float(f1), 4),
                 'cv_mean': round(float(cv_scores.mean()), 4),
                 'confusion_matrix': confusion_matrix(y_test, y_pred).tolist()
             })
+
+        best_model_entry = max(self.results, key=lambda x: x['f1_score'])
+        best_model_obj = self.models[best_model_entry['key']]
+        self._persist_artefact(best_model_obj, "best_model.pkl")
 
     def _persist_artefact(self, obj, filename):
         for target_dir in [MODELS_ROOT, REGISTRY_DIR]:
@@ -135,7 +155,10 @@ class TrainingPipeline:
             'metadata': {
                 'trained_at': datetime.utcnow().isoformat(),
                 'author': 'Enock Queenson Eduafo & Christabel Araba Edumadze',
-                'features': FEATURES
+                'features': FEATURES,
+                'preprocessing': 'StandardScaler',
+                'dataset_clean': True,
+                'deduplicated': True
             },
             'best_model': best_model['name'],
             'best_model_key': best_model['key'],
@@ -153,3 +176,4 @@ if __name__ == "__main__":
     pipeline.train_and_evaluate()
     pipeline.save_summary()
     logger.info("Training pipeline completed successfully.")
+

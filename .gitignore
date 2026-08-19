@@ -54,3 +54,12 @@ build/
 
 
 /frontend/static/uploads/*
+
+# ── Large Datasets ───────────────────────────────────────────
+data/Final_Augmented_dataset_Diseases_and_Symptoms.csv
+*.csv.zip
+
+# ── Local SQLite Instance ─────────────────────────────────────
+instance/
+*.db
+

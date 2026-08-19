@@ -1,869 +1,697 @@
 /**
- * Smart Health Sync v2.0 — Diagnosis Engine JavaScript
+ * Smart Health Sync v2.0 — Clinical Workflow & Diagnosis Engine
  * Author: Enock Queenson Eduafo | University of Ghana 2026
  */
 
 "use strict";
 
-// ── Feature order (matches backend FEATURE_ORDER) ─────────────
-const FEATURES = [
-    'Glucose', 'Cholesterol', 'Hemoglobin', 'Platelets',
-    'White Blood Cells', 'Red Blood Cells', 'Hematocrit',
-    'Mean Corpuscular Volume', 'Mean Corpuscular Hemoglobin',
-    'Mean Corpuscular Hemoglobin Concentration',
-    'Insulin', 'BMI', 'Systolic Blood Pressure', 'Diastolic Blood Pressure',
-    'Triglycerides', 'HbA1c', 'LDL Cholesterol', 'HDL Cholesterol',
-    'ALT', 'AST', 'Heart Rate', 'Creatinine', 'Troponin', 'C-reactive Protein'
-];
+let currentStep = 1;
+let currentCaseId = null;
+let recordedSymptoms = [];
+let preliminaryCandidates = [];
+let selectedInvestigations = [];
+let biomarkerValues = {};
+let latestPrediction = null;
 
-// Clinical display names for print card
-const FEATURE_LABELS = {
-    'Glucose': 'Fasting Glucose (mg/dL)',
-    'Cholesterol': 'Total Cholesterol (mg/dL)',
-    'Hemoglobin': 'Haemoglobin (g/dL)',
-    'Platelets': 'Platelets (×10³/µL)',
-    'White Blood Cells': 'WBC (×10³/µL)',
-    'Red Blood Cells': 'RBC (×10⁶/µL)',
-    'Hematocrit': 'Haematocrit (%)',
-    'Mean Corpuscular Volume': 'MCV (fL)',
-    'Mean Corpuscular Hemoglobin': 'MCH (pg)',
-    'Mean Corpuscular Hemoglobin Concentration': 'MCHC (g/dL)',
-    'Insulin': 'Insulin (µIU/mL)',
-    'BMI': 'BMI (kg/m²)',
-    'Systolic Blood Pressure': 'Systolic BP (mmHg)',
-    'Diastolic Blood Pressure': 'Diastolic BP (mmHg)',
-    'Triglycerides': 'Triglycerides (mg/dL)',
-    'HbA1c': 'HbA1c (%)',
-    'LDL Cholesterol': 'LDL Cholesterol (mg/dL)',
-    'HDL Cholesterol': 'HDL Cholesterol (mg/dL)',
-    'ALT': 'ALT (U/L)',
-    'AST': 'AST (U/L)',
-    'Heart Rate': 'Heart Rate (bpm)',
-    'Creatinine': 'Creatinine (mg/dL)',
-    'Troponin': 'Troponin (ng/mL)',
-    'C-reactive Protein': 'CRP (mg/L)',
-    'Widal O Titer': 'Widal O Titer',
-    'Widal H Titer': 'Widal H Titer',
-};
-
-const DISEASE_COLORS = {
-    'Healthy':          '#C5E710',
-    'Diabetes':         '#F4DF6B',
-    'Anemia':           '#ff9966',
-    'Heart Disease':    '#ff4757',
-    'Thalassemia':      '#a855f7',
-    'Thrombocytopenia': '#0099bb',
-};
-
-// ── Preset clinical profiles (normalised 0.0–1.0 values) ──────
-const PRESETS = {
-    healthy:  [0.12, 0.15, 0.65, 0.55, 0.45, 0.60, 0.58, 0.52, 0.55, 0.50,
-               0.15, 0.22, 0.65, 0.45, 0.18, 0.10, 0.14, 0.65, 0.15, 0.14,
-               0.18, 0.15, 0.05, 0.08],
-    diabetes: [0.85, 0.45, 0.55, 0.62, 0.42, 0.52, 0.50, 0.48, 0.45, 0.42,
-               0.72, 0.62, 0.45, 0.42, 0.55, 0.78, 0.48, 0.25, 0.45, 0.42,
-               0.48, 0.52, 0.15, 0.55],
-    anemia:   [0.42, 0.35, 0.15, 0.45, 0.42, 0.22, 0.18, 0.25, 0.22, 0.18,
-               0.35, 0.45, 0.35, 0.32, 0.38, 0.38, 0.32, 0.45, 0.35, 0.32,
-               0.65, 0.38, 0.12, 0.45],
-    heart:    [0.52, 0.85, 0.45, 0.52, 0.55, 0.40, 0.40, 0.45, 0.42, 0.40,
-               0.45, 0.58, 0.82, 0.78, 0.65, 0.48, 0.82, 0.15, 0.52, 0.48,
-               0.85, 0.55, 0.88, 0.85],
-};
-
-// Stored last result for print card
-let _lastResult = null;
-let _lastFeatures = null;
-
-const STORAGE_KEY = "shs_diagnosis_form_state";
-
-function saveFormState() {
-    const state = {
-        patientId: document.getElementById('linkPatientSelect')?.value || "",
-        patientRef: document.getElementById('patientReferenceInput')?.value || "",
-        category: document.getElementById('diseaseCategorySelect')?.value || "all",
-        biomarkers: {}
-    };
-    document.querySelectorAll('.biomarker-input').forEach(input => {
-        state.biomarkers[input.id] = input.value;
-    });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-function loadFormState() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    try {
-        const state = JSON.parse(raw);
-        
-        // Restore category first
-        const categorySelect = document.getElementById('diseaseCategorySelect');
-        if (categorySelect && state.category) {
-            categorySelect.value = state.category;
-            updateFieldVisibility(state.category);
-        }
-        
-        const patientSelect = document.getElementById('linkPatientSelect');
-        const refInput = document.getElementById('patientReferenceInput');
-        if (patientSelect && state.patientId) {
-            patientSelect.value = state.patientId;
-            setTimeout(() => {
-                const event = new Event('change');
-                patientSelect.dispatchEvent(event);
-                if (refInput && state.patientRef) {
-                    refInput.value = state.patientRef;
-                }
-            }, 100);
-        } else {
-            if (refInput && state.patientRef) {
-                refInput.value = state.patientRef;
-            }
-        }
-        
-        // Restore biomarkers
-        if (state.biomarkers) {
-            for (const [id, val] of Object.entries(state.biomarkers)) {
-                const input = document.getElementById(id);
-                if (input && val !== undefined) {
-                    input.value = val;
-                }
-            }
-        }
-    } catch (e) {
-        console.error("Error loading saved form state:", e);
-    }
-}
-
-function clearFormState() {
-    localStorage.removeItem(STORAGE_KEY);
-    const form = document.getElementById('predictionForm');
-    if (form) form.reset();
-    
-    const categorySelect = document.getElementById('diseaseCategorySelect');
-    if (categorySelect) {
-        categorySelect.value = "all";
-        updateFieldVisibility("all");
-    }
-    
-    const patientSelect = document.getElementById('linkPatientSelect');
-    if (patientSelect) {
-        patientSelect.value = "";
-        const event = new Event('change');
-        patientSelect.dispatchEvent(event);
-    }
-}
-
-// ── DOM Ready ─────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    initPresets();
-    initForm();
-    initPatientLinking();
-    initCategorySelector();
-    
-    // Bind state saving events
-    document.getElementById('linkPatientSelect')?.addEventListener('change', saveFormState);
-    document.getElementById('diseaseCategorySelect')?.addEventListener('change', saveFormState);
-    document.querySelectorAll('.biomarker-input').forEach(input => {
-        input.addEventListener('input', saveFormState);
-    });
-    
-    // Clear form button
-    document.getElementById('clearFormBtn')?.addEventListener('click', () => {
-        if (confirm("Are you sure you want to clear all inputs?")) {
-            clearFormState();
-        }
-    });
-
-    // Initialize additional biomarkers search (Task 5)
-    initAdditionalBiomarkersSearch();
-
-    // Load saved form state
-    loadFormState();
+document.addEventListener("DOMContentLoaded", () => {
+    initStepNavigation();
+    initPatientSelector();
+    initSymptomSearch();
 });
 
-// ── Category Selection Visibility Control ─────────────────────
-const CATEGORY_FIELDS = {
-    all: [
-        'Glucose', 'Cholesterol', 'Hemoglobin', 'Platelets', 'White Blood Cells', 'Red Blood Cells',
-        'Hematocrit', 'Mean Corpuscular Volume', 'Mean Corpuscular Hemoglobin',
-        'Mean Corpuscular Hemoglobin Concentration', 'Insulin', 'BMI', 'Systolic Blood Pressure',
-        'Diastolic Blood Pressure', 'Triglycerides', 'HbA1c', 'LDL Cholesterol', 'HDL Cholesterol',
-        'ALT', 'AST', 'Heart Rate', 'Creatinine', 'Troponin', 'C-reactive Protein'
-    ],
-    diabetes: ['Glucose', 'HbA1c', 'Cholesterol', 'BMI'],
-    cardiovascular: ['Cholesterol', 'Troponin', 'Systolic Blood Pressure', 'Diastolic Blood Pressure', 'Platelets'],
-    anemia: [
-        'Hemoglobin', 'Red Blood Cells', 'Hematocrit', 'Mean Corpuscular Volume',
-        'Mean Corpuscular Hemoglobin', 'Mean Corpuscular Hemoglobin Concentration'
-    ],
-    typhoid: ['Widal O Titer', 'Widal H Titer', 'White Blood Cells', 'AST', 'ALT']
-};
-
-function initCategorySelector() {
-    const selector = document.getElementById('diseaseCategorySelect');
-    if (!selector) return;
-    selector.addEventListener('change', () => {
-        updateFieldVisibility(selector.value);
-    });
-    // Set initial visibility
-    updateFieldVisibility(selector.value);
-}
-
-function updateFieldVisibility(category) {
-    manuallyAddedFeatures.clear();
-    const visibleFeatures = CATEGORY_FIELDS[category] || CATEGORY_FIELDS.all;
-    
-    // Toggle input field column wrappers
-    const inputs = document.querySelectorAll('.biomarker-input');
-    inputs.forEach(input => {
-        const featName = input.dataset.feature;
-        const col = input.closest('.col-12');
-        if (!col) return;
-        
-        if (visibleFeatures.includes(featName)) {
-            col.style.display = 'block';
-            col.classList.remove('d-none');
-        } else {
-            col.style.display = 'none';
-            col.classList.add('d-none');
-        }
-    });
-
-    // Toggle Typhoid only titles/wrappers
-    const typhoidGroups = document.querySelectorAll('.typhoid-only-group');
-    typhoidGroups.forEach(grp => {
-        if (category === 'typhoid') {
-            grp.style.display = 'block';
-            grp.classList.remove('d-none');
-        } else {
-            grp.style.display = 'none';
-            grp.classList.add('d-none');
-        }
-    });
-
-    updateGroupHeaders();
-    updateSearchableBiomarkers();
-}
-
-// ── Searchable Additional Biomarkers Dropdown Logic ──
-const manuallyAddedFeatures = new Set();
-
-function initAdditionalBiomarkersSearch() {
-    const searchInput = document.getElementById("biomarkerSearchInput");
-    const suggestionsList = document.getElementById("biomarkerSuggestionsList");
-    if (!searchInput || !suggestionsList) return;
-
-    searchInput.addEventListener("input", () => {
-        const query = searchInput.value.toLowerCase().trim();
-        const items = suggestionsList.querySelectorAll("li");
-        let visibleCount = 0;
-        
-        items.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            if (text.includes(query)) {
-                item.style.display = "block";
-                visibleCount++;
-            } else {
-                item.style.display = "none";
-            }
-        });
-
-        suggestionsList.style.display = (query.length > 0 && visibleCount > 0) ? "block" : "none";
-    });
-
-    searchInput.addEventListener("focus", () => {
-        updateSearchableBiomarkers();
-        const query = searchInput.value.toLowerCase().trim();
-        const items = suggestionsList.querySelectorAll("li");
-        if (items.length > 0) {
-            suggestionsList.style.display = "block";
-        }
-    });
-
-    // Close suggestions when clicking outside
-    document.addEventListener("click", (e) => {
-        if (!searchInput.contains(e.target) && !suggestionsList.contains(e.target)) {
-            suggestionsList.style.display = "none";
-        }
-    });
-}
-
-function updateSearchableBiomarkers() {
-    const categorySelect = document.getElementById('diseaseCategorySelect');
-    const category = categorySelect ? categorySelect.value : 'all';
-    
-    const additionalSection = document.getElementById('additionalBiomarkersSection');
-    const suggestionsList = document.getElementById("biomarkerSuggestionsList");
-    if (!suggestionsList) return;
-
-    // Searchable dropdown is only needed if a specific category is selected (not "all" or "typhoid")
-    if (category === 'all' || category === 'typhoid') {
-        if (additionalSection) additionalSection.style.display = 'none';
-        return;
-    } else {
-        if (additionalSection) additionalSection.style.display = 'block';
-    }
-
-    const visibleFeatures = CATEGORY_FIELDS[category] || CATEGORY_FIELDS.all;
-    
-    // Find all biomarkers from the 24 panel that are not visible and not manually added
-    const remainingFeatures = FEATURES.filter(f => !visibleFeatures.includes(f) && !manuallyAddedFeatures.has(f));
-
-    suggestionsList.innerHTML = "";
-    remainingFeatures.forEach(f => {
-        const li = document.createElement("li");
-        li.textContent = f;
-        li.style.padding = "8px 12px";
-        li.style.cursor = "pointer";
-        li.style.borderBottom = "1px solid var(--bg-border, #333)";
-        
-        li.addEventListener("mouseover", () => {
-            li.style.background = "rgba(197, 231, 16, 0.08)";
-            li.style.color = "var(--cyan-primary)";
-        });
-        li.addEventListener("mouseout", () => {
-            li.style.background = "";
-            li.style.color = "";
-        });
-
-        li.addEventListener("click", () => {
-            manuallyAddedFeatures.add(f);
-            
-            // Unhide input field
-            const inputs = document.querySelectorAll('.biomarker-input');
-            inputs.forEach(input => {
-                if (input.dataset.feature === f) {
-                    const col = input.closest('.col-12');
-                    if (col) {
-                        col.style.display = 'block';
-                        col.classList.remove('d-none');
-                        // Highlight animation border
-                        input.style.borderColor = 'var(--cyan-primary)';
-                        setTimeout(() => (input.style.borderColor = ''), 1000);
-                        input.focus();
-                    }
-                }
-            });
-
-            // Re-run group title check and suggestion lists
-            updateGroupHeaders();
-            updateSearchableBiomarkers();
-            
-            // Clear input
-            const searchInput = document.getElementById("biomarkerSearchInput");
-            if (searchInput) {
-                searchInput.value = "";
-            }
-            suggestionsList.style.display = "none";
-        });
-
-        suggestionsList.appendChild(li);
-    });
-}
-
-function updateGroupHeaders() {
-    const groups = [
-        { title: 'Metabolic Indices', selector: '#f-Glucose, #f-Insulin, #f-BMI, #f-HbA1c' },
-        { title: 'Cardiovascular Metrics', selector: '#f-Cholesterol, #f-LDL, #f-HDL, #f-Triglycerides, #f-SBP, #f-DBP, #f-HR, #f-Troponin' },
-        { title: 'Hematology', selector: '#f-Hemoglobin, #f-Platelets, #f-WBC, #f-RBC, #f-Hematocrit, #f-MCV, #f-MCH, #f-MCHC' },
-        { title: 'Liver & Kidney Function', selector: '#f-ALT, #f-AST, #f-Creatinine, #f-CRP' }
-    ];
-
-    document.querySelectorAll('.biomarker-group-title').forEach(titleEl => {
-        const titleText = titleEl.textContent.trim();
-        const grp = groups.find(g => g.title === titleText);
-        if (grp) {
-            const elements = document.querySelectorAll(grp.selector);
-            let anyVisible = false;
-            elements.forEach(el => {
-                const col = el.closest('.col-12');
-                if (col && col.style.display !== 'none' && !col.classList.contains('d-none')) {
-                    anyVisible = true;
-                }
-            });
-            if (anyVisible) {
-                titleEl.style.display = 'block';
-                titleEl.classList.remove('d-none');
-            } else {
-                titleEl.style.display = 'none';
-                titleEl.classList.add('d-none');
-            }
-        }
-    });
-}
-
-// ── Model Selector ────────────────────────────────────────────
-function initModelSelector() {
-    const options = document.querySelectorAll('.model-option');
-    const hidden  = document.getElementById('selectedModel');
-    options.forEach(opt => {
-        opt.addEventListener('click', () => {
-            options.forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
-            if (hidden) hidden.value = opt.dataset.model;
-        });
-    });
-}
-
-// ── Presets ───────────────────────────────────────────────────
-function initPresets() {
-    document.querySelectorAll('.preset-btn').forEach(btn => {
-        btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
-    });
-}
-
-function applyPreset(key) {
-    const values = PRESETS[key];
-    if (!values) return;
-    const inputs = document.querySelectorAll('.biomarker-input');
-    inputs.forEach((input, i) => {
-        if (values[i] !== undefined) {
-            setTimeout(() => {
-                input.value = values[i];
-                clearFieldError(input);
-                input.style.borderColor = 'var(--cyan-primary)';
-                setTimeout(() => (input.style.borderColor = ''), 600);
-            }, i * 25);
-        }
-    });
-}
-
-// ── Form ──────────────────────────────────────────────────────
-function initForm() {
-    const form = document.getElementById('predictionForm');
-    if (!form) return;
-    form.addEventListener('submit', async e => {
-        e.preventDefault();
-        await runDiagnosis();
-    });
-
-    // Live validation on blur
-    document.querySelectorAll('.biomarker-input').forEach(input => {
-        input.addEventListener('blur', () => {
-            const col = input.closest('.col-12');
-            const isHidden = col && (col.style.display === 'none' || col.classList.contains('d-none'));
-            if (!isHidden) validateSingleField(input);
-        });
-        input.addEventListener('input', () => {
-            if (input.classList.contains('invalid')) {
-                const col = input.closest('.col-12');
-                const isHidden = col && (col.style.display === 'none' || col.classList.contains('d-none'));
-                if (!isHidden) validateSingleField(input);
-            }
-        });
-    });
-}
-
-async function runDiagnosis() {
-    const features = collectFeatures();
-    if (!features) return;
-    const model = document.getElementById('selectedModel')?.value || 'random_forest';
-    const category = document.getElementById('diseaseCategorySelect')?.value || 'all';
-
-    const patientSelect = document.getElementById('linkPatientSelect');
-    const patientRefInput = document.getElementById('patientReferenceInput');
-
-    const patient_id = patientSelect && patientSelect.value ? parseInt(patientSelect.value) : null;
-    let patient_reference = patientRefInput ? patientRefInput.value.trim() : '';
-
-    if (patientSelect && patientSelect.value && !patient_reference) {
-        const selectedOption = patientSelect.options[patientSelect.selectedIndex];
-        patient_reference = selectedOption.text.split(' (ID:')[0].trim();
-    }
-
-    const symptoms = {};
-    if (category === 'typhoid') {
-        symptoms.fever = document.getElementById('symp-fever')?.checked || false;
-        symptoms.abdominal_pain = document.getElementById('symp-pain')?.checked || false;
-        symptoms.headache = document.getElementById('symp-headache')?.checked || false;
-        symptoms.diarrhea_constipation = document.getElementById('symp-diarrhea')?.checked || false;
-        symptoms.fatigue = document.getElementById('symp-fatigue')?.checked || false;
-    }
-
-    const btn = document.getElementById('submitBtn');
-    setLoading(btn, true);
-
-    try {
-        const payload = {
-            features,
-            category,
-            model,
-            patient_id,
-            patient_reference,
-            draft_id: window.selectedDraftId || null,
-            symptoms
-        };
-        const res = await fetch('/api/predict', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            const msg = data.details
-                ? `${data.error}\n\nDetails: ${JSON.stringify(data.details, null, 2)}`
-                : (data.error || `HTTP ${res.status}`);
-            showError(msg);
+// ── 1. Step Navigation & Stepper Bar ─────────────────────────────────
+function navigateToStep(stepNum) {
+    if (stepNum > 1 && !currentCaseId) {
+        if (!initOrCreateCase()) {
+            showToast("Please select a patient case first.", "warning");
             return;
         }
+    }
+    
+    currentStep = stepNum;
+    for (let i = 1; i <= 6; i++) {
+        const container = document.getElementById(`stepContainer${i}`);
+        const badge = document.getElementById(`stepBadge${i}`);
+        if (container) container.style.display = (i === stepNum) ? "block" : "none";
+        if (badge) {
+            if (i === stepNum) {
+                badge.style.borderColor = "var(--cyan-primary)";
+                badge.style.background = "rgba(197, 231, 16, 0.1)";
+                badge.style.color = "var(--cyan-primary)";
+            } else if (i < stepNum) {
+                badge.style.borderColor = "rgba(197, 231, 16, 0.4)";
+                badge.style.background = "rgba(197, 231, 16, 0.03)";
+                badge.style.color = "var(--text-primary)";
+            } else {
+                badge.style.borderColor = "rgba(255, 255, 255, 0.1)";
+                badge.style.background = "transparent";
+                badge.style.color = "var(--text-secondary)";
+            }
+        }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-        _lastResult   = data;
-        _lastFeatures = features;
-        setTimeout(() => showResult(data), 600);
-    } catch (err) {
-        showError('Network error: ' + err.message);
-    } finally {
-        setTimeout(() => setLoading(btn, false), 650);
+function initStepNavigation() {
+    navigateToStep(1);
+}
+
+// ── 2. Patient Case Selection ─────────────────────────────────────────
+function initPatientSelector() {
+    const select = document.getElementById("linkPatientSelect");
+    const refInput = document.getElementById("patientReferenceInput");
+    const preview = document.getElementById("referencePreview");
+    
+    if (select) {
+        select.addEventListener("change", () => {
+            const val = select.value;
+            if (val) {
+                const opt = select.options[select.selectedIndex];
+                const uuid = opt.dataset.uuid || `PAT-${val}`;
+                const name = opt.dataset.name || "Patient";
+                const initials = name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+                const ref = `SHS-${initials}-${uuid.slice(-6)}`;
+                if (refInput) refInput.value = ref;
+                if (preview) preview.textContent = `Case Reference: ${ref}`;
+            } else {
+                if (refInput) refInput.value = "";
+                if (preview) preview.textContent = "Preview: SHS-GEN-...";
+            }
+        });
+        
+        if (select.value) select.dispatchEvent(new Event("change"));
     }
 }
 
-// ── Field Validation (A2) ─────────────────────────────────────
-function validateSingleField(input) {
-    const val = parseFloat(input.value);
-    const feature = input.dataset.feature || '';
-    const errId = 'err-' + input.id.replace('f-', '');
-    const errEl = document.getElementById(errId);
-
-    if (input.value === '' || isNaN(val)) {
-        setFieldError(input, errEl, 'This field is required.');
-        return false;
+function initOrCreateCase() {
+    const select = document.getElementById("linkPatientSelect");
+    const refInput = document.getElementById("patientReferenceInput");
+    const patientId = select ? select.value : null;
+    
+    if (currentCaseId) return true;
+    
+    // Auto-generate reference if unassigned
+    let ref = refInput ? refInput.value.trim() : "";
+    if (!ref) {
+        const randHex = Math.random().toString(16).substring(2, 8).toUpperCase();
+        ref = `SHS-GEN-${randHex}`;
+        if (refInput) refInput.value = ref;
     }
-    // Relaxed validation to allow raw clinical values (non-negative numbers)
-    if (val < 0) {
-        setFieldError(input, errEl, `Value must be a positive number (got ${val.toFixed(2)}).`);
-        return false;
-    }
-    clearFieldError(input, errEl);
+    
+    // Call backend to initialize case record
+    fetch("/api/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            patient_id: patientId ? parseInt(patientId) : null,
+            patient_reference: ref,
+            features: { "Glucose": 0.5 } // baseline init
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.record_id) {
+            currentCaseId = data.record_id;
+            document.getElementById("currentCaseId").value = currentCaseId;
+            logger("Case initialized ID: " + currentCaseId);
+        }
+    })
+    .catch(err => console.error("Error creating case:", err));
+    
     return true;
 }
 
-function setFieldError(input, errEl, msg) {
-    input.classList.add('invalid');
-    if (errEl) { errEl.textContent = msg; errEl.classList.add('visible'); }
-}
-function clearFieldError(input, errEl) {
-    input.classList.remove('invalid');
-    if (errEl) errEl.classList.remove('visible');
+function proceedToStep2() {
+    if (initOrCreateCase()) {
+        navigateToStep(2);
+    }
 }
 
-function collectFeatures() {
-    const inputs  = document.querySelectorAll('.biomarker-input');
-    const dict    = {};
-    let   valid   = true;
-
-    inputs.forEach((input) => {
-        const col = input.closest('.col-12');
-        const isHidden = col && (col.style.display === 'none' || col.classList.contains('d-none'));
-        if (isHidden) return;
-
-        if (!validateSingleField(input)) valid = false;
-        const name = input.dataset.feature;
-        const val  = parseFloat(input.value);
-        if (!isNaN(val) && name) dict[name] = val;
+// ── 3. Symptom Capture & Searchable Multi-Select ─────────────────────
+function initSymptomSearch() {
+    const input = document.getElementById("symptomSearchInput");
+    const menu = document.getElementById("symptomDropdownMenu");
+    
+    if (!input || !menu) return;
+    
+    let debounceTimer;
+    input.addEventListener("input", () => {
+        clearTimeout(debounceTimer);
+        const q = input.value.trim();
+        if (q.length < 1) {
+            menu.style.display = "none";
+            return;
+        }
+        
+        debounceTimer = setTimeout(() => {
+            fetch(`/api/symptoms?query=${encodeURIComponent(q)}`)
+            .then(res => res.json())
+            .then(data => {
+                menu.innerHTML = "";
+                if (data.symptoms && data.symptoms.length > 0) {
+                    menu.style.display = "block";
+                    data.symptoms.forEach(sym => {
+                        const item = document.createElement("div");
+                        item.className = "dropdown-item p-2";
+                        item.style.cursor = "pointer";
+                        item.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+                        item.innerHTML = `<strong>${escapeHtml(sym.display_name)}</strong> <span style="font-size:0.75rem; color:var(--text-secondary);">(${escapeHtml(sym.category || 'General')})</span>`;
+                        item.onclick = () => {
+                            addSymptomChip(sym.display_name, sym.id, "selected", "Moderate", 3, "days");
+                            input.value = "";
+                            menu.style.display = "none";
+                        };
+                        menu.appendChild(item);
+                    });
+                } else {
+                    menu.style.display = "block";
+                    menu.innerHTML = `<div class="p-2 text-muted" style="font-size:0.85rem;">No catalog match for "${escapeHtml(q)}". <a href="#" onclick="addCustomSymptomFromQuery('${escapeHtml(q)}'); return false;" style="color:var(--cyan-primary);">Add as custom symptom</a></div>`;
+                }
+            })
+            .catch(err => console.error("Error fetching symptoms:", err));
+        }, 250);
     });
 
-    if (!valid) {
-        showError('Please correct the highlighted fields before running the diagnosis.');
-        document.querySelector('.biomarker-input.invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return null;
-    }
-    return dict;
+    document.addEventListener("click", (e) => {
+        if (!input.contains(e.target) && !menu.contains(e.target)) {
+            menu.style.display = "none";
+        }
+    });
 }
 
-// ── Results Panel ─────────────────────────────────────────────
-function showResult(result) {
-    const panel = document.getElementById('resultsPanel');
-    if (!panel) return;
-
-    panel.style.display = 'block';
-    setTimeout(() => panel.classList.add('visible'), 10);
-
-    const color = DISEASE_COLORS[result.prediction] || 'var(--cyan-primary)';
-
-    // Diagnosis name
-    const nameEl = document.getElementById('diagnosisName');
-    if (nameEl) { nameEl.textContent = result.prediction || '—'; nameEl.style.color = color; }
-
-    // Large confidence (A3/B1)
-    const confLarge = document.getElementById('confidenceLarge');
-    if (confLarge) confLarge.textContent = (result.confidence || 0).toFixed(1) + '%';
-
-    // Model used label
-    const modelLabel = document.getElementById('modelUsedLabel');
-    if (modelLabel) {
-        const mName = (result.model_used || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-        modelLabel.textContent = 'Model: ' + mName + (result.fallback_used ? ' (fallback)' : '');
+function addSymptomChip(name, catalogId = null, source = "selected", severity = "Moderate", durVal = 3, durUnit = "days") {
+    // Prevent duplicate entries
+    if (recordedSymptoms.some(s => s.display_name.lower === name.toLowerCase())) {
+        showToast(`Symptom "${name}" is already added.`, "info");
+        return;
     }
+    
+    const symObj = {
+        standard_symptom_id: catalogId,
+        display_name: name,
+        raw_text: name,
+        source: source,
+        severity: severity,
+        duration_value: durVal,
+        duration_unit: durUnit,
+        notes: ""
+    };
+    recordedSymptoms.push(symObj);
+    renderSymptomChips();
+}
 
-    // Confidence bar
-    const bar = document.getElementById('confidenceBar');
-    if (bar) {
-        const pct = result.confidence || 0;
-        bar.style.width = '0%';
-        setTimeout(() => {
-            bar.style.width = pct + '%';
-            bar.style.background = pct >= 80
-                ? 'linear-gradient(90deg, #C5E710, #8E9630)'
-                : pct >= 60
-                    ? 'linear-gradient(90deg, #F4DF6B, #C5E710)'
-                    : 'linear-gradient(90deg, #ff9966, #F4DF6B)';
-        }, 50);
+function addCustomSymptom() {
+    const txtInput = document.getElementById("customSymptomText");
+    const sevSelect = document.getElementById("customSymptomSeverity");
+    const durInput = document.getElementById("customSymptomDurationVal");
+    const durUnitSelect = document.getElementById("customSymptomDurationUnit");
+    
+    const text = txtInput ? txtInput.value.trim() : "";
+    if (!text) {
+        showToast("Please enter symptom description.", "warning");
+        return;
     }
+    
+    addSymptomChip(
+        text,
+        null,
+        "typed",
+        sevSelect ? sevSelect.value : "Moderate",
+        durInput ? parseInt(durInput.value) || 3 : 3,
+        durUnitSelect ? durUnitSelect.value : "days"
+    );
+    
+    if (txtInput) txtInput.value = "";
+}
 
-    // Description
-    const descEl = document.getElementById('diagnosisDescription');
-    if (descEl) descEl.textContent = result.description || '';
+function addCustomSymptomFromQuery(query) {
+    addSymptomChip(query, null, "typed", "Moderate", 3, "days");
+    const input = document.getElementById("symptomSearchInput");
+    const menu = document.getElementById("symptomDropdownMenu");
+    if (input) input.value = "";
+    if (menu) menu.style.display = "none";
+}
 
-    // Explanations (Why This Prediction Was Made)
-    const expSection = document.getElementById('explanationSection');
-    const expList = document.getElementById('clinicalExplanations');
-    if (expSection && expList) {
-        expList.innerHTML = '';
-        const exps = result.explanations || [];
-        if (exps.length > 0) {
-            exps.forEach(exp => {
-                const li = document.createElement('li');
-                li.textContent = exp;
-                expList.appendChild(li);
-            });
-            expSection.style.display = 'block';
+function removeSymptomChip(index) {
+    recordedSymptoms.splice(index, 1);
+    renderSymptomChips();
+}
+
+function renderSymptomChips() {
+    const container = document.getElementById("symptomChipsContainer");
+    const badge = document.getElementById("symptomCountBadge");
+    
+    if (!container) return;
+    if (badge) badge.textContent = recordedSymptoms.length;
+    
+    container.innerHTML = "";
+    if (recordedSymptoms.length === 0) {
+        container.innerHTML = '<span class="text-muted" style="font-size:0.85rem; font-style:italic;">No symptoms added yet. Use the search bar above or custom entry below.</span>';
+        return;
+    }
+    
+    recordedSymptoms.forEach((sym, idx) => {
+        const chip = document.createElement("div");
+        chip.style.cssText = "display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:20px; background:rgba(197,231,16,0.12); border:1px solid rgba(197,231,16,0.3); color:var(--text-primary); font-size:0.85rem;";
+        
+        let sevColor = "var(--amber-warn)";
+        if (sym.severity === "Severe") sevColor = "var(--red-critical)";
+        if (sym.severity === "Mild") sevColor = "var(--cyan-primary)";
+        
+        chip.innerHTML = `
+            <span><strong>${escapeHtml(sym.display_name)}</strong></span>
+            <span style="font-size:0.75rem; color:${sevColor}; border:1px solid ${sevColor}; padding:1px 6px; border-radius:10px;">${sym.severity}</span>
+            <span style="font-size:0.75rem; color:var(--text-secondary);">${sym.duration_value} ${sym.duration_unit}</span>
+            <i class="fa-solid fa-xmark" style="cursor:pointer; color:var(--text-secondary);" onclick="removeSymptomChip(${idx})"></i>
+        `;
+        container.appendChild(chip);
+    });
+}
+
+function proceedToStep3() {
+    if (recordedSymptoms.length === 0) {
+        showToast("Please add at least one presenting symptom before continuing.", "warning");
+        return;
+    }
+    
+    if (!currentCaseId) initOrCreateCase();
+    
+    // Save captured symptoms to backend
+    fetch(`/api/cases/${currentCaseId}/symptoms`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            replace: true,
+            symptoms: recordedSymptoms
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            runPreliminaryAssessmentBackend();
         } else {
-            expSection.style.display = 'none';
+            showToast("Failed to save symptoms: " + (data.error || "Unknown error"), "error");
         }
-    }
-
-    // Feature Importance chart (A4/C1)
-    renderFeatureImportance(result.feature_importance || {});
-
-    // Probability bars
-    const table = document.getElementById('probTable');
-    if (table) {
-        table.innerHTML = '';
-        const sorted = Object.entries(result.probabilities || {}).sort(([, a], [, b]) => b - a);
-        sorted.forEach(([name, prob]) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td style="padding:8px 0;font-size:0.85rem;">${name}</td>
-                <td class="prob-bar-cell">
-                    <div class="prob-bar">
-                        <div class="prob-fill" style="width:${prob}%;background:${DISEASE_COLORS[name] || 'var(--cyan-primary)'}"></div>
-                    </div>
-                </td>
-                <td style="text-align:right;font-family:var(--font-mono);font-size:0.8rem;">${prob.toFixed(1)}%</td>`;
-            table.appendChild(row);
-        });
-    }
-
-    // Recommendations
-    const list = document.getElementById('clinicalAdvice');
-    if (list) {
-        list.innerHTML = '';
-        (result.recommendations || []).forEach(rec => {
-            const li = document.createElement('li');
-            li.textContent = rec;
-            list.appendChild(li);
-        });
-    }
-
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-    // Hook up review draft button
-    const reviewBtn = document.getElementById("reviewDraftBtn");
-    if (reviewBtn) {
-        reviewBtn.onclick = () => {
-            clearFormState();
-            window.location.href = "/portal?section=view_record&record_id=" + result.record_id;
-        };
-    }
+    })
+    .catch(err => console.error("Error saving symptoms:", err));
 }
 
-// ── Feature Importance Chart (A4/C1) ─────────────────────────
-function renderFeatureImportance(importanceMap) {
-    const section   = document.getElementById('featureImportanceSection');
-    const container = document.getElementById('fiChartContainer');
-    if (!section || !container) return;
-
-    const entries = Object.entries(importanceMap);
-    if (entries.length === 0) { section.style.display = 'none'; return; }
-
-    section.style.display = 'block';
-    container.innerHTML   = '';
-
-    const maxPct = Math.max(...entries.map(([, v]) => v));
-
-    entries.forEach(([name, pct]) => {
-        const displayName = FEATURE_LABELS[name] || name;
-        const barWidth    = maxPct > 0 ? (pct / maxPct) * 100 : 0;
-
-        const row = document.createElement('div');
-        row.className = 'fi-row';
-        row.innerHTML = `
-            <div class="fi-label-row">
-                <span>${displayName}</span>
-                <span class="fi-pct">${pct.toFixed(1)}%</span>
+// ── 4. Preliminary Assessment Engine ────────────────────────────────
+function runPreliminaryAssessmentBackend() {
+    navigateToStep(3);
+    const container = document.getElementById("preliminaryCandidatesContainer");
+    if (container) {
+        container.innerHTML = `
+            <div class="col-12 text-center p-4">
+              <span class="btn-spinner" style="display:inline-block; width:24px; height:24px;"></span>
+              <p class="text-muted mt-2">Evaluating symptom presentation and clinical rules...</p>
             </div>
-            <div class="fi-bar-outer">
-                <div class="fi-bar-fill" data-width="${barWidth}"></div>
-            </div>`;
-        container.appendChild(row);
+        `;
+    }
+    
+    fetch(`/api/cases/${currentCaseId}/pre-assessment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success" && data.preliminary_assessment) {
+            preliminaryCandidates = data.preliminary_assessment.candidates || [];
+            renderPreliminaryCandidates(preliminaryCandidates);
+        } else {
+            if (container) container.innerHTML = `<div class="col-12 text-danger p-3">Error running assessment: ${escapeHtml(data.error || 'Failed')}</div>`;
+        }
+    })
+    .catch(err => console.error("Error running assessment:", err));
+}
 
-        // Animate bar after render
-        requestAnimationFrame(() => {
-            const fill = row.querySelector('.fi-bar-fill');
-            if (fill) setTimeout(() => { fill.style.width = barWidth + '%'; }, 80);
-        });
+function renderPreliminaryCandidates(candidates) {
+    const container = document.getElementById("preliminaryCandidatesContainer");
+    if (!container) return;
+    container.innerHTML = "";
+    
+    if (candidates.length === 0) {
+        container.innerHTML = '<div class="col-12 text-muted p-3">No specific differential candidates identified from presentation.</div>';
+        return;
+    }
+    
+    candidates.forEach((cand) => {
+        const col = document.createElement("div");
+        col.className = "col-12 col-md-6";
+        
+        let badgeHtml = cand.supported_by_biomarker_model
+            ? '<span class="badge" style="background:rgba(197,231,16,0.15); color:var(--cyan-primary); border:1px solid rgba(197,231,16,0.3);"><i class="fa-solid fa-circle-check"></i> Supported by Biomarker Model</span>'
+            : '<span class="badge" style="background:rgba(244,223,107,0.15); color:var(--amber-warn); border:1px solid rgba(244,223,107,0.3);"><i class="fa-solid fa-triangle-exclamation"></i> No biomarker prediction model available in current system</span>';
+            
+        col.innerHTML = `
+            <div class="portal-card h-100" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08);">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h4 style="font-size:1.1rem; color:var(--text-primary); font-family:var(--font-display); margin:0;">
+                  #${cand.rank} ${escapeHtml(cand.condition_name)}
+                </h4>
+                <span style="font-family:var(--font-mono); font-size:1rem; font-weight:700; color:var(--cyan-primary);">${cand.score}% score</span>
+              </div>
+              <div class="mb-3">${badgeHtml}</div>
+              <p style="color:var(--text-secondary); font-size:0.85rem; line-height:1.6; margin:0;">
+                ${escapeHtml(cand.rationale)}
+              </p>
+            </div>
+        `;
+        container.appendChild(col);
     });
 }
 
-// ── UI Helpers ────────────────────────────────────────────────
-function setLoading(btn, loading) {
-    if (!btn) return;
-    btn.disabled = loading;
-    btn.classList.toggle('loading', loading);
+function proceedToStep4() {
+    navigateToStep(4);
+    fetchInvestigationRecommendations();
 }
 
-function showError(message) {
-    const panel = document.getElementById('resultsPanel');
-    if (panel) {
-        panel.style.display = 'block';
-        setTimeout(() => panel.classList.add('visible'), 10);
-        const nameEl = document.getElementById('diagnosisName');
-        const descEl = document.getElementById('diagnosisDescription');
-        const confLarge = document.getElementById('confidenceLarge');
-        if (nameEl) { nameEl.textContent = 'Diagnosis Error'; nameEl.style.color = 'var(--red-critical)'; }
-        if (confLarge) confLarge.textContent = '—';
-        if (descEl) descEl.textContent = message;
-        const probTable = document.getElementById('probTable');
-        if (probTable) probTable.innerHTML = '';
-        const advice = document.getElementById('clinicalAdvice');
-        if (advice) advice.innerHTML = '<li>Please check that all fields are filled correctly and try again.</li>';
-        const fiSection = document.getElementById('featureImportanceSection');
-        if (fiSection) fiSection.style.display = 'none';
-        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } else {
-        alert('Error: ' + message);
+// ── 5. Investigation Recommendation & Selection ─────────────────────
+function fetchInvestigationRecommendations() {
+    const container = document.getElementById("investigationsListContainer");
+    if (container) {
+        container.innerHTML = `
+            <div class="col-12 text-center p-4">
+              <span class="btn-spinner" style="display:inline-block; width:24px; height:24px;"></span>
+              <p class="text-muted mt-2">Loading recommended investigation panels...</p>
+            </div>
+        `;
+    }
+    
+    fetch(`/api/cases/${currentCaseId}/investigation-recommendations`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success" && data.recommendations) {
+            renderInvestigationRecommendations(data.recommendations);
+        } else {
+            if (container) container.innerHTML = '<div class="col-12 text-danger p-3">Failed to load recommendations.</div>';
+        }
+    })
+    .catch(err => console.error("Error fetching recommendations:", err));
+}
+
+function renderInvestigationRecommendations(recs) {
+    const container = document.getElementById("investigationsListContainer");
+    if (!container) return;
+    container.innerHTML = "";
+    
+    selectedInvestigations = recs;
+    
+    recs.forEach((rec) => {
+        const inv = rec.investigation;
+        const col = document.createElement("div");
+        col.className = "col-12 col-md-6";
+        
+        let prioColor = "var(--cyan-primary)";
+        if (rec.priority === "High") prioColor = "var(--red-critical)";
+        if (rec.priority === "Medium") prioColor = "var(--amber-warn)";
+        
+        col.innerHTML = `
+            <div class="portal-card h-100" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08);">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <label class="d-flex align-items-center gap-2" style="cursor:pointer; font-weight:600; font-size:0.95rem; color:var(--text-primary);">
+                  <input type="checkbox" class="inv-checkbox" data-inv-id="${inv.id}" ${rec.doctor_selected ? 'checked' : ''} onchange="toggleInvestigationSelection(${inv.id}, this.checked)">
+                  ${escapeHtml(inv.name)}
+                </label>
+                <span style="font-size:0.75rem; color:${prioColor}; border:1px solid ${prioColor}; padding:2px 8px; border-radius:10px;">${rec.priority} Priority</span>
+              </div>
+              <p style="color:var(--text-secondary); font-size:0.82rem; line-height:1.5; margin-bottom:8px;">
+                ${escapeHtml(rec.reason)}
+              </p>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Category: ${escapeHtml(inv.category)} · Biomarkers: ${inv.biomarker_keys.length} markers</div>
+            </div>
+        `;
+        container.appendChild(col);
+    });
+}
+
+function toggleInvestigationSelection(invId, isSelected) {
+    const found = selectedInvestigations.find(r => r.investigation_id === invId);
+    if (found) {
+        found.doctor_selected = isSelected;
     }
 }
 
-// ── Patient Selection & Search Filtering ───────────────────────
-window.selectedDraftId = null;
-
-function initPatientLinking() {
-    const patientSelect = document.getElementById('linkPatientSelect');
-    const patientRefInput = document.getElementById('patientReferenceInput');
-    const refPreview = document.getElementById('referencePreview');
-    const draftSelectRow = document.getElementById('draftSelectRow');
-    const draftRecordSelect = document.getElementById('draftRecordSelect');
-
-    function generateRandomSuffix() {
-        const chars = '0123456789ABCDEF';
-        let suffix = '';
-        for (let i = 0; i < 6; i++) {
-            suffix += chars[Math.floor(Math.random() * 16)];
+function proceedToStep5() {
+    const activeSelection = selectedInvestigations.filter(r => r.doctor_selected);
+    if (activeSelection.length === 0) {
+        showToast("Please select at least one investigation panel.", "warning");
+        return;
+    }
+    
+    // Save selected investigations
+    fetch(`/api/cases/${currentCaseId}/investigations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            investigations: activeSelection
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            navigateToStep(5);
+            buildDynamicBiomarkerForm(activeSelection);
+        } else {
+            showToast("Failed to save selected investigations.", "error");
         }
-        return suffix;
+    })
+    .catch(err => console.error("Error saving investigations:", err));
+}
+
+// ── 6. Dynamic Lab Results Entry Form ───────────────────────────────
+function buildDynamicBiomarkerForm(activeInvestigations) {
+    const container = document.getElementById("dynamicBiomarkerGroupsContainer");
+    if (!container) return;
+    container.innerHTML = "";
+    
+    // Collect all unique biomarker keys implied by selected investigations
+    const requiredKeys = new Set();
+    activeInvestigations.forEach(inv => {
+        const keys = inv.investigation ? inv.investigation.biomarker_keys : [];
+        keys.forEach(k => requiredKeys.add(k));
+    });
+
+    if (requiredKeys.size === 0) {
+        // Default to baseline FBC + Glucose keys
+        ["Glucose", "Hemoglobin", "Platelets", "White Blood Cells", "Red Blood Cells", "HbA1c", "Cholesterol"].forEach(k => requiredKeys.add(k));
     }
+    
+    const METABOLIC_KEYS = ["Glucose", "HbA1c", "Insulin", "BMI"];
+    const CARDIOPULMONARY_KEYS = ["Cholesterol", "LDL Cholesterol", "HDL Cholesterol", "Triglycerides", "Systolic Blood Pressure", "Diastolic Blood Pressure", "Heart Rate", "Troponin", "C-reactive Protein"];
+    const HEMATOLOGY_KEYS = ["Hemoglobin", "Platelets", "White Blood Cells", "Red Blood Cells", "Hematocrit", "Mean Corpuscular Volume", "Mean Corpuscular Hemoglobin", "Mean Corpuscular Hemoglobin Concentration"];
+    const LFT_KFT_KEYS = ["ALT", "AST", "Creatinine"];
+    const TYPHOID_KEYS = ["Widal O Titer", "Widal H Titer"];
 
-    function updatePreview() {
-        if (refPreview && patientRefInput) {
-            refPreview.textContent = "Preview: " + patientRefInput.value;
-        }
-    }
+    const groups = [
+        { title: "Metabolic & Glycemic Indices", keys: METABOLIC_KEYS.filter(k => requiredKeys.has(k)) },
+        { title: "Cardiovascular & Inflammatory Markers", keys: CARDIOPULMONARY_KEYS.filter(k => requiredKeys.has(k)) },
+        { title: "Full Blood Count (FBC / Hematology)", keys: HEMATOLOGY_KEYS.filter(k => requiredKeys.has(k)) },
+        { title: "Hepatic & Renal Markers", keys: LFT_KFT_KEYS.filter(k => requiredKeys.has(k)) },
+        { title: "Special Serology Titers", keys: TYPHOID_KEYS.filter(k => requiredKeys.has(k)) }
+    ];
 
-    const submitBtn = document.getElementById("submitBtn");
-    function updateSubmitBtnState() {
-        if (submitBtn && patientSelect) {
-            submitBtn.disabled = (patientSelect.value === "");
-        }
-    }
-
-    // Set initial reference
-    if (patientRefInput && !patientRefInput.value) {
-        patientRefInput.value = "PAT-GEN-" + generateRandomSuffix();
-        updatePreview();
-    }
-
-    let patientDrafts = [];
-
-    if (patientSelect && patientRefInput) {
-        updateSubmitBtnState();
-        patientSelect.addEventListener('change', async () => {
-            updateSubmitBtnState();
-            window.selectedDraftId = null;
-            if (draftRecordSelect) {
-                draftRecordSelect.innerHTML = '<option value="">-- Enter biomarkers manually --</option>';
-            }
-            if (draftSelectRow) draftSelectRow.style.display = 'none';
-
-            if (patientSelect.value) {
-                const selectedOption = patientSelect.options[patientSelect.selectedIndex];
-                const patientUuid = selectedOption.getAttribute('data-uuid');
-                patientRefInput.value = patientUuid || ("PAT-GEN-" + generateRandomSuffix());
-                patientRefInput.readOnly = true;
-
-                // Fetch patient drafts
-                try {
-                    const res = await fetch(`/api/doctor/patient/${patientSelect.value}/drafts`);
-                    const data = await res.json();
-                    if (data.status === 'success' && data.drafts && data.drafts.length > 0) {
-                        patientDrafts = data.drafts;
-                        patientDrafts.forEach(d => {
-                            const opt = document.createElement('option');
-                            opt.value = d.id;
-                            opt.textContent = `Draft from ${d.created_at} (Ref: ${d.patient_reference})`;
-                            draftRecordSelect.appendChild(opt);
-                        });
-                        if (draftSelectRow) draftSelectRow.style.display = 'flex';
-                    }
-                } catch (err) {
-                    console.error("Error fetching patient drafts:", err);
-                }
-            } else {
-                patientRefInput.value = "PAT-GEN-" + generateRandomSuffix();
-                patientRefInput.readOnly = true;
-            }
-            updatePreview();
-            saveFormState();
+    groups.forEach(group => {
+        if (group.keys.length === 0) return;
+        
+        const grpCard = document.createElement("div");
+        grpCard.className = "portal-card mb-4";
+        grpCard.style.cssText = "background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06);";
+        
+        let rowHtml = `<div class="biomarker-group-title mb-3" style="color:var(--cyan-primary); font-family:var(--font-display); font-size:1rem;">${group.title}</div><div class="row g-3">`;
+        
+        group.keys.forEach(k => {
+            const currentVal = biomarkerValues[k] !== undefined ? biomarkerValues[k] : 0.5;
+            rowHtml += `
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                  <label class="input-label" style="font-size:0.85rem; color:var(--text-primary); display:block; margin-bottom:4px;">
+                    ${escapeHtml(k)}
+                  </label>
+                  <div class="input-unit-badge mb-1" style="font-size:0.7rem; color:var(--text-secondary);">normalised score (0.00-1.00)</div>
+                  <input type="number" step="0.01" min="0" max="1" class="biomarker-input auth-input" data-biomarker-key="${escapeHtml(k)}" value="${currentVal}">
+                </div>
+            `;
         });
-    }
+        rowHtml += `</div>`;
+        grpCard.innerHTML = rowHtml;
+        container.appendChild(grpCard);
+    });
+}
 
-    if (draftRecordSelect) {
-        draftRecordSelect.addEventListener('change', () => {
-            const draftId = draftRecordSelect.value;
-            if (draftId) {
-                const draft = patientDrafts.find(d => d.id == draftId);
-                if (draft) {
-                    window.selectedDraftId = draft.id;
-                    if (patientRefInput) {
-                        patientRefInput.value = draft.patient_reference;
-                        updatePreview();
-                    }
-                    // Auto populate biomarker inputs by data-feature
-                    for (const [bmName, bmVal] of Object.entries(draft.biomarkers)) {
-                        const input = document.querySelector(`.biomarker-input[data-feature="${bmName}"]`);
-                        if (input) {
-                            input.value = bmVal;
-                            input.classList.remove('invalid');
-                            const errId = 'err-' + input.id.replace('f-', '');
-                            const errEl = document.getElementById(errId);
-                            if (errEl) errEl.classList.remove('visible');
-                        }
-                    }
-                    saveFormState();
-                }
-            } else {
-                window.selectedDraftId = null;
+function proceedToStep6() {
+    // Gather all entered biomarker values
+    const inputs = document.querySelectorAll(".biomarker-input");
+    const enteredBiomarkers = {};
+    
+    inputs.forEach(inp => {
+        const key = inp.dataset.biomarkerKey;
+        if (key) {
+            const val = parseFloat(inp.value);
+            if (!isNaN(val)) {
+                enteredBiomarkers[key] = val;
+                biomarkerValues[key] = val;
             }
-        });
+        }
+    });
+
+    if (Object.keys(enteredBiomarkers).length === 0) {
+        showToast("Please enter at least one biomarker test result.", "warning");
+        return;
     }
 
-    // Auto-trigger if patient select is pre-populated
-    if (patientSelect && patientSelect.value) {
-        setTimeout(() => {
-            const event = new Event('change');
-            patientSelect.dispatchEvent(event);
-        }, 100);
+    // Submit investigation results to backend
+    fetch(`/api/cases/${currentCaseId}/investigations/1/results`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            results: enteredBiomarkers
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        navigateToStep(6);
+        runBiomarkerPredictionBackend(enteredBiomarkers);
+    })
+    .catch(err => console.error("Error submitting results:", err));
+}
+
+// ── 7. Predicted Diagnosis, AI Summary & Report Builder ──────────────
+function runBiomarkerPredictionBackend(biomarkers = null, selectedModel = "random_forest") {
+    fetch(`/api/cases/${currentCaseId}/predictions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            model: selectedModel,
+            features: biomarkers || biomarkerValues
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            latestPrediction = data;
+            renderPredictionResults(data);
+            generateWholeCaseAISummary();
+        } else {
+            showToast("Prediction error: " + (data.error || "Failed"), "error");
+        }
+    })
+    .catch(err => console.error("Error running prediction:", err));
+}
+
+function switchClassifierModel(modelKey) {
+    document.getElementById("selectedModel").value = modelKey;
+    runBiomarkerPredictionBackend(null, modelKey);
+}
+
+function renderPredictionResults(data) {
+    const diagName = document.getElementById("diagnosisName");
+    const confLarge = document.getElementById("confidenceLarge");
+    const confBar = document.getElementById("confidenceBar");
+    const desc = document.getElementById("diagnosisDescription");
+    const modelLbl = document.getElementById("modelUsedLabel");
+    const probTable = document.getElementById("probTable");
+
+    // Enforce Standardized Output Label: Predicted Diagnosis
+    if (diagName) diagName.textContent = data.predicted_diagnosis || "Healthy";
+    if (confLarge) confLarge.textContent = `${data.confidence || 0}%`;
+    if (confBar) confBar.style.width = `${data.confidence || 0}%`;
+    if (modelLbl) modelLbl.textContent = `Model: ${data.prediction_details?.model_used || 'random_forest'}`;
+    
+    if (desc) {
+        desc.textContent = data.prediction_details?.description || "Algorithmic inference completed based on normalised biomarker profile.";
     }
+    
+    // Render weighted probabilities table
+    if (probTable && data.prediction_details?.probabilities) {
+        probTable.innerHTML = "";
+        const probs = data.prediction_details.probabilities;
+        for (let cls in probs) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td style="padding:6px; color:var(--text-primary); font-weight:600;">${escapeHtml(cls)}</td>
+                <td style="padding:6px; width:60%;">
+                  <div style="background:rgba(255,255,255,0.05); height:8px; border-radius:4px; overflow:hidden;">
+                    <div style="width:${probs[cls]}%; height:100%; background:var(--cyan-primary);"></div>
+                  </div>
+                </td>
+                <td style="padding:6px; text-align:right; font-family:var(--font-mono); font-size:0.85rem; color:var(--cyan-primary);">${probs[cls]}%</td>
+            `;
+            probTable.appendChild(tr);
+        }
+    }
+}
+
+function generateWholeCaseAISummary() {
+    const notesInput = document.getElementById("doctorClinicalNotes");
+    
+    fetch(`/api/cases/${currentCaseId}/ai-summary`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            doctor_notes: notesInput ? notesInput.value.trim() : ""
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success" && data.ai_summary) {
+            const txt = document.getElementById("caseAISummaryText");
+            if (txt) txt.value = data.ai_summary.summary_text;
+        }
+    })
+    .catch(err => console.error("Error generating AI summary:", err));
+}
+
+function refreshAISummary() {
+    generateWholeCaseAISummary();
+}
+
+function finalizeAndBuildReport() {
+    const checkboxes = document.querySelectorAll(".report-sec-cb:checked");
+    const selectedSections = Array.from(checkboxes).map(cb => cb.value);
+    const signatureInput = document.getElementById("doctorSignatureInput");
+    
+    fetch(`/api/cases/${currentCaseId}/reports`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            sections: selectedSections,
+            doctor_signature: signatureInput ? signatureInput.value.trim() : "Dr. Physician"
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            showToast("Report generated and case saved to history successfully!", "success");
+            setTimeout(() => {
+                window.location.href = `/portal?section=view_record&id=${currentCaseId}`;
+            }, 1200);
+        } else {
+            showToast("Failed to generate report.", "error");
+        }
+    })
+    .catch(err => console.error("Error generating report:", err));
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function logger(msg) {
+    console.log("[SmartHealth Workflow]", msg);
+}
+
+function showToast(message, type = "info") {
+    const toast = document.createElement("div");
+    toast.className = `alert alert-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'success'} position-fixed bottom-0 end-0 m-3 z-index-toast`;
+    toast.style.cssText = "z-index: 9999; box-shadow: 0 0 20px rgba(0,0,0,0.5);";
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
 }
