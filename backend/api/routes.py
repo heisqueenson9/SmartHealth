@@ -1505,12 +1505,35 @@ def admin_toggle_doctor_status(doctor_id):
 def admin_delete_doctor(doctor_id):
     if session.get("role") != "admin":
         return jsonify({"error": "Unauthorized."}), 403
-        
-    from backend.database.models import User
+
+    from backend.database.models import (
+        User, DiagnosticRecord, Patient, Notification,
+        DoctorPatientConnection, DoctorTechnicianConnection,
+    )
     doctor = User.query.filter_by(id=doctor_id, role="doctor").first()
     if not doctor:
         return jsonify({"error": "Doctor not found."}), 404
-        
+
+    case_count = DiagnosticRecord.query.filter_by(user_id=doctor_id).count()
+    if case_count > 0:
+        return jsonify({
+            "error": (
+                f"This doctor has {case_count} clinical case(s) on record and cannot be "
+                "permanently deleted, to preserve the patient record history. "
+                "Use Deactivate instead to remove their system access."
+            )
+        }), 409
+
+    # No case history — safe to remove. Clean up references that would
+    # otherwise still violate foreign-key constraints.
+    Patient.query.filter_by(doctor_id=doctor_id).update({"doctor_id": None})
+    Notification.query.filter_by(user_id=doctor_id).delete()
+    DoctorPatientConnection.query.filter_by(doctor_id=doctor_id).delete()
+    DoctorTechnicianConnection.query.filter(
+        (DoctorTechnicianConnection.doctor_id == doctor_id)
+        | (DoctorTechnicianConnection.technician_id == doctor_id)
+    ).delete(synchronize_session=False)
+
     db.session.delete(doctor)
     db.session.commit()
     return jsonify({"status": "success", "message": "Doctor account permanently deleted."}), 200

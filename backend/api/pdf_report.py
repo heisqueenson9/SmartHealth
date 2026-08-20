@@ -14,6 +14,8 @@ from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
 )
 
+from backend.database.models import PreliminaryAssessment, AISummary
+
 STYLES = getSampleStyleSheet()
 TITLE_STYLE = ParagraphStyle(
     "SHSTitle", parent=STYLES["Title"], fontSize=18, spaceAfter=4,
@@ -104,7 +106,7 @@ def generate_case_report_pdf(record, sections, signature, output_path):
     if "Preliminary Assessment" in sections:
         story.append(Paragraph("Preliminary Assessment", SECTION_STYLE))
         pa = record.preliminary_assessments.order_by(
-            record.preliminary_assessments.property.mapper.class_.created_at.desc()
+            PreliminaryAssessment.created_at.desc()
         ).first() if hasattr(record.preliminary_assessments, "order_by") else None
         if pa:
             story.append(Paragraph(pa.summary_text or "—", BODY_STYLE))
@@ -161,7 +163,7 @@ def generate_case_report_pdf(record, sections, signature, output_path):
     if "AI Clinical Summary" in sections:
         story.append(Paragraph("AI Clinical Summary", SECTION_STYLE))
         ai_summary = record.ai_summaries.order_by(
-            record.ai_summaries.property.mapper.class_.created_at.desc()
+            AISummary.created_at.desc()
         ).first() if hasattr(record.ai_summaries, "order_by") else None
         if ai_summary:
             for line in (ai_summary.summary_text or "").split("\n"):
