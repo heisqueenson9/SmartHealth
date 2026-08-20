@@ -210,6 +210,11 @@ function showStackedToasts(notifications) {
             `;
             
             container.appendChild(toast);
+
+            setTimeout(() => {
+                const el = document.getElementById(`toast-notif-${n.id}`);
+                if (el) el.remove();
+            }, 30000);
         }
     });
     
