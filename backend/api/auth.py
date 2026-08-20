@@ -116,6 +116,10 @@ def _register_doctor(email, full_name, password):
     upload_path = os.path.join(current_app.config["UPLOAD_FOLDER"], unique_filename)
     file.save(upload_path)
 
+    file.seek(0)
+    proof_bytes = file.read()
+    proof_mimetype = file.mimetype
+
     user = User(
         username=email,
         email=email,
@@ -124,6 +128,8 @@ def _register_doctor(email, full_name, password):
         specialization=specialization,
         license_number=license_number,
         proof_filename=unique_filename,
+        proof_data=proof_bytes,
+        proof_mimetype=proof_mimetype,
         role="doctor",
         status="pending",
     )
@@ -309,7 +315,13 @@ def reupload_proof():
     upload_path = os.path.join(current_app.config["UPLOAD_FOLDER"], unique_filename)
     file.save(upload_path)
 
+    file.seek(0)
+    proof_bytes = file.read()
+    proof_mimetype = file.mimetype
+
     user.proof_filename = unique_filename
+    user.proof_data = proof_bytes
+    user.proof_mimetype = proof_mimetype
     user.status = "pending"
     db.session.commit()
     session["status"] = "pending"
@@ -369,7 +381,7 @@ def get_verified_doctors():
 @auth_bp.route("/admin/doctors/<int:doctor_id>/proof", methods=["GET"])
 def download_doctor_proof(doctor_id):
     """Super Admin: download uploaded proof document for doctor verification."""
-    from flask import send_from_directory
+    from flask import send_from_directory, Response
     if session.get("role") != "admin":
         return jsonify({"error": "Admin access required."}), 403
 
@@ -380,10 +392,22 @@ def download_doctor_proof(doctor_id):
     if not user.proof_filename:
         return jsonify({"error": "No proof document uploaded for this doctor."}), 404
 
-    upload_folder = current_app.config.get("UPLOAD_FOLDER")
-    if not upload_folder or not os.path.exists(os.path.join(upload_folder, user.proof_filename)):
-        return jsonify({"error": "Proof file not found on server storage."}), 404
+    if user.proof_data:
+        return Response(
+            user.proof_data,
+            mimetype=user.proof_mimetype or "application/octet-stream",
+            headers={"Content-Disposition": f'attachment; filename="{user.proof_filename}"'},
+        )
 
-    return send_from_directory(upload_folder, user.proof_filename, as_attachment=True)
+    upload_folder = current_app.config.get("UPLOAD_FOLDER")
+    if upload_folder and os.path.exists(os.path.join(upload_folder, user.proof_filename)):
+        return send_from_directory(upload_folder, user.proof_filename, as_attachment=True)
+
+    return jsonify({
+        "error": (
+            "This document was uploaded before a server restart and is no longer available on disk. "
+            "Please ask the doctor to re-submit their credentials."
+        )
+    }), 404
 
 

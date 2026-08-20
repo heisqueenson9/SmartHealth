@@ -129,13 +129,19 @@ def _ensure_patient_schema():
     try:
         insp = inspect(db.engine)
 
-        # 1. Update users table (license_number)
+        # 1. Update users table (license_number, proof_data, proof_mimetype)
         if "users" in insp.get_table_names():
             user_cols = {c["name"] for c in insp.get_columns("users")}
             if "license_number" not in user_cols:
                 log.info(f"[SmartHealth] Adding users.license_number column ({engine_name}).")
                 db.session.execute(text("ALTER TABLE users ADD COLUMN license_number VARCHAR(64)"))
                 db.session.commit()
+            for col_name, col_type in [("proof_data", "BYTEA" if engine_name == "postgresql" else "BLOB"),
+                                        ("proof_mimetype", "VARCHAR(100)")]:
+                if col_name not in user_cols:
+                    log.info(f"[SmartHealth] Adding users.{col_name} column ({engine_name}).")
+                    db.session.execute(text(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}"))
+                    db.session.commit()
 
         # 2. Update patients table
         if "patients" not in insp.get_table_names():

@@ -509,7 +509,7 @@
           <td>{{ doc.specialization or "—" }}</td>
           <td>
             {% if doc.proof_filename %}
-            <a href="{{ url_for('static', filename='uploads/' + doc.proof_filename) }}" target="_blank">
+            <a href="/api/auth/admin/doctors/{{ doc.id }}/proof" target="_blank">
               <i class="fa-solid fa-file-medical"></i> View Document
             </a>
             {% else %}—{% endif %}
