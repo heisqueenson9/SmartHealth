@@ -460,6 +460,34 @@ async function proceedToStep5() {
     }
 }
 
+// Real clinical reference ranges — must match backend/ml/preprocessing/normalization.py exactly
+const BIOMARKER_META = {
+    "Glucose": { unit: "mg/dL", min: 50, max: 300, step: 1, placeholder: "e.g. 95" },
+    "Cholesterol": { unit: "mg/dL", min: 100, max: 400, step: 1, placeholder: "e.g. 180" },
+    "Hemoglobin": { unit: "g/dL", min: 5, max: 25, step: 0.1, placeholder: "e.g. 14.5" },
+    "Platelets": { unit: "x10\u00b3/\u00b5L", min: 50, max: 600, step: 1, placeholder: "e.g. 250" },
+    "White Blood Cells": { unit: "x10\u00b3/\u00b5L", min: 1, max: 20, step: 0.1, placeholder: "e.g. 7.5" },
+    "Red Blood Cells": { unit: "x10\u2076/\u00b5L", min: 2, max: 8, step: 0.1, placeholder: "e.g. 4.8" },
+    "Hematocrit": { unit: "%", min: 20, max: 60, step: 0.1, placeholder: "e.g. 42" },
+    "Mean Corpuscular Volume": { unit: "fL", min: 50, max: 120, step: 0.1, placeholder: "e.g. 88" },
+    "Mean Corpuscular Hemoglobin": { unit: "pg", min: 15, max: 45, step: 0.1, placeholder: "e.g. 30" },
+    "Mean Corpuscular Hemoglobin Concentration": { unit: "g/dL", min: 25, max: 40, step: 0.1, placeholder: "e.g. 34" },
+    "Insulin": { unit: "\u00b5IU/mL", min: 1, max: 100, step: 0.1, placeholder: "e.g. 10" },
+    "BMI": { unit: "kg/m\u00b2", min: 10, max: 50, step: 0.1, placeholder: "e.g. 23.5" },
+    "Systolic Blood Pressure": { unit: "mmHg", min: 70, max: 220, step: 1, placeholder: "e.g. 120" },
+    "Diastolic Blood Pressure": { unit: "mmHg", min: 40, max: 130, step: 1, placeholder: "e.g. 80" },
+    "Triglycerides": { unit: "mg/dL", min: 30, max: 500, step: 1, placeholder: "e.g. 120" },
+    "HbA1c": { unit: "%", min: 3, max: 15, step: 0.1, placeholder: "e.g. 5.4" },
+    "LDL Cholesterol": { unit: "mg/dL", min: 30, max: 300, step: 1, placeholder: "e.g. 95" },
+    "HDL Cholesterol": { unit: "mg/dL", min: 10, max: 100, step: 1, placeholder: "e.g. 55" },
+    "ALT": { unit: "U/L", min: 0, max: 200, step: 1, placeholder: "e.g. 25" },
+    "AST": { unit: "U/L", min: 0, max: 200, step: 1, placeholder: "e.g. 22" },
+    "Heart Rate": { unit: "bpm", min: 30, max: 200, step: 1, placeholder: "e.g. 72" },
+    "Creatinine": { unit: "mg/dL", min: 0.1, max: 10, step: 0.1, placeholder: "e.g. 0.9" },
+    "Troponin": { unit: "ng/mL", min: 0, max: 2, step: 0.01, placeholder: "e.g. 0.02" },
+    "C-reactive Protein": { unit: "mg/L", min: 0, max: 100, step: 0.1, placeholder: "e.g. 3" }
+};
+
 // ── 6. Dynamic Lab Results Entry Form ───────────────────────────────
 function buildDynamicBiomarkerForm(activeInvestigations) {
     const container = document.getElementById("dynamicBiomarkerGroupsContainer");
@@ -500,14 +528,14 @@ function buildDynamicBiomarkerForm(activeInvestigations) {
         let rowHtml = `<div class="biomarker-group-title mb-3" style="color:var(--cyan-primary); font-family:var(--font-display); font-size:1rem;">${group.title}</div><div class="row g-3">`;
         
         group.keys.forEach(k => {
-            const currentVal = biomarkerValues[k] !== undefined ? biomarkerValues[k] : 0.5;
+            const meta = BIOMARKER_META[k] || { unit: "", min: 0, max: 1000, step: 0.1, placeholder: "" };
+            const currentVal = biomarkerValues[k] !== undefined ? biomarkerValues[k] : "";
             rowHtml += `
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                   <label class="input-label" style="font-size:0.85rem; color:var(--text-primary); display:block; margin-bottom:4px;">
-                    ${escapeHtml(k)}
+                    ${escapeHtml(k)}${meta.unit ? ` <span style="color:var(--text-secondary); font-size:0.75rem;">(${meta.unit})</span>` : ''}
                   </label>
-                  <div class="input-unit-badge mb-1" style="font-size:0.7rem; color:var(--text-secondary);">normalised score (0.00-1.00)</div>
-                  <input type="number" step="0.01" min="0" max="1" class="biomarker-input auth-input" data-biomarker-key="${escapeHtml(k)}" value="${currentVal}">
+                  <input type="number" step="${meta.step}" min="${meta.min}" max="${meta.max}" placeholder="${escapeHtml(meta.placeholder)}" class="biomarker-input auth-input" data-biomarker-key="${escapeHtml(k)}" value="${currentVal}">
                 </div>
             `;
         });
@@ -561,7 +589,13 @@ async function proceedToStep6() {
             }
 
             const response = await fetch(
-                `/api/cases/${currentCaseId}/investigations/${item.investigation_id}/results`,
+                `/api/cases/${currentCaseId}/investigations/${item.id}/results`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ results: investigationResults })
+                }
+            );
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
