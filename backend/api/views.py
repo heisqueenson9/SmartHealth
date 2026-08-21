@@ -4,7 +4,7 @@ Authors: Enock Queenson Eduafo & Christabel Araba Edumadze | University of Ghana
 """
 
 from flask import Blueprint, render_template, request, session, redirect, url_for
-from backend.database.models import User, Patient, DiagnosticRecord, DoctorPatientConnection
+from backend.database.models import db, User, Patient, DiagnosticRecord, DoctorPatientConnection
 from backend.ml.model_manager import model_manager
 
 views_bp = Blueprint("views", __name__)
@@ -41,7 +41,7 @@ def predict_page():
         return redirect(url_for("views.portal_page"))
     if role == "doctor":
         from backend.database.models import User
-        current_user = User.query.get(user_id)
+        current_user = db.session.get(User, user_id)
         if not current_user or current_user.status != "approved":
             return redirect(url_for("views.portal_page"))
 
@@ -127,10 +127,10 @@ def _build_portal_context(user_id, role, section):
     record = None
     record_id = request.args.get("record_id", type=int)
     if record_id:
-        record = DiagnosticRecord.query.get(record_id)
+        record = db.session.get(DiagnosticRecord, record_id)
 
     if role == "admin":
-        doctor = User.query.get(user_id)
+        doctor = db.session.get(User, user_id)
         doctors = User.query.filter_by(role="doctor").order_by(User.created_at.desc()).all()
         all_users = User.query.order_by(User.created_at.desc()).all()
         records = DiagnosticRecord.query.order_by(DiagnosticRecord.created_at.desc()).limit(50).all()
@@ -158,7 +158,7 @@ def _build_portal_context(user_id, role, section):
         }
 
     # Otherwise: Doctor
-    doctor = User.query.get(user_id)
+    doctor = db.session.get(User, user_id)
     if doctor:
         session["status"] = doctor.status
 

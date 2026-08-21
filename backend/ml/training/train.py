@@ -11,7 +11,7 @@ import json
 import logging
 import shutil
 import warnings
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import joblib
@@ -173,7 +173,7 @@ class TrainingPipeline:
         
         summary = {
             'metadata': {
-                'trained_at': datetime.utcnow().isoformat(),
+                'trained_at': datetime.now(timezone.utc).isoformat(),
                 'author': 'Enock Queenson Eduafo & Christabel Araba Edumadze',
                 'features': FEATURES,
                 'preprocessing': 'StandardScaler',
@@ -203,7 +203,7 @@ class TrainingPipeline:
             "test_samples": self.test_count,
             "classes": list(self.label_encoder.classes_),
             "features": FEATURES,
-            "trained_at": datetime.utcnow().isoformat()
+            "trained_at": datetime.now(timezone.utc).isoformat()
         }
         with open(MODELS_ROOT / "metadata.json", 'w') as f:
             json.dump(metadata, f, indent=2)

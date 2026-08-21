@@ -4,7 +4,7 @@ Authors: Enock Queenson Eduafo & Christabel Araba Edumadze | University of Ghana
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -81,7 +81,7 @@ def generate_case_report_pdf(record, sections, signature, output_path):
             ("Date of Birth", patient.date_of_birth.strftime("%d %b %Y") if patient and patient.date_of_birth else "—"),
             ("Gender", patient.gender if patient else "—"),
             ("Case ID", record.id),
-            ("Report Generated", datetime.utcnow().strftime("%d %b %Y, %H:%M UTC")),
+            ("Report Generated", datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M UTC")),
         ]))
 
     if "Presenting Symptoms" in sections:
@@ -179,7 +179,7 @@ def generate_case_report_pdf(record, sections, signature, output_path):
     if "Doctor Identity/Signature" in sections:
         story.append(Spacer(1, 20))
         story.append(Paragraph(f"Signed: {signature or '—'}", BODY_STYLE))
-        story.append(Paragraph(datetime.utcnow().strftime("%d %b %Y, %H:%M UTC"), BODY_STYLE))
+        story.append(Paragraph(datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M UTC"), BODY_STYLE))
 
     doc.build(story)
     return output_path

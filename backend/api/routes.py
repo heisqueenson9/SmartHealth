@@ -216,7 +216,7 @@ def predict():
 
         if linked_patient_id:
             from backend.database.models import Patient
-            patient = Patient.query.get(int(linked_patient_id))
+            patient = db.session.get(Patient, int(linked_patient_id))
             if patient:
                 if not patient_ref or patient_ref.startswith("[Auto") or patient_ref.strip() == f"{patient.full_name}":
                     import random
@@ -404,7 +404,7 @@ def predict():
                     )
                     if linked_patient_id is not None:
                         from backend.database.models import Patient
-                        patient = Patient.query.get(int(linked_patient_id))
+                        patient = db.session.get(Patient, int(linked_patient_id))
                         if patient:
                             record.patient_id = patient.id
                     db.session.add(record)
@@ -415,7 +415,7 @@ def predict():
                 from backend.database.models import Notification, Patient
                 p_name = patient_ref
                 if record.patient_id:
-                    patient = Patient.query.get(record.patient_id)
+                    patient = db.session.get(Patient, record.patient_id)
                     if patient:
                         p_name = patient.full_name
                 
@@ -502,7 +502,7 @@ def diagnosis_record(record_id):
     if not user_id:
         return jsonify({"error": "Authentication required."}), 401
 
-    record = DiagnosticRecord.query.get(record_id)
+    record = db.session.get(DiagnosticRecord, record_id)
     if not record:
         return jsonify({"error": "Record not found."}), 404
 
@@ -596,7 +596,7 @@ def explain_diagnosis(record_id):
     if not user_id:
         return jsonify({"error": "Authentication required."}), 401
         
-    record = DiagnosticRecord.query.get(record_id)
+    record = db.session.get(DiagnosticRecord, record_id)
     if not record:
         return jsonify({"error": "Diagnosis record not found."}), 404
         
@@ -709,7 +709,7 @@ def approve_diagnosis(record_id):
     if not user_id or role not in ("doctor", "admin"):
         return jsonify({"error": "Access denied. Doctor account required."}), 403
         
-    record = DiagnosticRecord.query.get(record_id)
+    record = db.session.get(DiagnosticRecord, record_id)
     if not record:
         return jsonify({"error": "Diagnosis record not found."}), 404
         
@@ -770,7 +770,7 @@ def approve_diagnosis(record_id):
     from backend.database.models import Notification, Patient
     p_name = record.patient_reference or f"SHS-{record.id}"
     if record.patient_id:
-        patient = Patient.query.get(record.patient_id)
+        patient = db.session.get(Patient, record.patient_id)
         if patient:
             p_name = patient.full_name
             
@@ -785,7 +785,7 @@ def approve_diagnosis(record_id):
     db.session.refresh(record)
     if record.patient_id and not record.patient:
         from backend.database.models import Patient
-        record.patient = Patient.query.get(record.patient_id)
+        record.patient = db.session.get(Patient, record.patient_id)
     
     logger.info(f"[API] Doctor {user_id} approved record {record_id} as finalized.")
     return jsonify({
@@ -814,7 +814,7 @@ def technician_connect_doctor():
     if existing:
         if existing.status == "rejected":
             existing.status = "pending"
-            existing.created_at = datetime.utcnow()
+            existing.created_at = datetime.now(timezone.utc)
             db.session.commit()
             return jsonify({"status": "success", "message": "Connection request re-submitted."}), 200
         return jsonify({"error": f"Connection request is already {existing.status}."}), 400
@@ -921,7 +921,7 @@ def technician_submit_biomarkers():
     if not conn:
         return jsonify({"error": "Access denied. You are not approved by this doctor."}), 403
         
-    patient = Patient.query.get(int(patient_id))
+    patient = db.session.get(Patient, int(patient_id))
     if not patient:
         return jsonify({"error": "Patient not found."}), 404
         
@@ -960,7 +960,7 @@ def preview_models(record_id):
     if not user_id:
         return jsonify({"error": "Authentication required."}), 401
         
-    record = DiagnosticRecord.query.get(record_id)
+    record = db.session.get(DiagnosticRecord, record_id)
     if not record:
         return jsonify({"error": "Record not found."}), 404
         
@@ -1222,7 +1222,7 @@ def generate_explanation(record_id):
     if not user_id or role not in ("doctor", "admin"):
         return jsonify({"error": "Unauthorized."}), 403
 
-    record = DiagnosticRecord.query.get(record_id)
+    record = db.session.get(DiagnosticRecord, record_id)
     if not record:
         return jsonify({"error": "Record not found."}), 404
 
@@ -1698,7 +1698,7 @@ def get_authorized_case(case_id, allow_admin=True):
     elif role != "technician":
         return None, (jsonify({"error": "Doctor or admin access required."}), 403)
 
-    record = DiagnosticRecord.query.get(case_id)
+    record = db.session.get(DiagnosticRecord, case_id)
     if not record:
         return None, (jsonify({"error": "Case not found."}), 404)
 
@@ -1721,7 +1721,7 @@ def create_case():
     if role not in ("doctor", "admin"):
         return jsonify({"error": "Doctor or admin access required."}), 403
     if role == "doctor":
-        current_user = User.query.get(user_id)
+        current_user = db.session.get(User, user_id)
         if not current_user or current_user.status != "approved":
             return jsonify({"error": "Approved doctor account required."}), 403
 
@@ -1736,7 +1736,7 @@ def create_case():
                 patient_id = int(patient_id)
             except (TypeError, ValueError):
                 return jsonify({"error": "Invalid patient_id."}), 400
-            patient = Patient.query.get(patient_id)
+            patient = db.session.get(Patient, patient_id)
             if not patient:
                 return jsonify({"error": "Patient profile not found."}), 404
             if role == "doctor" and patient.doctor_id != user_id and patient.user_id != user_id:
@@ -1821,7 +1821,7 @@ def capture_case_symptoms(case_id):
             standard_symptom_id = item.get("standard_symptom_id")
             
             if standard_symptom_id:
-                matched_catalog = SymptomCatalog.query.get(standard_symptom_id)
+                matched_catalog = db.session.get(SymptomCatalog, standard_symptom_id)
             else:
                 raw_lower = raw_text.lower()
                 for cat in catalog_items:

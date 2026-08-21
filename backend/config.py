@@ -97,7 +97,7 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
-    SECRET_KEY = os.environ.get("SECRET_KEY")  # Must be set in prod
+    SECRET_KEY = os.environ.get("SECRET_KEY") or os.urandom(24).hex()
 
 
 def get_config():

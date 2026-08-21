@@ -3,7 +3,7 @@ Smart Health Sync — Database Models
 Authors: Enock Queenson Eduafo & Christabel Araba Edumadze | University of Ghana 2026
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -26,7 +26,7 @@ class User(db.Model):
     proof_data = db.Column(db.LargeBinary, nullable=True)
     proof_mimetype = db.Column(db.String(100), nullable=True)
     status = db.Column(db.String(20), default='pending')  # approved, pending, rejected
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     # Relationships
     records = db.relationship(
@@ -55,7 +55,7 @@ class Patient(db.Model):
     date_of_birth = db.Column(db.Date, nullable=True)
     gender = db.Column(db.String(10))
     blood_group = db.Column(db.String(5))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     # Doctor Case Management fields
     full_name = db.Column(db.String(120), nullable=True)
@@ -82,7 +82,7 @@ class DoctorPatientConnection(db.Model):
     doctor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
     status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     # Relationships
     doctor = db.relationship('User', backref=db.backref('patient_connections', lazy='dynamic'))
@@ -97,7 +97,7 @@ class DoctorTechnicianConnection(db.Model):
     doctor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     technician_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     # Relationships
     doctor = db.relationship('User', foreign_keys=[doctor_id], backref=db.backref('technician_connections', lazy='dynamic'))
@@ -129,7 +129,7 @@ class DiagnosticRecord(db.Model):
     report_sections = db.Column(db.Text, nullable=True)
     doctor_signature = db.Column(db.String(120), nullable=True)
     
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
     # Additive relationships
     case_symptoms = db.relationship('PatientCaseSymptom', backref='case', lazy='dynamic', cascade='all, delete-orphan')
@@ -183,7 +183,7 @@ class Notification(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     message = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False, index=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), index=True)
     
     user = db.relationship('User', backref=db.backref('notifications', lazy='dynamic'))
 
@@ -206,7 +206,7 @@ class ModelAuditLog(db.Model):
     action = db.Column(db.String(64))  # load, predict, update
     status = db.Column(db.String(20))  # success, failure
     details = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # ─── Additive Workflow Schema Extensions ───────────────────────
@@ -250,7 +250,7 @@ class PatientCaseSymptom(db.Model):
     notes = db.Column(db.Text, nullable=True)
     mapping_confidence = db.Column(db.Float, default=1.0)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     standard_symptom = db.relationship('SymptomCatalog', backref='case_references')
 
@@ -280,7 +280,7 @@ class PreliminaryAssessment(db.Model):
     status = db.Column(db.String(32), default='completed')
     summary_text = db.Column(db.Text, nullable=True)
     disclaimer = db.Column(db.Text, default="This is a preliminary clinical consideration based on reported symptoms, not a confirmed diagnosis.")
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     candidates = db.relationship('AssessmentCandidate', backref='assessment', lazy='dynamic', cascade='all, delete-orphan')
 
@@ -404,7 +404,7 @@ class InvestigationResult(db.Model):
     raw_value = db.Column(db.Float, nullable=False)
     normalized_value = db.Column(db.Float, nullable=True)
     unit = db.Column(db.String(32), nullable=True)
-    measured_at = db.Column(db.DateTime, default=datetime.utcnow)
+    measured_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     def to_dict(self):
         return {
@@ -430,7 +430,7 @@ class ModelPrediction(db.Model):
     probability = db.Column(db.Float, nullable=False)
     probability_scores_json = db.Column(db.Text, nullable=True)
     feature_importance_json = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     def to_dict(self):
         import json
@@ -459,7 +459,7 @@ class AISummary(db.Model):
     results_narrative = db.Column(db.Text, nullable=True)
     prediction_narrative = db.Column(db.Text, nullable=True)
     doctor_notes = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     def to_dict(self):
         return {
@@ -485,7 +485,7 @@ class GeneratedReport(db.Model):
     selected_sections_json = db.Column(db.Text, nullable=True)
     doctor_signature = db.Column(db.String(120), nullable=True)
     pdf_filename = db.Column(db.String(256), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     def to_dict(self):
         import json

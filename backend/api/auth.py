@@ -262,7 +262,7 @@ def verify_doctor():
         if not doctor_id or action not in ["approve", "reject"]:
             return jsonify({"error": "Invalid doctor ID or verification action."}), 400
 
-        doctor = User.query.get(doctor_id)
+        doctor = db.session.get(User, doctor_id)
         if not doctor or doctor.role != "doctor":
             return jsonify({"error": "Doctor account not found."}), 404
 
@@ -293,7 +293,7 @@ def reupload_proof():
     if not user_id:
         return jsonify({"error": "Authentication required."}), 401
 
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user or user.role != "doctor":
         return jsonify({"error": "Doctor account not found."}), 404
 
@@ -347,7 +347,7 @@ def manage_user():
     if not target_id:
         return jsonify({"error": "User ID required."}), 400
 
-    user = User.query.get(target_id)
+    user = db.session.get(User, target_id)
     if not user:
         return jsonify({"error": "User not found."}), 404
 
@@ -385,7 +385,7 @@ def download_doctor_proof(doctor_id):
     if session.get("role") != "admin":
         return jsonify({"error": "Admin access required."}), 403
 
-    user = User.query.get(doctor_id)
+    user = db.session.get(User, doctor_id)
     if not user or user.role != "doctor":
         return jsonify({"error": "Doctor account not found."}), 404
 
