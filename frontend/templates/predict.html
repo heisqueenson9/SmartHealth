@@ -54,7 +54,7 @@
 
       <div class="row g-3 mb-4">
         <div class="col-12 col-md-8 mx-auto">
-          <div class="auth-form-group">
+          <div class="auth-form-group mb-3">
             <label class="auth-label">Select Patient Profile *</label>
             <select id="linkPatientSelect" class="auth-input" {% if selected_patient_id %}disabled{% endif %}>
               <option value="">-- Select Patient Case --</option>
@@ -68,6 +68,14 @@
             </select>
             <div class="auth-field-hint mt-2">
               Select a patient from your connected medical records.
+            </div>
+          </div>
+
+          <div class="auth-form-group">
+            <label class="auth-label">Case Reference ID</label>
+            <input type="text" id="patientReferenceInput" class="auth-input" placeholder="Auto-generated Case ID..." readonly>
+            <div class="auth-field-hint mt-2" id="referencePreview">
+              Select a patient above to auto-generate a case reference.
             </div>
           </div>
         </div>

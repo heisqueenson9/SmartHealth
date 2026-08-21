@@ -1686,12 +1686,12 @@ def get_authorized_case(case_id, allow_admin=True):
     """
     user_id = session.get("user_id")
     role = session.get("role")
-    status = session.get("status")
     if not user_id:
         return None, (jsonify({"error": "Authentication required."}), 401)
     if role == "doctor":
-        if status != "approved":
-            return None, (jsonify({"error": "Approved doctor account required."}), 403)
+        current_user = db.session.get(User, user_id)
+        if not current_user or current_user.status != "approved":
+            return None, (jsonify({"error": "Approved doctor account required. If you were recently approved, please log out and log back in."}), 403)
     elif role == "admin":
         if not allow_admin:
             return None, (jsonify({"error": "Admin access not permitted."}), 403)
@@ -1898,6 +1898,73 @@ def update_case_symptom(case_id, symptom_id):
         }), 500
 
 
+def _generate_ai_rationales(candidates, symptom_names):
+    """Generate a clinically-grounded, symptom-specific explanation for each
+    preliminary candidate using Groq, if configured. Falls back silently to
+    each candidate's existing rule-based rationale on any failure — this
+    never blocks the assessment from completing."""
+    groq_api_key = current_app.config.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
+    if not groq_api_key or not candidates:
+        return candidates
+    try:
+        candidate_lines = "\n".join(
+            f"- {c['condition_name']} (score: {c['score']}%): currently explained as \"{c['rationale']}\""
+            for c in candidates
+        )
+        system_prompt = (
+            "You are a clinical reasoning assistant for a diagnostic support tool. "
+            "For each candidate condition below, write ONE concise sentence (max 30 words) explaining "
+            "why the patient's specific reported symptoms support that condition at that score, "
+            "using real clinical reasoning. Do not invent symptoms not listed. "
+            "Return ONLY a JSON array of strings, one per candidate, in the same order given. No other text."
+        )
+        user_prompt = (
+            f"Reported symptoms: {', '.join(symptom_names) if symptom_names else 'none specified'}\n\n"
+            f"Candidates:\n{candidate_lines}"
+        )
+        reply_text = None
+        try:
+            from groq import Groq
+            client = Groq(api_key=groq_api_key)
+            completion = client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0.3,
+                max_tokens=500,
+            )
+            reply_text = completion.choices[0].message.content
+        except ImportError:
+            import requests
+            headers = {"Authorization": f"Bearer {groq_api_key}", "Content-Type": "application/json"}
+            payload = {
+                "model": "llama-3.1-8b-instant",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                "temperature": 0.3,
+                "max_tokens": 500,
+            }
+            res = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload, timeout=12)
+            if res.status_code == 200:
+                reply_text = res.json()["choices"][0]["message"]["content"]
+        if reply_text:
+            cleaned = reply_text.strip().strip("`")
+            if cleaned.lower().startswith("json"):
+                cleaned = cleaned[4:].strip()
+            explanations = json.loads(cleaned)
+            if isinstance(explanations, list) and len(explanations) == len(candidates):
+                for c, explanation in zip(candidates, explanations):
+                    c["rationale"] = explanation
+                    c["ai_generated"] = True
+    except Exception as exc:
+        logger.warning(f"[AI Rationale] Falling back to rule-based explanations: {exc}")
+    return candidates
+
+
 @api_bp.route("/cases/<int:case_id>/pre-assessment", methods=["POST"])
 def run_pre_assessment(case_id):
     record, err_resp = get_authorized_case(case_id)
@@ -1994,6 +2061,7 @@ def run_pre_assessment(case_id):
             })
 
         candidates_scores.sort(key=lambda x: x["score"], reverse=True)
+        candidates_scores = _generate_ai_rationales(candidates_scores, list(set(symptom_names)))
 
         pa = PreliminaryAssessment(
             case_id=case_id,

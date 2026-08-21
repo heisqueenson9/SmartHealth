@@ -18,14 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initPatientSelector();
     initSymptomSearch();
     resumeExistingCase();
-
-    const btn1 = document.getElementById("btnStep1Next");
-    if (btn1) {
-        btn1.addEventListener("click", (e) => {
-            e.preventDefault();
-            proceedToStep2();
-        });
-    }
 });
 
 // ── 1. Step Navigation & Stepper Bar ─────────────────────────────────
@@ -65,7 +57,25 @@ function initStepNavigation() {
 
 // ── 2. Patient Case Selection (Dedicated API: POST /api/cases) ────────
 function initPatientSelector() {
-    // UI selection handler
+    const select = document.getElementById("linkPatientSelect");
+    const refInput = document.getElementById("patientReferenceInput");
+    const preview = document.getElementById("referencePreview");
+    if (!select || !refInput) return;
+    const updateReference = () => {
+        if (!select.value) {
+            refInput.value = "";
+            if (preview) preview.textContent = "Select a patient above to auto-generate a case reference.";
+            return;
+        }
+        const opt = select.options[select.selectedIndex];
+        const uuid = (opt && opt.dataset && opt.dataset.uuid) || "";
+        const name = (opt && opt.dataset && opt.dataset.name) || "Patient";
+        const ref = uuid || `PAT-${select.value}`;
+        refInput.value = ref;
+        if (preview) preview.textContent = `Auto-generated for ${name}.`;
+    };
+    select.addEventListener("change", updateReference);
+    if (select.value) updateReference();
 }
 
 async function initOrCreateCase() {
@@ -197,9 +207,16 @@ function initSymptomSearch() {
                         item.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
                         item.innerHTML = `<strong>${escapeHtml(sym.display_name)}</strong> <span style="font-size:0.75rem; color:var(--text-secondary);">(${escapeHtml(sym.category || 'General')})</span>`;
                         item.onclick = () => {
-                            addSymptomChip(sym.display_name, sym.id, "selected", "Moderate", 3, "days");
+                            const txtInput = document.getElementById("customSymptomText");
+                            if (txtInput) {
+                                txtInput.value = sym.display_name;
+                                txtInput.dataset.catalogId = sym.id;
+                                txtInput.dataset.source = "selected";
+                                txtInput.focus();
+                            }
                             input.value = "";
                             menu.style.display = "none";
+                            showToast(`"${sym.display_name}" selected — set severity & duration below, then click Add.`, "info");
                         };
                         menu.appendChild(item);
                     });
@@ -252,16 +269,23 @@ function addCustomSymptom() {
         return;
     }
     
+    const catalogId = txtInput && txtInput.dataset.catalogId ? parseInt(txtInput.dataset.catalogId, 10) : null;
+    const source = (txtInput && txtInput.dataset.source) || "typed";
+
     addSymptomChip(
         text,
-        null,
-        "typed",
+        catalogId,
+        source,
         sevSelect ? sevSelect.value : "Moderate",
         durInput ? parseInt(durInput.value, 10) || 3 : 3,
         durUnitSelect ? durUnitSelect.value : "days"
     );
     
-    if (txtInput) txtInput.value = "";
+    if (txtInput) {
+        txtInput.value = "";
+        delete txtInput.dataset.catalogId;
+        delete txtInput.dataset.source;
+    }
 }
 
 function addCustomSymptomFromQuery(query) {
@@ -479,22 +503,22 @@ async function proceedToStep5() {
         showToast("Please select at least one investigation panel.", "warning");
         return;
     }
-    
     try {
         const response = await fetch(`/api/cases/${currentCaseId}/investigations`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                investigations: activeSelection
-            })
+            body: JSON.stringify({ investigations: activeSelection })
         });
         const data = await response.json();
         if (!response.ok || data.status !== "success") {
             throw new Error(data.error || "Failed to save selected investigations.");
         }
-        
+        // Critical: replace the stale recommendation objects (no real ID yet)
+        // with the actual persisted CaseInvestigation records the backend just
+        // created — these have the real .id the results endpoint needs.
+        selectedInvestigations = data.investigations || [];
         navigateToStep(5);
-        buildDynamicBiomarkerForm(activeSelection);
+        buildDynamicBiomarkerForm(selectedInvestigations.filter(item => item.doctor_selected));
     } catch (error) {
         console.error(error);
         showToast(error.message, "error");
