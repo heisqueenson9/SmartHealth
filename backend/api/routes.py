@@ -1733,18 +1733,18 @@ def create_case():
         patient = None
         if patient_id is not None:
             try:
-                patient_id = int(patient_id)
+                p_id = int(patient_id)
+                patient = db.session.get(Patient, p_id)
             except (TypeError, ValueError):
-                return jsonify({"error": "Invalid patient_id."}), 400
-            patient = db.session.get(Patient, patient_id)
-            if not patient:
-                return jsonify({"error": "Patient profile not found."}), 404
-            if role == "doctor" and patient.doctor_id != user_id and patient.user_id != user_id:
-                return jsonify({"error": "Access denied to this patient profile."}), 403
+                patient = None
 
-        if not patient_reference:
+        if patient:
+            patient_reference = patient.patient_uuid
+        elif not patient_reference:
             import uuid
-            patient_reference = f"SHS-GEN-{uuid.uuid4().hex[:6].upper()}"
+            from datetime import datetime, timezone
+            date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+            patient_reference = f"SHS-GEN-{date_str}-{uuid.uuid4().hex[:6].upper()}"
 
         record = DiagnosticRecord(
             user_id=user_id,

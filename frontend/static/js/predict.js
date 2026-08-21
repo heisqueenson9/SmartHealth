@@ -64,13 +64,17 @@ async function initOrCreateCase() {
     if (currentCaseId) return currentCaseId;
     
     const select = document.getElementById("linkPatientSelect");
-    if (!select || !select.value) {
-        throw new Error("Please select a patient profile to continue.");
+    let patientId = null;
+    let patUuid = null;
+
+    if (select && select.value) {
+        patientId = parseInt(select.value, 10);
+        if (isNaN(patientId)) patientId = null;
+        const opt = select.options[select.selectedIndex];
+        if (opt) {
+            patUuid = (opt.dataset && opt.dataset.uuid) || opt.getAttribute("data-uuid") || null;
+        }
     }
-    
-    const patientId = parseInt(select.value, 10);
-    const opt = select.options[select.selectedIndex];
-    const patUuid = (opt.dataset && opt.dataset.uuid) || opt.getAttribute("data-uuid") || `PAT-${patientId}`;
     
     const response = await fetch("/api/cases", {
         method: "POST",
@@ -91,17 +95,11 @@ async function initOrCreateCase() {
     const hidden = document.getElementById("currentCaseId");
     if (hidden) hidden.value = currentCaseId;
     
-    logger(`Case initialized ID: ${currentCaseId} (${patUuid})`);
+    logger(`Case initialized ID: ${currentCaseId}`);
     return currentCaseId;
 }
 
 async function proceedToStep2() {
-    const select = document.getElementById("linkPatientSelect");
-    if (!select || !select.value) {
-        showToast("Please select a patient case profile first.", "warning");
-        return;
-    }
-
     const btn = document.getElementById("btnStep1Next");
     if (btn) { btn.disabled = true; btn.textContent = "Saving Case..."; }
     try {
