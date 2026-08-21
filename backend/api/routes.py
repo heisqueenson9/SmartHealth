@@ -1552,7 +1552,6 @@ def admin_get_datasets():
         return jsonify({"error": "Unauthorized."}), 403
         
     datasets_dir = os.path.abspath(current_app.root_path + "/../data")
-    import os
     files = []
     if os.path.exists(datasets_dir):
         for f in os.listdir(datasets_dir):
