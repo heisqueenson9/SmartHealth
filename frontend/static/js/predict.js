@@ -64,6 +64,20 @@ function generateStandaloneRef() {
     return `SHS-GEN-${code}`;
 }
 
+function generateNewCaseReferenceUI() {
+    const refInput = document.getElementById("patientReferenceInput");
+    const preview = document.getElementById("referencePreview");
+    const select = document.getElementById("linkPatientSelect");
+    if (select && !select.disabled) {
+        select.value = "";
+    }
+    const genRef = generateStandaloneRef();
+    if (refInput) refInput.value = genRef;
+    if (preview) preview.textContent = `Auto-generated Case ID: ${genRef}`;
+    showToast(`Generated Case Reference ID: ${genRef}`, "info");
+}
+window.generateNewCaseReferenceUI = generateNewCaseReferenceUI;
+
 // ── 2. Patient Case Selection (Dedicated API: POST /api/cases) ────────
 function initPatientSelector() {
     const select = document.getElementById("linkPatientSelect");
@@ -93,6 +107,14 @@ function initPatientSelector() {
     
     if (select) {
         select.addEventListener("change", updateReference);
+    }
+    if (refInput) {
+        refInput.addEventListener("input", () => {
+            const val = refInput.value.trim();
+            if (preview) {
+                preview.textContent = val ? `Case Reference: ${val}` : "Preview: SHS-GEN-...";
+            }
+        });
     }
     updateReference();
 }
