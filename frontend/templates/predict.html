@@ -53,7 +53,7 @@
       </p>
 
       <div class="row g-3 mb-4">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-8 mx-auto">
           <div class="auth-form-group">
             <label class="auth-label">Select Patient Profile *</label>
             <select id="linkPatientSelect" class="auth-input" {% if selected_patient_id %}disabled{% endif %}>
@@ -68,15 +68,6 @@
             </select>
             <div class="auth-field-hint mt-2">
               Select a patient from your connected medical records.
-            </div>
-          </div>
-        </div>
-        <div class="col-12 col-md-6">
-          <div class="auth-form-group">
-            <label class="auth-label">Case Reference ID</label>
-            <input type="text" id="patientReferenceInput" class="auth-input" value="{{ default_case_reference }}" placeholder="Patient ID (e.g. PAT-XXXXXX)..." readonly>
-            <div class="auth-field-hint mt-2" id="referencePreview">
-              Preview: {{ default_case_reference or 'PAT-...' }}
             </div>
           </div>
         </div>

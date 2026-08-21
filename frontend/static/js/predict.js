@@ -57,50 +57,20 @@ function initStepNavigation() {
 
 // ── 2. Patient Case Selection (Dedicated API: POST /api/cases) ────────
 function initPatientSelector() {
-    const select = document.getElementById("linkPatientSelect");
-    const refInput = document.getElementById("patientReferenceInput");
-    const preview = document.getElementById("referencePreview");
-    
-    if (!select || !refInput) return;
-
-    function updateReference() {
-        const val = select.value;
-        if (val) {
-            const opt = select.options[select.selectedIndex];
-            const patUuid = (opt.dataset && opt.dataset.uuid) || opt.getAttribute("data-uuid") || `PAT-${val}`;
-            refInput.value = patUuid;
-            if (preview) preview.textContent = `Preview: ${patUuid}`;
-        } else {
-            refInput.value = "";
-            if (preview) preview.textContent = "Preview: PAT-...";
-        }
-    }
-
-    select.addEventListener("change", updateReference);
-    updateReference();
+    // UI selection handler
 }
 
 async function initOrCreateCase() {
     if (currentCaseId) return currentCaseId;
     
     const select = document.getElementById("linkPatientSelect");
-    const refInput = document.getElementById("patientReferenceInput");
-    const preview = document.getElementById("referencePreview");
-    
     if (!select || !select.value) {
         throw new Error("Please select a patient profile to continue.");
     }
     
     const patientId = parseInt(select.value, 10);
     const opt = select.options[select.selectedIndex];
-    const patUuid = (opt.dataset && opt.dataset.uuid) || opt.getAttribute("data-uuid") || refInput.value.trim();
-    
-    if (!patUuid) {
-        throw new Error("Invalid patient ID selected.");
-    }
-    
-    if (refInput) refInput.value = patUuid;
-    if (preview) preview.textContent = `Preview: ${patUuid}`;
+    const patUuid = (opt.dataset && opt.dataset.uuid) || opt.getAttribute("data-uuid") || `PAT-${patientId}`;
     
     const response = await fetch("/api/cases", {
         method: "POST",
@@ -120,11 +90,6 @@ async function initOrCreateCase() {
     currentCaseId = data.case.id;
     const hidden = document.getElementById("currentCaseId");
     if (hidden) hidden.value = currentCaseId;
-    
-    if (refInput && data.case.patient_reference) {
-        refInput.value = data.case.patient_reference;
-        if (preview) preview.textContent = `Preview: ${data.case.patient_reference}`;
-    }
     
     logger(`Case initialized ID: ${currentCaseId} (${patUuid})`);
     return currentCaseId;
