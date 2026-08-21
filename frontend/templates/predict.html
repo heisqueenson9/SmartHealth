@@ -74,9 +74,9 @@
         <div class="col-12 col-md-6">
           <div class="auth-form-group">
             <label class="auth-label">Case Reference ID</label>
-            <input type="text" id="patientReferenceInput" class="auth-input" placeholder="Auto-generated Case ID..." readonly>
+            <input type="text" id="patientReferenceInput" class="auth-input" value="{{ default_case_reference }}" placeholder="Auto-generated Case ID..." readonly>
             <div class="auth-field-hint mt-2" id="referencePreview">
-              Preview: SHS-GEN-...
+              Preview: {{ default_case_reference }}
             </div>
           </div>
         </div>
@@ -415,5 +415,5 @@
 {% endblock %}
 
 {% block portal_scripts %}
-<script src="{{ url_for('static', filename='js/predict.js') }}"></script>
+<script src="{{ url_for('static', filename='js/predict.js') }}?v={{ default_case_reference }}"></script>
 {% endblock %}
