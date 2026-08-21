@@ -430,6 +430,7 @@ class ModelPrediction(db.Model):
     probability = db.Column(db.Float, nullable=False)
     probability_scores_json = db.Column(db.Text, nullable=True)
     feature_importance_json = db.Column(db.Text, nullable=True)
+    data_coverage_json = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     def to_dict(self):
@@ -443,6 +444,7 @@ class ModelPrediction(db.Model):
             "probability": self.probability,
             "probability_scores": json.loads(self.probability_scores_json) if self.probability_scores_json else {},
             "feature_importance": json.loads(self.feature_importance_json) if self.feature_importance_json else {},
+            "data_coverage": json.loads(self.data_coverage_json) if self.data_coverage_json else {},
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
 

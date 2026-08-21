@@ -175,6 +175,26 @@ def _ensure_patient_schema():
         log.warning(f"[SmartHealth] Schema migration skipped/failed (patients/users): {exc}")
 
 
+def _ensure_model_predictions_schema():
+    """Migrate model_predictions table schema on existing databases (SQLite AND Postgres)."""
+    from sqlalchemy import inspect, text
+
+    log = logging.getLogger("smarthealth.factory")
+    engine_name = db.engine.name
+    try:
+        insp = inspect(db.engine)
+        if "model_predictions" not in insp.get_table_names():
+            return
+        cols = {c["name"] for c in insp.get_columns("model_predictions")}
+        if "data_coverage_json" not in cols:
+            log.info(f"[SmartHealth] Adding model_predictions.data_coverage_json column ({engine_name}).")
+            db.session.execute(text("ALTER TABLE model_predictions ADD COLUMN data_coverage_json TEXT"))
+            db.session.commit()
+    except Exception as exc:
+        db.session.rollback()
+        log.warning(f"[SmartHealth] Schema migration error (model_predictions): {exc}")
+
+
 def configure_logging(level: str = "INFO"):
     """Set up structured logging for the application."""
     numeric = getattr(logging, level.upper(), logging.INFO)

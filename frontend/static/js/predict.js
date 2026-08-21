@@ -716,6 +716,17 @@ function renderPredictionResults(data) {
     if (confLarge) confLarge.textContent = `${data.confidence || 0}%`;
     if (confBar) confBar.style.width = `${data.confidence || 0}%`;
     if (modelLbl) modelLbl.textContent = `Model: ${data.prediction_details?.model_used || 'random_forest'}`;
+
+    const coverageEl = document.getElementById("dataCoverageNotice");
+    if (coverageEl && data.data_coverage) {
+        const cov = data.data_coverage;
+        if (cov.coverage_pct < 100) {
+            coverageEl.style.display = "block";
+            coverageEl.innerHTML = `<i class="fa-solid fa-circle-info"></i> This prediction used ${cov.entered_count} of ${cov.total_count} biomarkers from actual entered results (${cov.coverage_pct}% coverage). The remaining values were assumed within normal range. Entering results for more investigations will improve prediction reliability.`;
+        } else {
+            coverageEl.style.display = "none";
+        }
+    }
     
     if (desc) {
         desc.textContent = data.prediction_details?.description || "Algorithmic inference completed based on normalised biomarker profile.";

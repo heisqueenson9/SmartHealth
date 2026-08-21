@@ -261,7 +261,7 @@
       </div>
 
       <!-- ML Prediction Verdict Panel -->
-      <div class="result-panel mb-4" id="resultsPanel" style="display:block;">
+      <div class="result-panel mb-2" id="resultsPanel" style="display:block;">
         <div class="result-header">
           <div>
             <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">
@@ -280,6 +280,7 @@
         <div class="confidence-bar mb-3">
           <div class="confidence-fill" id="confidenceBar" style="width:0%;"></div>
         </div>
+        <div id="dataCoverageNotice" class="auth-field-hint mb-3" style="display:none;"></div>
 
         <p class="result-description" id="diagnosisDescription" style="color:var(--text-secondary); margin-bottom:20px; font-size:0.9rem;">
           Evaluating biomarker features...
@@ -304,7 +305,7 @@
       </div>
 
       <!-- Expanded AI Clinical Summary Card -->
-      <div class="portal-card mb-4" style="background:rgba(197, 231, 16, 0.02); border:1px solid rgba(197, 231, 16, 0.2);">
+      <div class="portal-card mb-4" style="background:rgba(197, 231, 16, 0.02); border:1px solid rgba(197, 231, 16, 0.2); margin-top:12px;">
         <div class="portal-section-title d-flex justify-content-between align-items-center">
           <span style="color:var(--cyan-primary);"><i class="fa-solid fa-brain"></i> Whole-Case AI Clinical Summary</span>
           <button class="btn-outline btn-sm" style="border-color:var(--cyan-primary); color:var(--cyan-primary);" onclick="refreshAISummary()">

@@ -2353,6 +2353,10 @@ def run_case_prediction(case_id):
 
         res = model_manager.predict(full_features, model_key)
 
+        features_actually_entered = sorted(normalized_inputs.keys())
+        features_defaulted = sorted(set(HEALTHY_BASELINE.keys()) - set(normalized_inputs.keys()))
+        coverage_pct = round(len(features_actually_entered) / len(HEALTHY_BASELINE) * 100, 1)
+
         from backend.database.models import ModelPrediction
         mp = ModelPrediction(
             case_id=case_id,
@@ -2361,7 +2365,12 @@ def run_case_prediction(case_id):
             predicted_diagnosis=res["prediction"],
             probability=res["confidence"],
             probability_scores_json=json.dumps(res.get("probabilities", {})),
-            feature_importance_json=json.dumps(res.get("feature_importance", {}))
+            feature_importance_json=json.dumps(res.get("feature_importance", {})),
+            data_coverage_json=json.dumps({
+                "entered": features_actually_entered,
+                "defaulted": features_defaulted,
+                "coverage_pct": coverage_pct,
+            })
         )
         db.session.add(mp)
         
@@ -2372,13 +2381,38 @@ def run_case_prediction(case_id):
         record.case_status = "Prediction Available"
         
         db.session.commit()
-        
+
+        from backend.database.models import Notification, User
+        notif_message = f"Prediction ready for case {record.patient_reference or ('#' + str(record.id))}: {res['prediction']} ({res['confidence']:.1f}% confidence)."
+        recipients = set()
+        if record.user_id:
+            recipients.add(record.user_id)
+        for admin_user in User.query.filter_by(role="admin").all():
+            recipients.add(admin_user.id)
+        for uid in recipients:
+            db.session.add(Notification(user_id=uid, message=notif_message))
+        db.session.commit()
+
+        try:
+            from backend.api.mail_utils import notify_prediction_ready
+            author = db.session.get(User, record.user_id) if record.user_id else None
+            if author and author.email:
+                notify_prediction_ready(author, record, res)
+        except Exception as mail_exc:
+            logger.warning(f"[Mail] Prediction-ready email skipped: {mail_exc}")
+
         return jsonify({
             "status": "success",
             "predicted_diagnosis": res["prediction"],
             "confidence": res["confidence"],
             "case_status": record.case_status,
-            "prediction_details": res
+            "prediction_details": res,
+            "data_coverage": {
+                "entered_count": len(features_actually_entered),
+                "total_count": len(HEALTHY_BASELINE),
+                "coverage_pct": coverage_pct,
+                "defaulted_features": features_defaulted,
+            },
         }), 200
     except Exception as exc:
         db.session.rollback()

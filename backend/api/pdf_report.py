@@ -175,6 +175,17 @@ def generate_case_report_pdf(record, sections, signature, output_path):
     if "Doctor Notes" in sections and record.doctor_remarks:
         story.append(Paragraph("Doctor Notes", SECTION_STYLE))
         story.append(Paragraph(record.doctor_remarks, BODY_STYLE))
+    if "Doctor Notes" in sections and record.observations:
+        story.append(Paragraph("Clinical Recommendations", SECTION_STYLE))
+        story.append(Paragraph(record.observations, BODY_STYLE))
+    if "Doctor Notes" in sections and record.treatment_notes:
+        story.append(Paragraph("Treatment Plan", SECTION_STYLE))
+        story.append(Paragraph(record.treatment_notes, BODY_STYLE))
+    if "AI Clinical Summary" in sections and record.ai_explanation:
+        story.append(Paragraph("AI Simplified Explanation", SECTION_STYLE))
+        for line in record.ai_explanation.split("\n"):
+            if line.strip():
+                story.append(Paragraph(line, BODY_STYLE))
 
     if "Doctor Identity/Signature" in sections:
         story.append(Spacer(1, 20))
