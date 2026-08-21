@@ -218,6 +218,16 @@
     <i class="fa-solid fa-file-pdf"></i> Generate PDF
   </button>
 </div>
+{% elif session.get('role') in ('doctor', 'admin') and record.status == 'draft' %}
+<div class="portal-card">
+  <div class="portal-section-title"><i class="fa-solid fa-triangle-exclamation"></i> Case In Progress</div>
+  <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:15px;">
+    This case hasn't been through the clinical workflow yet — no symptoms, investigations, or lab results have been recorded. Continue the workflow before a report can be generated.
+  </p>
+  <a href="/predict?case_id={{ record.id }}" class="auth-btn" style="max-width:280px;display:inline-block;text-align:center;">
+    <i class="fa-solid fa-arrow-right"></i> Continue This Case
+  </a>
+</div>
 {% else %}
 <div class="portal-card">
   <div class="portal-section-title d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -377,16 +387,6 @@
       </div>
     </div>
   </div>
-</div>
-{% elif session.get('role') in ('doctor', 'admin') and record.status == 'draft' %}
-<div class="portal-card">
-  <div class="portal-section-title"><i class="fa-solid fa-triangle-exclamation"></i> Case In Progress</div>
-  <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:15px;">
-    This case hasn't been through the clinical workflow yet — no symptoms, investigations, or lab results have been recorded. Continue the workflow before a report can be generated.
-  </p>
-  <a href="/predict?case_id={{ record.id }}" class="auth-btn" style="max-width:280px;display:inline-block;text-align:center;">
-    <i class="fa-solid fa-arrow-right"></i> Continue This Case
-  </a>
 </div>
 {% endif %}
 {% else %}
