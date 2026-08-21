@@ -74,9 +74,9 @@
         <div class="col-12 col-md-6">
           <div class="auth-form-group">
             <label class="auth-label">Case Reference ID</label>
-            <input type="text" id="patientReferenceInput" class="auth-input" value="{{ default_case_reference }}" placeholder="Auto-generated Case ID..." readonly>
+            <input type="text" id="patientReferenceInput" class="auth-input" value="{{ default_case_reference }}" placeholder="Patient ID (e.g. PAT-XXXXXX)..." readonly>
             <div class="auth-field-hint mt-2" id="referencePreview">
-              Preview: {{ default_case_reference }}
+              Preview: {{ default_case_reference or 'PAT-...' }}
             </div>
           </div>
         </div>

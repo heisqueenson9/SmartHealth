@@ -55,55 +55,29 @@ function initStepNavigation() {
     navigateToStep(1);
 }
 
-function generateCaseReference(patientOpt) {
-    const now = new Date();
-    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
-    const randomHex = Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0').toUpperCase();
-    
-    if (patientOpt && patientOpt.value) {
-        const uuid = patientOpt.dataset.uuid || `PAT-${patientOpt.value}`;
-        const name = patientOpt.dataset.name || "Patient";
-        const words = name.trim().split(/\s+/).filter(Boolean);
-        const initials = words.map(w => w[0]).join("").toUpperCase().slice(0, 2) || "PT";
-        const suffix = uuid.length >= 6 ? uuid.slice(-6).toUpperCase() : randomHex;
-        return `SHS-${initials}-${suffix}`;
-    } else {
-        return `SHS-GEN-${dateStr}-${randomHex}`;
-    }
-}
-
 // ── 2. Patient Case Selection (Dedicated API: POST /api/cases) ────────
 function initPatientSelector() {
     const select = document.getElementById("linkPatientSelect");
     const refInput = document.getElementById("patientReferenceInput");
     const preview = document.getElementById("referencePreview");
     
-    if (!refInput) return;
+    if (!select || !refInput) return;
 
-    function updateReference(forceNew = false) {
-        if (currentCaseId && refInput.value && !forceNew) return;
-
-        const val = select ? select.value : "";
+    function updateReference() {
+        const val = select.value;
         if (val) {
             const opt = select.options[select.selectedIndex];
-            const ref = generateCaseReference(opt);
-            refInput.value = ref;
-            if (preview) preview.textContent = `Preview: ${ref}`;
+            const patUuid = (opt.dataset && opt.dataset.uuid) || opt.getAttribute("data-uuid") || `PAT-${val}`;
+            refInput.value = patUuid;
+            if (preview) preview.textContent = `Preview: ${patUuid}`;
         } else {
-            if (!refInput.value || forceNew) {
-                const ref = generateCaseReference(null);
-                refInput.value = ref;
-                if (preview) preview.textContent = `Preview: ${ref}`;
-            } else if (preview && refInput.value) {
-                preview.textContent = `Preview: ${refInput.value}`;
-            }
+            refInput.value = "";
+            if (preview) preview.textContent = "Preview: PAT-...";
         }
     }
 
-    if (select) {
-        select.addEventListener("change", () => updateReference(true));
-    }
-    updateReference(false);
+    select.addEventListener("change", updateReference);
+    updateReference();
 }
 
 async function initOrCreateCase() {
@@ -113,22 +87,27 @@ async function initOrCreateCase() {
     const refInput = document.getElementById("patientReferenceInput");
     const preview = document.getElementById("referencePreview");
     
-    const patientId = select && select.value ? parseInt(select.value, 10) : null;
-    let patientReference = refInput && refInput.value ? refInput.value.trim() : null;
-    
-    if (!patientReference) {
-        const opt = select && select.value ? select.options[select.selectedIndex] : null;
-        patientReference = generateCaseReference(opt);
-        if (refInput) refInput.value = patientReference;
-        if (preview) preview.textContent = `Preview: ${patientReference}`;
+    if (!select || !select.value) {
+        throw new Error("Please select a patient profile to continue.");
     }
+    
+    const patientId = parseInt(select.value, 10);
+    const opt = select.options[select.selectedIndex];
+    const patUuid = (opt.dataset && opt.dataset.uuid) || opt.getAttribute("data-uuid") || refInput.value.trim();
+    
+    if (!patUuid) {
+        throw new Error("Invalid patient ID selected.");
+    }
+    
+    if (refInput) refInput.value = patUuid;
+    if (preview) preview.textContent = `Preview: ${patUuid}`;
     
     const response = await fetch("/api/cases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             patient_id: patientId,
-            patient_reference: patientReference
+            patient_reference: patUuid
         })
     });
     
@@ -147,20 +126,25 @@ async function initOrCreateCase() {
         if (preview) preview.textContent = `Preview: ${data.case.patient_reference}`;
     }
     
-    logger(`Case initialized ID: ${currentCaseId} (${patientReference})`);
+    logger(`Case initialized ID: ${currentCaseId} (${patUuid})`);
     return currentCaseId;
 }
 
 async function proceedToStep2() {
+    const select = document.getElementById("linkPatientSelect");
+    if (!select || !select.value) {
+        showToast("Please select a patient case profile first.", "warning");
+        return;
+    }
+
     const btn = document.getElementById("btnStep1Next");
-    if (btn) { btn.disabled = true; btn.textContent = "Creating case..."; }
+    if (btn) { btn.disabled = true; btn.textContent = "Saving Case..."; }
     try {
         await initOrCreateCase();
         navigateToStep(2);
     } catch (error) {
         console.error("[SmartHealth] Case creation failed:", error);
-        showToast(error.message || "Unable to create case.", "error");
-        alert(`Could not start the case:\n\n${error.message}\n\nOpen your browser's developer console (F12) for details.`);
+        showToast(error.message || "Unable to save case.", "error");
     } finally {
         if (btn) { btn.disabled = false; btn.textContent = "Save & Continue to Symptoms →"; }
     }

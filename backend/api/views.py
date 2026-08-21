@@ -46,14 +46,19 @@ def predict_page():
             return redirect(url_for("views.portal_page"))
 
     ctx = _build_portal_context(user_id, role, "diagnosis")
-    ctx["selected_patient_id"] = request.args.get("patient_id")
+    selected_patient_id = request.args.get("patient_id")
+    ctx["selected_patient_id"] = selected_patient_id
     ctx["resume_case_id"] = request.args.get("case_id")
     
-    import uuid
-    from datetime import datetime, timezone
-    date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
-    random_hex = uuid.uuid4().hex[:6].upper()
-    ctx["default_case_reference"] = f"SHS-GEN-{date_str}-{random_hex}"
+    default_ref = ""
+    if selected_patient_id:
+        try:
+            pat = db.session.get(Patient, int(selected_patient_id))
+            if pat and pat.patient_uuid:
+                default_ref = pat.patient_uuid
+        except Exception:
+            pass
+    ctx["default_case_reference"] = default_ref
     
     return render_template("predict.html", **ctx)
 
