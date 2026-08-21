@@ -18,6 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
     initPatientSelector();
     initSymptomSearch();
     resumeExistingCase();
+
+    const btn1 = document.getElementById("btnStep1Next");
+    if (btn1) {
+        btn1.addEventListener("click", (e) => {
+            e.preventDefault();
+            proceedToStep2();
+        });
+    }
 });
 
 // ── 1. Step Navigation & Stepper Bar ─────────────────────────────────
@@ -103,8 +111,12 @@ async function proceedToStep2() {
     const btn = document.getElementById("btnStep1Next");
     if (btn) { btn.disabled = true; btn.textContent = "Saving Case..."; }
     try {
-        await initOrCreateCase();
-        navigateToStep(2);
+        const caseId = await initOrCreateCase();
+        if (caseId) {
+            navigateToStep(2);
+        } else {
+            showToast("Unable to initialize case. Please try again.", "error");
+        }
     } catch (error) {
         console.error("[SmartHealth] Case creation failed:", error);
         showToast(error.message || "Unable to save case.", "error");
@@ -112,6 +124,11 @@ async function proceedToStep2() {
         if (btn) { btn.disabled = false; btn.textContent = "Save & Continue to Symptoms →"; }
     }
 }
+
+// Bind to window for inline onclick handlers
+window.navigateToStep = navigateToStep;
+window.proceedToStep2 = proceedToStep2;
+window.initOrCreateCase = initOrCreateCase;
 
 async function resumeExistingCase() {
     const hidden = document.getElementById("resumeCaseId");
