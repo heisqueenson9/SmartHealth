@@ -637,12 +637,6 @@ async function proceedToStep6() {
                     body: JSON.stringify({ results: investigationResults })
                 }
             );
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ results: investigationResults })
-                }
-            );
 
             const data = await response.json();
             if (!response.ok || data.status !== "success") {
