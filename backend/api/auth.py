@@ -15,6 +15,8 @@ from werkzeug.utils import secure_filename
 
 from backend.database.models import db, User, Patient
 
+from backend.factory import limiter
+
 logger = logging.getLogger("smarthealth.auth")
 auth_bp = Blueprint("auth", __name__)
 
@@ -59,6 +61,7 @@ def _set_user_session(user, patient_profile=None):
 
 # ── POST /register ───────────────────────────────────────────
 @auth_bp.route("/register", methods=["POST"])
+@limiter.limit("10 per minute")
 def register():
     try:
         account_type = request.form.get("account_type", "doctor").strip().lower()
@@ -197,6 +200,7 @@ def _register_patient(email, full_name, password):
 
 # ── POST /login ──────────────────────────────────────────────
 @auth_bp.route("/login", methods=["POST"])
+@limiter.limit("10 per minute")
 def login():
     try:
         data = request.get_json(force=True, silent=True) or {}

@@ -185,25 +185,14 @@ class ModelManager:
         self._load_artefact("label_encoder", "label_encoder.pkl", kind="encoder")
         self._load_summary()
 
-        # Eagerly load only the model actually used by default in production
-        # (every prediction call in routes.py defaults to "random_forest").
-        # The others load lazily on first real use — see get_model() below.
         self._classifier_files = {
             "random_forest":       "random_forest.pkl",
             "svm":                 "support_vector_machine.pkl",
             "decision_tree":       "decision_tree.pkl",
             "logistic_regression": "logistic_regression.pkl",
         }
-        self._load_model("random_forest", self._classifier_files["random_forest"])
         for key, filename in self._classifier_files.items():
-            if key == "random_forest":
-                continue
-            path = self.models_dir / filename
-            if path.exists():
-                logger.info(f"[SmartHealth] {key} available, will load on first use: {filename}")
-            else:
-                logger.warning(f"[SmartHealth] Missing model: {filename}")
-                self.missing_models.append(filename)
+            self._load_model(key, filename)
 
         # Summary log
         logger.info(f"[SmartHealth] ✓ Loaded models : {list(self.loaded_models.keys())}")

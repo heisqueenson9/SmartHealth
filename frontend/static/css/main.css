@@ -5,16 +5,16 @@
 
 /* ── CSS Variables ────────────────────────────────────────────── */
 :root {
-  --bg-void:       #010A00;
-  --bg-surface:    #050e04;
-  --bg-elevated:   #0c1a01;
-  --bg-border:     rgba(197, 231, 16, 0.14);
+  --bg-void:       #000000;
+  --bg-surface:    #0a0a0a;
+  --bg-elevated:   #141414;
+  --bg-border:     rgba(185, 253, 80, 0.14);
 
-  --cyan-primary:  #C5E710;
-  --cyan-glow:     rgba(197, 231, 16, 0.2);
-  --cyan-dim:      #8E9630;
+  --cyan-primary:  #B9FD50;
+  --cyan-glow:     rgba(185, 253, 80, 0.2);
+  --cyan-dim:      #8FA05C;
 
-  --green-ok:      #C5E710;
+  --green-ok:      #B9FD50;
   --amber-warn:    #F4DF6B;
   --red-critical:  #ff4757;
   --purple-neural: #a855f7;
