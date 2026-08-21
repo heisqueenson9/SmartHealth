@@ -73,13 +73,8 @@
         </div>
         <div class="col-12 col-md-6">
           <div class="auth-form-group">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <label class="auth-label mb-0">Case Reference ID</label>
-              <button type="button" class="btn btn-sm" id="btnAutoGenerateRef" onclick="generateNewCaseReferenceUI()" style="font-size:0.75rem; padding:3px 10px; background:rgba(197, 231, 16, 0.15); color:var(--cyan-primary); border:1px solid rgba(197, 231, 16, 0.4); border-radius:6px; cursor:pointer;">
-                <i class="fa-solid fa-rotate"></i> Auto-Generate ID
-              </button>
-            </div>
-            <input type="text" id="patientReferenceInput" class="auth-input" placeholder="Auto-generated Case ID..." style="background:rgba(255,255,255,0.04);">
+            <label class="auth-label">Case Reference ID</label>
+            <input type="text" id="patientReferenceInput" class="auth-input" placeholder="Auto-generated Case ID..." readonly>
             <div class="auth-field-hint mt-2" id="referencePreview">
               Preview: SHS-GEN-...
             </div>

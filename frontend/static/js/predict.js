@@ -55,28 +55,22 @@ function initStepNavigation() {
     navigateToStep(1);
 }
 
-function generateStandaloneRef() {
-    const chars = "0123456789ABCDEF";
-    let code = "";
-    for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
+function generateCaseReference(patientOpt) {
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
+    const randomHex = Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0').toUpperCase();
+    
+    if (patientOpt && patientOpt.value) {
+        const uuid = patientOpt.dataset.uuid || `PAT-${patientOpt.value}`;
+        const name = patientOpt.dataset.name || "Patient";
+        const words = name.trim().split(/\s+/).filter(Boolean);
+        const initials = words.map(w => w[0]).join("").toUpperCase().slice(0, 2) || "PT";
+        const suffix = uuid.length >= 6 ? uuid.slice(-6).toUpperCase() : randomHex;
+        return `SHS-${initials}-${suffix}`;
+    } else {
+        return `SHS-GEN-${dateStr}-${randomHex}`;
     }
-    return `SHS-GEN-${code}`;
 }
-
-function generateNewCaseReferenceUI() {
-    const refInput = document.getElementById("patientReferenceInput");
-    const preview = document.getElementById("referencePreview");
-    const select = document.getElementById("linkPatientSelect");
-    if (select && !select.disabled) {
-        select.value = "";
-    }
-    const genRef = generateStandaloneRef();
-    if (refInput) refInput.value = genRef;
-    if (preview) preview.textContent = `Auto-generated Case ID: ${genRef}`;
-    showToast(`Generated Case Reference ID: ${genRef}`, "info");
-}
-window.generateNewCaseReferenceUI = generateNewCaseReferenceUI;
 
 // ── 2. Patient Case Selection (Dedicated API: POST /api/cases) ────────
 function initPatientSelector() {
@@ -84,39 +78,32 @@ function initPatientSelector() {
     const refInput = document.getElementById("patientReferenceInput");
     const preview = document.getElementById("referencePreview");
     
-    function updateReference() {
-        if (!refInput) return;
+    if (!refInput) return;
+
+    function updateReference(forceNew = false) {
+        if (currentCaseId && refInput.value && !forceNew) return;
+
         const val = select ? select.value : "";
         if (val) {
             const opt = select.options[select.selectedIndex];
-            const uuid = opt.dataset.uuid || `PAT-${val}`;
-            const name = opt.dataset.name || "Patient";
-            const words = name.trim().split(/\s+/).filter(Boolean);
-            const initials = words.map(w => w[0]).join("").toUpperCase().slice(0, 2) || "PT";
-            const ref = `SHS-${initials}-${uuid.slice(-6).toUpperCase()}`;
+            const ref = generateCaseReference(opt);
             refInput.value = ref;
-            if (preview) preview.textContent = `Case Reference: ${ref}`;
+            if (preview) preview.textContent = `Preview: ${ref}`;
         } else {
-            if (!refInput.value || refInput.value.startsWith("SHS-GEN-")) {
-                const genRef = generateStandaloneRef();
-                refInput.value = genRef;
-                if (preview) preview.textContent = `Auto-generated Case ID: ${genRef}`;
+            if (!refInput.value || forceNew) {
+                const ref = generateCaseReference(null);
+                refInput.value = ref;
+                if (preview) preview.textContent = `Preview: ${ref}`;
+            } else if (preview && refInput.value) {
+                preview.textContent = `Preview: ${refInput.value}`;
             }
         }
     }
-    
+
     if (select) {
-        select.addEventListener("change", updateReference);
+        select.addEventListener("change", () => updateReference(true));
     }
-    if (refInput) {
-        refInput.addEventListener("input", () => {
-            const val = refInput.value.trim();
-            if (preview) {
-                preview.textContent = val ? `Case Reference: ${val}` : "Preview: SHS-GEN-...";
-            }
-        });
-    }
-    updateReference();
+    updateReference(false);
 }
 
 async function initOrCreateCase() {
@@ -124,12 +111,16 @@ async function initOrCreateCase() {
     
     const select = document.getElementById("linkPatientSelect");
     const refInput = document.getElementById("patientReferenceInput");
+    const preview = document.getElementById("referencePreview");
     
     const patientId = select && select.value ? parseInt(select.value, 10) : null;
     let patientReference = refInput && refInput.value ? refInput.value.trim() : null;
+    
     if (!patientReference) {
-        patientReference = generateStandaloneRef();
+        const opt = select && select.value ? select.options[select.selectedIndex] : null;
+        patientReference = generateCaseReference(opt);
         if (refInput) refInput.value = patientReference;
+        if (preview) preview.textContent = `Preview: ${patientReference}`;
     }
     
     const response = await fetch("/api/cases", {
@@ -153,9 +144,10 @@ async function initOrCreateCase() {
     
     if (refInput && data.case.patient_reference) {
         refInput.value = data.case.patient_reference;
+        if (preview) preview.textContent = `Preview: ${data.case.patient_reference}`;
     }
     
-    logger(`Case initialized ID: ${currentCaseId}`);
+    logger(`Case initialized ID: ${currentCaseId} (${patientReference})`);
     return currentCaseId;
 }
 
