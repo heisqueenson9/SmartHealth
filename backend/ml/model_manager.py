@@ -185,15 +185,25 @@ class ModelManager:
         self._load_artefact("label_encoder", "label_encoder.pkl", kind="encoder")
         self._load_summary()
 
-        # Load classifiers
-        classifier_map = {
-            "random_forest":      "random_forest.pkl",
-            "svm":                "support_vector_machine.pkl",
-            "decision_tree":      "decision_tree.pkl",
-            "logistic_regression":"logistic_regression.pkl",
+        # Eagerly load only the model actually used by default in production
+        # (every prediction call in routes.py defaults to "random_forest").
+        # The others load lazily on first real use — see get_model() below.
+        self._classifier_files = {
+            "random_forest":       "random_forest.pkl",
+            "svm":                 "support_vector_machine.pkl",
+            "decision_tree":       "decision_tree.pkl",
+            "logistic_regression": "logistic_regression.pkl",
         }
-        for key, filename in classifier_map.items():
-            self._load_model(key, filename)
+        self._load_model("random_forest", self._classifier_files["random_forest"])
+        for key, filename in self._classifier_files.items():
+            if key == "random_forest":
+                continue
+            path = self.models_dir / filename
+            if path.exists():
+                logger.info(f"[SmartHealth] {key} available, will load on first use: {filename}")
+            else:
+                logger.warning(f"[SmartHealth] Missing model: {filename}")
+                self.missing_models.append(filename)
 
         # Summary log
         logger.info(f"[SmartHealth] ✓ Loaded models : {list(self.loaded_models.keys())}")
@@ -246,6 +256,18 @@ class ModelManager:
             logger.error(f"[SmartHealth] ✗ Corrupted model: {filename} — {exc}", exc_info=True)
             self.corrupted_models.append(filename)
 
+    def get_model(self, key: str):
+        """Return a loaded model, loading it on demand the first time it's
+        actually requested — avoids paying the joblib.load() cost at boot
+        for models the current request path doesn't need."""
+        key = self._normalise_key(key)
+        if key in self.loaded_models:
+            return self.loaded_models[key]
+        filename = getattr(self, "_classifier_files", {}).get(key)
+        if filename and (self.models_dir / filename).exists() and key not in self.corrupted_models:
+            self._load_model(key, filename)
+        return self.loaded_models.get(key)
+
     # ── Health Check ─────────────────────────────────────────
     def health_report(self) -> dict:
         """Return structured health status for the /api/health/models endpoint."""
@@ -279,14 +301,15 @@ class ModelManager:
         """
         # ── Validate model availability ──────────────────────
         model_key = self._normalise_key(model_key)
-        model = self.loaded_models.get(model_key)
+        model = self.get_model(model_key)
         fallback_used = False
 
         if model is None:
             # Try fallback cascade
             for fallback in ["random_forest", "svm", "decision_tree", "logistic_regression"]:
-                if self.loaded_models.get(fallback):
-                    model = self.loaded_models[fallback]
+                fallback_model = self.get_model(fallback)
+                if fallback_model:
+                    model = fallback_model
                     model_key = fallback
                     fallback_used = True
                     logger.warning(f"[SmartHealth] Fallback to model: {fallback}")

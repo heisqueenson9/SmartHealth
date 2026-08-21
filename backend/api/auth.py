@@ -288,7 +288,7 @@ def verify_doctor():
 # ── POST /reupload ───────────────────────────────────────────
 @auth_bp.route("/reupload", methods=["POST"])
 def reupload_proof():
-    """Allow rejected doctors to re-submit credentials."""
+    """Allow a doctor to (re-)submit their verification document at any time; only resets review status if they weren't already approved."""
     user_id = session.get("user_id")
     if not user_id:
         return jsonify({"error": "Authentication required."}), 401
@@ -297,8 +297,7 @@ def reupload_proof():
     if not user or user.role != "doctor":
         return jsonify({"error": "Doctor account not found."}), 404
 
-    if user.status not in ("rejected", "pending"):
-        return jsonify({"error": "Credential re-upload is only available for rejected accounts."}), 400
+    was_approved = (user.status == "approved")
 
     if "proof" not in request.files:
         return jsonify({"error": "Proof document is required."}), 400
@@ -322,13 +321,14 @@ def reupload_proof():
     user.proof_filename = unique_filename
     user.proof_data = proof_bytes
     user.proof_mimetype = proof_mimetype
-    user.status = "pending"
+    if not was_approved:
+        user.status = "pending"
+        session["status"] = "pending"
     db.session.commit()
-    session["status"] = "pending"
 
     return jsonify({
         "status": "success",
-        "message": "Credentials re-submitted. Your account is pending verification.",
+        "message": "Verification document updated successfully." if was_approved else "Credentials re-submitted. Your account is pending verification.",
     }), 200
 
 

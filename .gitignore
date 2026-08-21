@@ -62,4 +62,7 @@ data/Final_Augmented_dataset_Diseases_and_Symptoms.csv
 # ── Local SQLite Instance ─────────────────────────────────────
 instance/
 *.db
+
+# ── Notebook Exploratory Artifacts ────────────────────────────
+notebooks/analysis_artifacts/
 

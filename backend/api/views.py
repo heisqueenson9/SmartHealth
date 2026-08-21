@@ -33,16 +33,21 @@ def index():
 def predict_page():
     user_id = session.get("user_id")
     role = session.get("role")
-    status = session.get("status")
 
     if not role:
         return redirect(url_for("views.login_page"))
 
-    if role != "admin" and (role != "doctor" or status != "approved"):
+    if role not in ("admin", "doctor"):
         return redirect(url_for("views.portal_page"))
+    if role == "doctor":
+        from backend.database.models import User
+        current_user = User.query.get(user_id)
+        if not current_user or current_user.status != "approved":
+            return redirect(url_for("views.portal_page"))
 
     ctx = _build_portal_context(user_id, role, "diagnosis")
     ctx["selected_patient_id"] = request.args.get("patient_id")
+    ctx["resume_case_id"] = request.args.get("case_id")
     return render_template("predict.html", **ctx)
 
 

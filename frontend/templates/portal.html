@@ -58,7 +58,7 @@
     </div>
   </div>
 </div>
-{% elif session.get('role') in ('doctor', 'admin') and record.status == 'draft' %}
+{% elif session.get('role') in ('doctor', 'admin') and record.status == 'draft' and record.biomarkers_json %}
 <div class="portal-card">
   <div class="portal-section-title"><i class="fa-solid fa-file-medical"></i> Review Diagnosis Draft</div>
   <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:15px;">
@@ -377,6 +377,16 @@
       </div>
     </div>
   </div>
+</div>
+{% elif session.get('role') in ('doctor', 'admin') and record.status == 'draft' %}
+<div class="portal-card">
+  <div class="portal-section-title"><i class="fa-solid fa-triangle-exclamation"></i> Case In Progress</div>
+  <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:15px;">
+    This case hasn't been through the clinical workflow yet — no symptoms, investigations, or lab results have been recorded. Continue the workflow before a report can be generated.
+  </p>
+  <a href="/predict?case_id={{ record.id }}" class="auth-btn" style="max-width:280px;display:inline-block;text-align:center;">
+    <i class="fa-solid fa-arrow-right"></i> Continue This Case
+  </a>
 </div>
 {% endif %}
 {% else %}
@@ -944,19 +954,30 @@
       </div>
     </div>
   </div>
-  {% if doctor.status == 'rejected' %}
+  {% if doctor.role == 'doctor' %}
   <div class="col-12 col-md-6">
     <div class="portal-card">
-      <div class="portal-section-title"><i class="fa-solid fa-file-upload"></i> Re-upload Credentials</div>
-      <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;">Submit updated proof of
-        professionalism for Super Admin review.</p>
+      <div class="portal-section-title">
+        <i class="fa-solid fa-file-upload"></i> 
+        {% if doctor.status == 'approved' %}Update Verification Document{% else %}Re-upload Credentials{% endif %}
+      </div>
+      <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;">
+        {% if doctor.status == 'approved' %}
+          Upload a replacement proof of medical license/credentials (updates document without altering your approved status).
+        {% else %}
+          Submit updated proof of professionalism for Super Admin review.
+        {% endif %}
+      </p>
       <div id="reuploadAlert" class="alert d-none" role="alert"></div>
       <form id="reuploadForm" enctype="multipart/form-data">
         <div class="auth-form-group">
           <label class="auth-label">Proof Document (PDF, PNG, JPG, DOC)</label>
           <input type="file" name="proof" class="auth-input" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" required>
         </div>
-        <button type="submit" class="auth-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Submit for Review</button>
+        <button type="submit" class="auth-btn">
+          <i class="fa-solid fa-cloud-arrow-up"></i> 
+          {% if doctor.status == 'approved' %}Update Document{% else %}Submit for Review{% endif %}
+        </button>
       </form>
     </div>
   </div>
@@ -1003,8 +1024,14 @@
           <td>{{ (r.model_version or '—') | replace('_', ' ') | title }}</td>
           <td><span class="status-badge status-{{ r.status }}">{{ r.status }}</span></td>
           <td>
+            {% if r.status == 'draft' and r.case_status not in ('Reported/Archived',) %}
+            <a href="/predict?case_id={{ r.id }}" class="btn-action-verify btn-approve">
+              <i class="fa-solid fa-arrow-right"></i> Continue Case
+            </a>
+            {% else %}
             <a href="/portal?section=view_record&record_id={{ r.id }}" class="btn-action-verify btn-approve"><i
                 class="fa-solid fa-eye"></i> Details</a>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}

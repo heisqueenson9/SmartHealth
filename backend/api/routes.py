@@ -715,6 +715,12 @@ def approve_diagnosis(record_id):
         
     if role == "doctor" and int(record.user_id) != int(user_id):
         return jsonify({"error": "Access denied. You can only sign off on your own diagnoses."}), 403
+
+    biomarkers_check = json.loads(record.biomarkers_json) if record.biomarkers_json else {}
+    if not biomarkers_check:
+        return jsonify({
+            "error": "This case has no clinical data yet. Complete Symptoms, Investigations, and Lab Results before approving."
+        }), 409
         
     data = request.get_json(force=True, silent=True) or {}
     remarks = data.get("remarks", "").strip()
@@ -1545,7 +1551,7 @@ def admin_get_datasets():
     if session.get("role") != "admin":
         return jsonify({"error": "Unauthorized."}), 403
         
-    datasets_dir = current_app.root_path + "/../datasets"
+    datasets_dir = os.path.abspath(current_app.root_path + "/../data")
     import os
     files = []
     if os.path.exists(datasets_dir):
@@ -1580,7 +1586,7 @@ def admin_upload_dataset():
     if not filename.endswith(".csv") or filename not in ("train_data.csv", "test_data.csv"):
         return jsonify({"error": "Only replacement of 'train_data.csv' or 'test_data.csv' is allowed."}), 400
         
-    datasets_dir = os.path.abspath(current_app.root_path + "/../datasets")
+    datasets_dir = os.path.abspath(current_app.root_path + "/../data")
     os.makedirs(datasets_dir, exist_ok=True)
     target_path = os.path.join(datasets_dir, filename)
     
@@ -1596,7 +1602,7 @@ def admin_delete_dataset(filename):
     if filename not in ("train_data.csv", "test_data.csv"):
         return jsonify({"error": "Invalid dataset filename."}), 400
         
-    datasets_dir = os.path.abspath(current_app.root_path + "/../datasets")
+    datasets_dir = os.path.abspath(current_app.root_path + "/../data")
     target_path = os.path.join(datasets_dir, filename)
     
     if os.path.exists(target_path):
@@ -1711,13 +1717,14 @@ def create_case():
     """
     user_id = session.get("user_id")
     role = session.get("role")
-    status = session.get("status")
     if not user_id:
         return jsonify({"error": "Authentication required."}), 401
     if role not in ("doctor", "admin"):
         return jsonify({"error": "Doctor or admin access required."}), 403
-    if role == "doctor" and status != "approved":
-        return jsonify({"error": "Approved doctor account required."}), 403
+    if role == "doctor":
+        current_user = User.query.get(user_id)
+        if not current_user or current_user.status != "approved":
+            return jsonify({"error": "Approved doctor account required."}), 403
 
     try:
         data = request.get_json(force=True, silent=True) or {}
@@ -1766,6 +1773,15 @@ def create_case():
             "status": "failed",
             "details": str(exc) if current_app.debug else None,
         }), 500
+
+
+@api_bp.route("/cases/<int:case_id>", methods=["GET"])
+def get_case(case_id):
+    """Fetch case details by ID for workflow resumption."""
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
+    return jsonify({"status": "success", "case": record.to_dict()}), 200
 
 
 @api_bp.route("/cases/<int:case_id>/symptoms", methods=["POST"])

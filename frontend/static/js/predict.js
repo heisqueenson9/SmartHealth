@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initStepNavigation();
     initPatientSelector();
     initSymptomSearch();
+    resumeExistingCase();
 });
 
 // ── 1. Step Navigation & Stepper Bar ─────────────────────────────────
@@ -101,7 +102,8 @@ async function initOrCreateCase() {
     
     const data = await response.json();
     if (!response.ok || data.status !== "success") {
-        throw new Error(data.error || "Unable to create patient case.");
+        console.error("[SmartHealth] /api/cases failed:", response.status, data);
+        throw new Error(data.error || `Unable to create patient case (HTTP ${response.status})`);
     }
     
     currentCaseId = data.case.id;
@@ -117,12 +119,54 @@ async function initOrCreateCase() {
 }
 
 async function proceedToStep2() {
+    const btn = document.getElementById("btnStep1Next");
+    if (btn) { btn.disabled = true; btn.textContent = "Creating case..."; }
     try {
         await initOrCreateCase();
         navigateToStep(2);
     } catch (error) {
-        console.error(error);
-        showToast(error.message, "error");
+        console.error("[SmartHealth] Case creation failed:", error);
+        showToast(error.message || "Unable to create case.", "error");
+        alert(`Could not start the case:\n\n${error.message}\n\nOpen your browser's developer console (F12) for details.`);
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = "Save & Continue to Symptoms →"; }
+    }
+}
+
+async function resumeExistingCase() {
+    const hidden = document.getElementById("resumeCaseId");
+    const caseId = hidden && hidden.value ? parseInt(hidden.value, 10) : null;
+    if (!caseId) return;
+
+    try {
+        const res = await fetch(`/api/cases/${caseId}`);
+        const data = await res.json();
+        if (!res.ok || !data.case) {
+            showToast("Could not load that case — it may no longer exist.", "error");
+            return;
+        }
+
+        currentCaseId = caseId;
+        const caseHidden = document.getElementById("currentCaseId");
+        if (caseHidden) caseHidden.value = caseId;
+
+        const stageMap = {
+            "Draft Case": 1,
+            "Symptoms Captured": 2,
+            "Pre-Assessment Ready": 3,
+            "Investigations Selected": 4,
+            "Results Available": 5,
+            "Prediction Available": 6,
+            "Case Reviewed": 6,
+            "Reported/Archived": 6
+        };
+
+        const targetStep = stageMap[data.case.case_status] || 2;
+        navigateToStep(targetStep);
+        showToast(`Resumed case ${data.case.patient_reference || '#' + caseId}.`, "info");
+    } catch (err) {
+        console.error("[SmartHealth] Failed to resume case:", err);
+        showToast("Could not resume the case. Starting fresh.", "warning");
     }
 }
 

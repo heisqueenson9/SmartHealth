@@ -23,6 +23,41 @@ document.addEventListener("DOMContentLoaded", () => {
         loadDatasetsTable();
     }
 
+    // Re-upload proof document handler
+    const reuploadForm = document.getElementById("reuploadForm");
+    if (reuploadForm) {
+        reuploadForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const alertBox = document.getElementById("reuploadAlert");
+            const formData = new FormData(reuploadForm);
+            try {
+                const res = await fetch("/api/auth/reupload", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await res.json();
+                if (alertBox) {
+                    alertBox.classList.remove("d-none", "alert-danger", "alert-success");
+                    if (res.ok && data.status === "success") {
+                        alertBox.classList.add("alert-success");
+                        alertBox.textContent = data.message || "Document updated successfully!";
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        alertBox.classList.add("alert-danger");
+                        alertBox.textContent = data.error || "Failed to upload document.";
+                    }
+                }
+            } catch (err) {
+                console.error("Re-upload failed:", err);
+                if (alertBox) {
+                    alertBox.classList.remove("d-none", "alert-success");
+                    alertBox.classList.add("alert-danger");
+                    alertBox.textContent = "Network error during upload.";
+                }
+            }
+        });
+    }
+
     // Auto-load admin model metrics table if present
     if (document.getElementById("modelMetricsBody")) {
         loadModelMetrics();
@@ -95,14 +130,21 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ── Notification Utilities ── */
 
 let notifCurrentPage = 1;
-const shownNotifIds = new Set();
-
 function getShownNotifIds() {
-    return shownNotifIds;
+    try {
+        const raw = sessionStorage.getItem("shs_shown_notif_ids");
+        return new Set(raw ? JSON.parse(raw) : []);
+    } catch (e) {
+        return new Set();
+    }
 }
 
 function saveShownNotifIds(set) {
-    // No-op, updated in-memory Set
+    try {
+        sessionStorage.setItem("shs_shown_notif_ids", JSON.stringify(Array.from(set)));
+    } catch (e) {
+        // sessionStorage unavailable (e.g. private browsing) — toast may re-show; not critical
+    }
 }
 
 async function fetchNotifications(page) {
