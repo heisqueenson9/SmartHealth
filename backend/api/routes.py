@@ -2562,7 +2562,7 @@ def execute_llm_chat_completion(messages):
     elif "sleep" in user_msg_lower or "rest" in user_msg_lower:
         fallback_ans = "Healthy sleep habits involve maintaining a consistent sleep schedule and targeting 7 to 9 hours of restorative sleep per night."
     elif "hba1c" in user_msg_lower:
-        fallback_ans = "HbA1c measures glycated hemoglobin, evaluating average blood glucose control over the preceding 8–12 weeks. In clinical practice, an HbA1c ≥ 6.5% indicates Diabetes."
+        fallback_ans = "HbA1c measures glycated hemoglobin, evaluating average blood glucose control over the preceding 8-12 weeks. In clinical practice, an HbA1c >= 6.5% indicates Diabetes."
     elif "platelet" in user_msg_lower:
         fallback_ans = "Platelet count evaluates hemostatic capability and hemostasis. Normal reference range is 150–450 x10³/µL."
     elif "creatinine" in user_msg_lower:
