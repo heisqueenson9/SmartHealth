@@ -158,20 +158,22 @@ def predict():
 
         category = str(data.get("category", "all")).lower().strip()
 
-        # Healthy Baseline features for blending missing values
+        # Raw clinical healthy baseline — used to fill any missing biomarkers.
+        # model_manager.predict() applies StandardScaler internally, so we pass
+        # raw clinical values (not pre-normalised 0-1 values).
         HEALTHY_BASELINE = {
-            "Glucose": 0.12, "Cholesterol": 0.15, "Hemoglobin": 0.65,
-            "Platelets": 0.55, "White Blood Cells": 0.45, "Red Blood Cells": 0.60,
-            "Hematocrit": 0.58, "Mean Corpuscular Volume": 0.52,
-            "Mean Corpuscular Hemoglobin": 0.55, "Mean Corpuscular Hemoglobin Concentration": 0.50,
-            "Insulin": 0.15, "BMI": 0.22, "Systolic Blood Pressure": 0.65,
-            "Diastolic Blood Pressure": 0.45, "Triglycerides": 0.18,
-            "HbA1c": 0.10, "LDL Cholesterol": 0.14, "HDL Cholesterol": 0.65,
-            "ALT": 0.15, "AST": 0.14, "Heart Rate": 0.18, "Creatinine": 0.15,
-            "Troponin": 0.05, "C-reactive Protein": 0.08,
+            "Glucose": 85.0, "Cholesterol": 180.0, "Hemoglobin": 15.0,
+            "Platelets": 250.0, "White Blood Cells": 7.0, "Red Blood Cells": 4.8,
+            "Hematocrit": 42.0, "Mean Corpuscular Volume": 88.0,
+            "Mean Corpuscular Hemoglobin": 30.0, "Mean Corpuscular Hemoglobin Concentration": 33.5,
+            "Insulin": 10.0, "BMI": 22.0, "Systolic Blood Pressure": 120.0,
+            "Diastolic Blood Pressure": 80.0, "Triglycerides": 110.0,
+            "HbA1c": 5.2, "LDL Cholesterol": 90.0, "HDL Cholesterol": 55.0,
+            "ALT": 24.0, "AST": 22.0, "Heart Rate": 72.0, "Creatinine": 0.9,
+            "Troponin": 0.01, "C-reactive Protein": 2.0,
         }
 
-        # Validate that raw entered values are numeric
+        # Validate that entered values are numeric
         for f_name, f_val in features_dict.items():
             try:
                 float(f_val)
@@ -181,34 +183,13 @@ def predict():
                     "status": "failed"
                 }), 400
 
-        # Normalise raw inputs to 0-1 using approximated clinical reference ranges.
-        # These ranges are approximated from standard clinical references since the original
-        # training data's normalization parameters were not preserved, which is a documented
-        # limitation of the system.
-        normalized_inputs = normalize_input(features_dict)
-
-        # Merge normalised input features with healthy baseline (which is already normalised)
+        # Merge entered raw values over the healthy baseline
         full_features = HEALTHY_BASELINE.copy()
-        for k, v in normalized_inputs.items():
-            full_features[k] = v
-
-        # Validate biomarker ranges (post-normalization check):
-        for f_name, f_val in full_features.items():
-            # If the user specifically entered Typhoid titers, skip 24-feature validation bound checks
-            if f_name in ("Widal O Titer", "Widal H Titer") and category == "typhoid":
-                continue
+        for k, v in features_dict.items():
             try:
-                val_f = float(f_val)
-                if val_f < 0.0 or val_f > 1.0:
-                    return jsonify({
-                        "error": f"Normalised biomarker '{f_name}' value {f_val} is out of bounds (must be between 0.0 and 1.0).",
-                        "status": "failed"
-                    }), 400
+                full_features[k] = float(v)
             except (ValueError, TypeError):
-                return jsonify({
-                    "error": f"Biomarker '{f_name}' must be a numeric value.",
-                    "status": "failed"
-                }), 400
+                pass
 
         model_key = "random_forest"
         patient_ref = str(data.get("patient_reference", "")).strip() or None
@@ -2335,26 +2316,31 @@ def run_case_prediction(case_id):
             return jsonify({"error": "No biomarker investigation results available to run prediction."}), 400
             
         HEALTHY_BASELINE = {
-            "Glucose": 0.12, "Cholesterol": 0.15, "Hemoglobin": 0.65,
-            "Platelets": 0.55, "White Blood Cells": 0.45, "Red Blood Cells": 0.60,
-            "Hematocrit": 0.58, "Mean Corpuscular Volume": 0.52,
-            "Mean Corpuscular Hemoglobin": 0.55, "Mean Corpuscular Hemoglobin Concentration": 0.50,
-            "Insulin": 0.15, "BMI": 0.22, "Systolic Blood Pressure": 0.65,
-            "Diastolic Blood Pressure": 0.45, "Triglycerides": 0.18,
-            "HbA1c": 0.10, "LDL Cholesterol": 0.14, "HDL Cholesterol": 0.65,
-            "ALT": 0.15, "AST": 0.14, "Heart Rate": 0.18, "Creatinine": 0.15,
-            "Troponin": 0.05, "C-reactive Protein": 0.08,
+            "Glucose": 85.0, "Cholesterol": 180.0, "Hemoglobin": 15.0,
+            "Platelets": 250.0, "White Blood Cells": 7.0, "Red Blood Cells": 4.8,
+            "Hematocrit": 42.0, "Mean Corpuscular Volume": 88.0,
+            "Mean Corpuscular Hemoglobin": 30.0, "Mean Corpuscular Hemoglobin Concentration": 33.5,
+            "Insulin": 10.0, "BMI": 22.0, "Systolic Blood Pressure": 120.0,
+            "Diastolic Blood Pressure": 80.0, "Triglycerides": 110.0,
+            "HbA1c": 5.2, "LDL Cholesterol": 90.0, "HDL Cholesterol": 55.0,
+            "ALT": 24.0, "AST": 22.0, "Heart Rate": 72.0, "Creatinine": 0.9,
+            "Troponin": 0.01, "C-reactive Protein": 2.0,
         }
 
-        normalized_inputs = normalize_input(biomarkers)
         full_features = HEALTHY_BASELINE.copy()
-        for k, v in normalized_inputs.items():
-            full_features[k] = v
+        entered_keys = []
+        for k, v in biomarkers.items():
+            try:
+                full_features[k] = float(v)
+                if k in HEALTHY_BASELINE:
+                    entered_keys.append(k)
+            except (ValueError, TypeError):
+                pass
 
         res = model_manager.predict(full_features, model_key)
 
-        features_actually_entered = sorted(normalized_inputs.keys())
-        features_defaulted = sorted(set(HEALTHY_BASELINE.keys()) - set(normalized_inputs.keys()))
+        features_actually_entered = sorted(entered_keys)
+        features_defaulted = sorted(set(HEALTHY_BASELINE.keys()) - set(entered_keys))
         coverage_pct = round(len(features_actually_entered) / len(HEALTHY_BASELINE) * 100, 1)
 
         from backend.database.models import ModelPrediction
