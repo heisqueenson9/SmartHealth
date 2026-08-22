@@ -2308,14 +2308,13 @@ def run_case_prediction(case_id):
     try:
         data = request.get_json(force=True, silent=True) or {}
         model_key = data.get("model", "random_forest")
-        
+
         biomarkers = data.get("features")
         if not biomarkers:
             biomarkers = json.loads(record.biomarkers_json) if record.biomarkers_json else {}
-            
         if not biomarkers:
             return jsonify({"error": "No biomarker investigation results available to run prediction."}), 400
-            
+
         HEALTHY_BASELINE = {
             "Glucose": 85.0, "Cholesterol": 180.0, "Hemoglobin": 15.0,
             "Platelets": 250.0, "White Blood Cells": 7.0, "Red Blood Cells": 4.8,
@@ -2338,12 +2337,34 @@ def run_case_prediction(case_id):
             except (ValueError, TypeError):
                 pass
 
+        # ── CRITICAL PATH: the actual prediction. If this fails, we genuinely
+        # have nothing to return, so this part alone stays inside the outer
+        # try/except. Everything below this point is a side-effect. ──
         res = model_manager.predict(full_features, model_key)
 
         features_actually_entered = sorted(entered_keys)
         features_defaulted = sorted(set(HEALTHY_BASELINE.keys()) - set(entered_keys))
         coverage_pct = round(len(features_actually_entered) / len(HEALTHY_BASELINE) * 100, 1)
 
+        record.prediction_label = res["prediction"]
+        record.confidence_score = res["confidence"]
+        record.model_version = res.get("model_used")
+        record.result_json = json.dumps(res)
+        record.case_status = "Prediction Available"
+        db.session.commit()
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception(f"[API] Error in run_case_prediction (critical path): {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
+
+    # ── EVERYTHING BELOW IS A SIDE-EFFECT. The prediction already succeeded
+    # and is already saved. Nothing past this point is allowed to turn a
+    # successful prediction into an error response. ──
+    try:
         from backend.database.models import ModelPrediction
         mp = ModelPrediction(
             case_id=case_id,
@@ -2360,17 +2381,14 @@ def run_case_prediction(case_id):
             })
         )
         db.session.add(mp)
-        
-        record.prediction_label = res["prediction"]
-        record.confidence_score = res["confidence"]
-        record.model_version = res.get("model_used")
-        record.result_json = json.dumps(res)
-        record.case_status = "Prediction Available"
-        
         db.session.commit()
+    except Exception as exc:
+        db.session.rollback()
+        logger.warning(f"[API] Prediction succeeded but history logging failed (non-fatal): {exc}")
 
+    try:
         from backend.database.models import Notification, User
-        notif_message = f"Prediction ready for case {record.patient_reference or ('#' + str(record.id))}: {res['prediction']} ({res['confidence']:.1f}% confidence)."
+        notif_message = f"Prediction ready for case {record.patient_reference or ('#' + str(record.id))}"
         recipients = set()
         if record.user_id:
             recipients.add(record.user_id)
@@ -2379,36 +2397,32 @@ def run_case_prediction(case_id):
         for uid in recipients:
             db.session.add(Notification(user_id=uid, message=notif_message))
         db.session.commit()
-
-        try:
-            from backend.api.mail_utils import notify_prediction_ready
-            author = db.session.get(User, record.user_id) if record.user_id else None
-            if author and author.email:
-                notify_prediction_ready(author, record, res)
-        except Exception as mail_exc:
-            logger.warning(f"[Mail] Prediction-ready email skipped: {mail_exc}")
-
-        return jsonify({
-            "status": "success",
-            "predicted_diagnosis": res["prediction"],
-            "confidence": res["confidence"],
-            "case_status": record.case_status,
-            "prediction_details": res,
-            "data_coverage": {
-                "entered_count": len(features_actually_entered),
-                "total_count": len(HEALTHY_BASELINE),
-                "coverage_pct": coverage_pct,
-                "defaulted_features": features_defaulted,
-            },
-        }), 200
     except Exception as exc:
         db.session.rollback()
-        logger.exception(f"[API] Error in run_case_prediction: {exc}")
-        return jsonify({
-            "error": "Internal server error.",
-            "status": "failed",
-            "details": str(exc) if current_app.debug else None,
-        }), 500
+        logger.warning(f"[API] Prediction succeeded but notification creation failed (non-fatal): {exc}")
+
+    try:
+        from backend.api.mail_utils import notify_prediction_ready
+        from backend.database.models import User
+        author = db.session.get(User, record.user_id) if record.user_id else None
+        if author and author.email:
+            notify_prediction_ready(author, record, res)
+    except Exception as exc:
+        logger.warning(f"[API] Prediction succeeded but email notification failed (non-fatal): {exc}")
+
+    return jsonify({
+        "status": "success",
+        "predicted_diagnosis": res["prediction"],
+        "confidence": res["confidence"],
+        "case_status": record.case_status,
+        "prediction_details": res,
+        "data_coverage": {
+            "entered_count": len(features_actually_entered),
+            "total_count": len(HEALTHY_BASELINE),
+            "coverage_pct": coverage_pct,
+            "defaulted_features": features_defaulted,
+        },
+    }), 200
 
 
 @api_bp.route("/cases/<int:case_id>/ai-summary", methods=["POST"])
