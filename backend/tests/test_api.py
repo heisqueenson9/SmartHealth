@@ -264,3 +264,52 @@ class TestEmailNotifications:
             with patch.dict(os.environ, {"RESEND_API_KEY": "test_key_abc"}, clear=False):
                 resp = _approve_as_admin(client, pending_doctor, "reject")
                 assert resp.status_code == 200
+
+
+# ── Case State & Restoration Tests ─────────────────────────
+class TestStateRestoration:
+    """Verify that case state, symptoms, and pre-assessment candidates persist and restore properly."""
+
+    def test_case_state_restoration_flow(self, app, authenticated_doctor_client):
+        with app.app_context():
+            doc = User.query.get(999)
+            if not doc:
+                doc = User(id=999, username="doctor.test@smarthealth.com", email="doctor.test@smarthealth.com", role="doctor", status="approved", full_name="Dr. Test User")
+                doc.set_password("pass")
+                db.session.add(doc)
+                db.session.commit()
+
+        # 1. Create case
+        res = authenticated_doctor_client.post("/api/cases", json={})
+        assert res.status_code == 201
+        case_data = json.loads(res.data)["case"]
+        case_id = case_data["id"]
+        assert case_data["case_status"] == "Draft Case"
+
+        # 2. Add symptoms
+        symptoms_payload = {
+            "replace": True,
+            "symptoms": [
+                {"display_name": "High Fever", "raw_text": "High Fever", "severity": "Severe", "duration_value": 3, "duration_unit": "days"}
+            ]
+        }
+        res_sym = authenticated_doctor_client.post(f"/api/cases/{case_id}/symptoms", json=symptoms_payload)
+        assert res_sym.status_code == 201
+        assert json.loads(res_sym.data)["case_status"] == "Symptoms Captured"
+
+        # 3. Run pre-assessment
+        res_pa = authenticated_doctor_client.post(f"/api/cases/{case_id}/pre-assessment", json={})
+        assert res_pa.status_code == 200
+        assert json.loads(res_pa.data)["case_status"] == "Pre-Assessment Ready"
+
+        # 4. Fetch case for resumption (verify state restoration fields)
+        res_get = authenticated_doctor_client.get(f"/api/cases/{case_id}")
+        assert res_get.status_code == 200
+        restored = json.loads(res_get.data)["case"]
+
+        assert restored["case_status"] == "Pre-Assessment Ready"
+        assert len(restored["symptoms"]) == 1
+        assert restored["symptoms"][0]["display_name"] == "High Fever"
+        assert restored["preliminary_assessment"] is not None
+        assert len(restored["preliminary_assessment"]["candidates"]) > 0
+

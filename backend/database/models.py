@@ -151,6 +151,11 @@ class DiagnosticRecord(db.Model):
                 "patient_email": self.patient.user.email if (self.patient.user and self.patient.user.email) else '—'
             }
         
+        symptoms_data = [s.to_dict() for s in self.case_symptoms.all()]
+        pa_latest = self.preliminary_assessments.order_by(PreliminaryAssessment.created_at.desc()).first()
+        pa_data = pa_latest.to_dict() if pa_latest else None
+        investigations_data = [inv.to_dict() for inv in self.case_investigations.all()]
+
         base_dict = {
             "id": self.id,
             "patient_reference": self.patient_reference,
@@ -170,6 +175,9 @@ class DiagnosticRecord(db.Model):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "biomarkers": json.loads(self.biomarkers_json) if self.biomarkers_json else {},
             "result": json.loads(self.result_json) if self.result_json else {},
+            "symptoms": symptoms_data,
+            "preliminary_assessment": pa_data,
+            "investigations": investigations_data,
         }
         base_dict.update(p_dict)
         return base_dict

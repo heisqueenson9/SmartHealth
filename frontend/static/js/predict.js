@@ -48,6 +48,28 @@ function navigateToStep(stepNum) {
             }
         }
     }
+
+    if (stepNum === 2) {
+        renderSymptomChips();
+    } else if (stepNum === 3) {
+        if (preliminaryCandidates && preliminaryCandidates.length > 0) {
+            renderPreliminaryCandidates(preliminaryCandidates);
+        }
+    } else if (stepNum === 4) {
+        if (selectedInvestigations && selectedInvestigations.length > 0) {
+            renderInvestigationRecommendations(selectedInvestigations);
+        } else if (currentCaseId) {
+            fetchInvestigationRecommendations();
+        }
+    } else if (stepNum === 5) {
+        const activeSelection = selectedInvestigations.filter(r => r.doctor_selected !== false);
+        buildDynamicBiomarkerForm(activeSelection.length > 0 ? activeSelection : selectedInvestigations);
+    } else if (stepNum === 6) {
+        if (latestPrediction) {
+            renderPredictionResults(latestPrediction);
+        }
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -156,6 +178,31 @@ async function resumeExistingCase() {
         currentCaseId = caseId;
         const caseHidden = document.getElementById("currentCaseId");
         if (caseHidden) caseHidden.value = caseId;
+
+        // Restore symptoms
+        if (Array.isArray(data.case.symptoms) && data.case.symptoms.length > 0) {
+            recordedSymptoms = data.case.symptoms;
+        }
+
+        // Restore preliminary assessment
+        if (data.case.preliminary_assessment && Array.isArray(data.case.preliminary_assessment.candidates)) {
+            preliminaryCandidates = data.case.preliminary_assessment.candidates;
+        }
+
+        // Restore investigations
+        if (Array.isArray(data.case.investigations) && data.case.investigations.length > 0) {
+            selectedInvestigations = data.case.investigations;
+        }
+
+        // Restore biomarkers
+        if (data.case.biomarkers && typeof data.case.biomarkers === "object") {
+            biomarkerValues = data.case.biomarkers;
+        }
+
+        // Restore prediction result
+        if (data.case.result && data.case.result.prediction) {
+            latestPrediction = data.case.result;
+        }
 
         const stageMap = {
             "Draft Case": 1,

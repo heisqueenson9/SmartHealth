@@ -1779,7 +1779,8 @@ def capture_case_symptoms(case_id):
         from backend.database.models import PatientCaseSymptom, SymptomCatalog
         
         if data.get("replace", False):
-            PatientCaseSymptom.query.filter_by(case_id=case_id).delete()
+            if symptoms_list or data.get("allow_empty", False):
+                PatientCaseSymptom.query.filter_by(case_id=case_id).delete()
             
         added_symptoms = []
         catalog_items = SymptomCatalog.query.all()
