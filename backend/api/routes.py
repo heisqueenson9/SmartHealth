@@ -2512,7 +2512,7 @@ def ai_chat_global():
                 messages.append({"role": item["role"], "content": str(item["content"])})
         messages.append({"role": "user", "content": user_message})
 
-        groq_models = ["llama-3.3-70b-versatile", "llama-3.1-70b-versatile", "llama3-70b-8192", "mixtral-8x7b-32768", "gemma2-9b-it"]
+        groq_models = ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.6-27b", "llama-3.3-70b-versatile", "llama3-8b-8192"]
         
         for groq_model in groq_models:
             try:
@@ -2534,7 +2534,7 @@ def ai_chat_global():
                     method="POST"
                 )
 
-                with urllib.request.urlopen(req, timeout=10) as response:
+                with urllib.request.urlopen(req, timeout=15) as response:
                     res_body = py_json.loads(response.read().decode("utf-8"))
                     if res_body.get("choices") and len(res_body["choices"]) > 0:
                         answer = res_body["choices"][0]["message"]["content"].strip()
@@ -2543,6 +2543,11 @@ def ai_chat_global():
                 logger.warning(f"[AI Chat] Groq model '{groq_model}' attempt failed: {groq_err}.")
 
     if not answer:
+        if groq_api_key:
+            logger.error("[AI Chat] All Groq models failed — falling back to templated reasoning engine.")
+        else:
+            logger.warning("[AI Chat] GROQ_API_KEY not configured — using templated fallback engine.")
+
         q_lower = user_message.lower()
         if "food" in q_lower or "eat" in q_lower or "diet" in q_lower or "breakfast" in q_lower:
             answer = "A balanced daily diet emphasizes whole foods: fruits, vegetables, whole grains, lean proteins, healthy fats, and adequate hydration."
@@ -2639,7 +2644,7 @@ def ask_ai_case(case_id):
                     messages.append({"role": item["role"], "content": str(item["content"])})
             messages.append({"role": "user", "content": user_question})
 
-            groq_models = ["llama-3.3-70b-versatile", "llama-3.1-70b-versatile", "llama3-70b-8192", "mixtral-8x7b-32768", "gemma2-9b-it"]
+            groq_models = ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.6-27b", "llama-3.3-70b-versatile", "llama3-8b-8192"]
             
             for groq_model in groq_models:
                 try:
@@ -2661,7 +2666,7 @@ def ask_ai_case(case_id):
                         method="POST"
                     )
 
-                    with urllib.request.urlopen(req, timeout=10) as response:
+                    with urllib.request.urlopen(req, timeout=15) as response:
                         res_body = py_json.loads(response.read().decode("utf-8"))
                         if res_body.get("choices") and len(res_body["choices"]) > 0:
                             answer = res_body["choices"][0]["message"]["content"].strip()
@@ -2670,6 +2675,10 @@ def ask_ai_case(case_id):
                     logger.warning(f"[Ask AI] Groq model '{groq_model}' attempt failed: {groq_err}.")
 
         if not answer:
+            if groq_api_key:
+                logger.error("[Ask AI] All Groq models failed — falling back to templated reasoning engine.")
+            else:
+                logger.warning("[Ask AI] GROQ_API_KEY not configured — using templated fallback engine.")
             # High-Quality Clinical & Health Fallback Engine
             q_lower = user_question.lower()
 
