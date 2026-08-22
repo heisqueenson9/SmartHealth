@@ -2473,8 +2473,9 @@ def generate_case_ai_summary(case_id):
         }), 500
 
 
+@api_bp.route("/cases/<int:case_id>/ask-ai", methods=["POST"])
 @api_bp.route("/cases/<int:case_id>/ai-assistant", methods=["POST"])
-def ask_ai_assistant(case_id):
+def ask_ai_case(case_id):
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
@@ -2485,12 +2486,23 @@ def ask_ai_assistant(case_id):
         if not user_question:
             return jsonify({"error": "Question is required."}), 400
 
+        conversation_history = data.get("conversation", [])
+        if not isinstance(conversation_history, list):
+            conversation_history = []
+
         from backend.database.models import PatientCaseSymptom, PreliminaryAssessment, CaseInvestigation
+        
         symptoms = PatientCaseSymptom.query.filter_by(case_id=case_id).all()
-        sym_str = ", ".join([f"{s.display_name} ({s.severity})" for s in symptoms]) if symptoms else "None reported"
+        sym_list = [f"{s.display_name} (Severity: {s.severity or 'unspecified'}, Duration: {s.duration_value or ''} {s.duration_unit or ''})".strip() for s in symptoms]
+        sym_str = ", ".join(sym_list) if sym_list else "None reported"
 
         pa = PreliminaryAssessment.query.filter_by(case_id=case_id).order_by(PreliminaryAssessment.created_at.desc()).first()
-        cand_str = ", ".join([f"{c.condition_name} ({c.score}%)" for c in pa.candidates.all()]) if pa else "None"
+        cand_list = [f"{c.condition_name} ({c.score:.1f}% probability) - {c.rationale or ''}".strip() for c in pa.candidates.all()] if pa else []
+        cand_str = "; ".join(cand_list) if cand_list else "None"
+
+        invs = CaseInvestigation.query.filter_by(case_id=case_id).all()
+        inv_list = [ci.investigation.name for ci in invs if ci.investigation]
+        inv_str = ", ".join(inv_list) if inv_list else "None selected"
 
         biomarkers = json.loads(record.biomarkers_json) if record.biomarkers_json else {}
         bio_str = ", ".join([f"{k}: {v}" for k, v in biomarkers.items()]) if biomarkers else "None entered"
@@ -2498,37 +2510,149 @@ def ask_ai_assistant(case_id):
         pred_label = record.prediction_label or "Pending"
         confidence = f"{record.confidence_score:.1f}%" if record.confidence_score else "N/A"
         model_version = record.model_version or "random_forest"
+        obs_str = (record.observations or record.doctor_remarks or "None").strip()
+        treat_str = (record.treatment_notes or "None").strip()
+        summary_str = (record.ai_explanation or "").strip()
 
-        q_lower = user_question.lower()
+        system_prompt = (
+            "You are SmartHealth's clinical decision-support AI assistant for doctors. "
+            "Answer the doctor's exact question using the provided patient case context. "
+            "Do not repeat the entire case summary unless the question specifically asks for it. "
+            "Be precise, clinically clear, concise, and explain reasoning when appropriate. "
+            "Distinguish between ML predictions and confirmed clinical diagnoses. "
+            "Never invent patient data, laboratory results, symptoms, diagnoses, or treatment facts that are not present in the supplied case. "
+            "If the available information is insufficient to answer confidently, say so and explain what information is missing. "
+            "You support the clinician and do not replace clinical judgment.\n\n"
+            "PATIENT CASE CONTEXT:\n"
+            f"- Case ID: #{case_id}\n"
+            f"- Presenting Symptoms: {sym_str}\n"
+            f"- Preliminary Assessment Considerations: {cand_str}\n"
+            f"- Investigations Ordered/Performed: {inv_str}\n"
+            f"- Actual Entered Biomarkers: {bio_str}\n"
+            f"- ML Model Verdict: {pred_label} (Model: {model_version}, Confidence: {confidence})\n"
+            f"- Doctor Observations: {obs_str}\n"
+            f"- Doctor Treatment Plan: {treat_str}\n"
+            f"- Whole-Case AI Summary: {summary_str if summary_str else 'N/A'}"
+        )
 
-        if "why" in q_lower or "predict" in q_lower or "reason" in q_lower:
-            answer = (
-                f"The ML model ({model_version}) inferred **{pred_label}** with a confidence score of **{confidence}** "
-                f"based on the patient's presenting symptoms ({sym_str}) and laboratory biomarker values ({bio_str}). "
-                f"Preliminary considerations also identified differential probabilities of {cand_str}."
-            )
-        elif "biomarker" in q_lower or "significance" in q_lower or "marker" in q_lower or "lab" in q_lower:
-            answer = (
-                f"The patient's recorded biomarker results are: {bio_str}. "
-                f"In the context of **{pred_label}**, these biomarkers serve as critical physiological indicators evaluated by the model during feature classification."
-            )
-        elif "confidence" in q_lower or "score" in q_lower or "mean" in q_lower:
-            answer = (
-                f"The confidence score of **{confidence}** represents the model's algorithmic probability density for the predicted class ({pred_label}). "
-                "Higher confidence reflects strong alignment between the patient's biomarker inputs and the model's trained pattern clusters."
-            )
-        elif "simpler" in q_lower or "terms" in q_lower or "explain" in q_lower:
-            answer = (
-                f"In simple clinical terms, the patient presented with symptoms ({sym_str}) and lab test results ({bio_str}). "
-                f"The decision-support algorithm analyzed these findings and identified **{pred_label}** as the most likely condition."
-            )
-        else:
-            answer = (
-                f"Regarding your query on Case #{record.id}: The model predicted **{pred_label}** ({confidence} confidence) "
-                f"from presenting symptoms ({sym_str}) and lab results ({bio_str}). Preliminary considerations: {cand_str}."
-            )
+        groq_api_key = current_app.config.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
+        answer = None
 
-        disclaimer = "Clinical Decision-Support Notice: Algorithmic predictions and AI explanations provide decision support only. Final clinical diagnosis remains the sole responsibility of the attending physician."
+        if groq_api_key:
+            try:
+                import urllib.request
+                import json as py_json
+                
+                messages = [{"role": "system", "content": system_prompt}]
+                for item in conversation_history[-6:]:
+                    if isinstance(item, dict) and item.get("role") in ("user", "assistant") and item.get("content"):
+                        messages.append({"role": item["role"], "content": str(item["content"])})
+                messages.append({"role": "user", "content": user_question})
+
+                req_payload = py_json.dumps({
+                    "model": "llama-3.3-70b-versatile",
+                    "messages": messages,
+                    "temperature": 0.3,
+                    "max_tokens": 800
+                }).encode("utf-8")
+
+                req = urllib.request.Request(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    data=req_payload,
+                    headers={
+                        "Authorization": f"Bearer {groq_api_key}",
+                        "Content-Type": "application/json",
+                        "User-Agent": "SmartHealth-ClinicalAI/2026"
+                    },
+                    method="POST"
+                )
+
+                with urllib.request.urlopen(req, timeout=12) as response:
+                    res_body = py_json.loads(response.read().decode("utf-8"))
+                    if res_body.get("choices") and len(res_body["choices"]) > 0:
+                        answer = res_body["choices"][0]["message"]["content"].strip()
+            except Exception as groq_err:
+                logger.warning(f"[Ask AI] Groq API call failed or timed out: {groq_err}. Falling back to clinical reasoning engine.")
+
+        if not answer:
+            q_lower = user_question.lower()
+
+            matched_bio_key = None
+            for key in biomarkers.keys():
+                if key.lower() in q_lower:
+                    matched_bio_key = key
+                    break
+            
+            if matched_bio_key:
+                val = biomarkers[matched_bio_key]
+                answer = f"For this patient, **{matched_bio_key}** is recorded as **{val}**. In evaluating **{pred_label}**, this biomarker provides specific physiological evidence. "
+                if "hba1c" in matched_bio_key.lower():
+                    answer += f"An HbA1c of {val}% measures 2–3 month average glycemic control."
+                elif "platelet" in matched_bio_key.lower():
+                    answer += f"A platelet count of {val} reflects megakaryocyte thrombopoiesis and clotting capability."
+                elif "creatinine" in matched_bio_key.lower():
+                    answer += f"A creatinine of {val} mg/dL assesses renal filtration capacity."
+                elif "glucose" in matched_bio_key.lower():
+                    answer += f"A blood glucose level of {val} mg/dL reflects current circulating glycemia."
+                elif "hemoglobin" in matched_bio_key.lower():
+                    answer += f"A hemoglobin concentration of {val} g/dL reflects oxygen transport capability."
+            
+            elif "hba1c" in q_lower:
+                if "HbA1c" in biomarkers:
+                    answer = f"The patient's HbA1c level is **{biomarkers['HbA1c']}%**. HbA1c reflects average blood glucose control over the preceding 8–12 weeks."
+                else:
+                    answer = "HbA1c was not included in the lab panel for this case. In clinical practice, HbA1c evaluates long-term glycemic control (≥ 6.5% indicates Diabetes)."
+            
+            elif "platelet" in q_lower:
+                if "Platelets" in biomarkers:
+                    answer = f"The patient's platelet count is **{biomarkers['Platelets']} x10³/µL**, evaluating thrombopoiesis and hemostatic capacity."
+                else:
+                    answer = "Platelet count was not recorded in this patient's lab panel."
+            
+            elif "creatinine" in q_lower:
+                if "Creatinine" in biomarkers:
+                    answer = f"The patient's serum creatinine is **{biomarkers['Creatinine']} mg/dL**, assessing renal clearance."
+                else:
+                    answer = "Creatinine was not recorded in this patient's lab panel."
+
+            elif "confidence" in q_lower or "score" in q_lower or "%" in q_lower:
+                answer = (
+                    f"The confidence score of **{confidence}** represents the ML model's ({model_version}) pattern similarity density "
+                    f"between this patient's biomarker inputs and the reference distribution for **{pred_label}**. "
+                    "It reflects statistical pattern match probability, but requires clinical correlation."
+                )
+
+            elif "why" in q_lower or "predict" in q_lower or "reason" in q_lower:
+                answer = (
+                    f"The model predicted **{pred_label}** with **{confidence}** confidence because the patient's presenting symptoms "
+                    f"({sym_str}) and laboratory values ({bio_str}) strongly aligned with the model's trained pattern clusters for {pred_label}."
+                )
+
+            elif "difference" in q_lower or "versus" in q_lower or "vs" in q_lower or "compared" in q_lower:
+                answer = (
+                    f"In this case, preliminary considerations identified potential candidates: {cand_str}. "
+                    f"The ML biomarker model predicted **{pred_label}** based on the entered laboratory values ({bio_str})."
+                )
+
+            elif "simple" in q_lower or "terms" in q_lower:
+                answer = (
+                    f"In simple terms: The patient presented with {sym_str}. Lab tests showed {bio_str}. "
+                    f"The decision-support algorithm evaluated these findings and identified **{pred_label}** as the primary prediction."
+                )
+
+            elif "verify" in q_lower or "confirm" in q_lower or "information" in q_lower or "help" in q_lower:
+                answer = (
+                    f"To verify the prediction of **{pred_label}**, the attending clinician can review confirmatory diagnostic testing, "
+                    f"monitor clinical symptoms, and evaluate targeted follow-up investigations ({inv_str})."
+                )
+
+            else:
+                answer = (
+                    f"Regarding '{user_question}': For Case #{case_id} (Predicted: {pred_label}, Confidence: {confidence}), "
+                    f"the patient presented with symptoms ({sym_str}) and recorded biomarkers ({bio_str})."
+                )
+
+        disclaimer = "Clinical Decision-Support Notice: AI answers assist clinician decision-making and do not replace professional judgment or confirmed diagnosis."
 
         return jsonify({
             "status": "success",
@@ -2538,14 +2662,14 @@ def ask_ai_assistant(case_id):
             "context": {
                 "prediction": pred_label,
                 "confidence": confidence,
-                "symptoms": sym_str,
                 "biomarkers": bio_str
             }
         }), 200
+
     except Exception as exc:
-        logger.exception(f"[API] Error in ask_ai_assistant: {exc}")
+        logger.exception(f"[API] Error in ask_ai_case: {exc}")
         return jsonify({
-            "error": "Internal server error.",
+            "error": "Unable to generate an AI response right now. Please try again.",
             "status": "failed",
             "details": str(exc) if current_app.debug else None,
         }), 500

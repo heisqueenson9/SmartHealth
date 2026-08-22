@@ -367,3 +367,30 @@ class TestStateRestoration:
         assert rep_data["status"] == "success"
         assert "download_url" in rep_data
 
+    def test_ask_ai_conversational_endpoint(self, app, authenticated_doctor_client):
+        res = authenticated_doctor_client.post("/api/cases", json={})
+        case_id = json.loads(res.data)["case"]["id"]
+
+        # Question 1: Specific prediction reason
+        res_q1 = authenticated_doctor_client.post(f"/api/cases/{case_id}/ask-ai", json={
+            "question": "Why did the model predict Diabetes?"
+        })
+        assert res_q1.status_code == 200
+        d1 = json.loads(res_q1.data)
+        assert d1["status"] == "success"
+        assert d1["question"] == "Why did the model predict Diabetes?"
+        assert "answer" in d1
+
+        # Question 2: Specific biomarker question with conversation history
+        res_q2 = authenticated_doctor_client.post(f"/api/cases/{case_id}/ask-ai", json={
+            "question": "What about the HbA1c?",
+            "conversation": [
+                {"role": "user", "content": "Why did the model predict Diabetes?"},
+                {"role": "assistant", "content": d1["answer"]}
+            ]
+        })
+        assert res_q2.status_code == 200
+        d2 = json.loads(res_q2.data)
+        assert d2["status"] == "success"
+        assert "HbA1c" in d2["answer"] or "hba1c" in d2["answer"].lower()
+

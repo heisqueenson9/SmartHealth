@@ -897,56 +897,201 @@ function refreshAISummary() {
     generateWholeCaseAISummary();
 }
 
-function askAIAssistantQuick(questionText) {
-    const input = document.getElementById("aiAssistantQuestion");
+let askAiConversationHistory = [];
+
+function askAiQuick(questionText) {
+    const input = document.getElementById("askAiQuestionInput");
     if (input) input.value = questionText;
-    askAIAssistantCustom();
+    submitAskAiQuestion(questionText);
 }
 
-function askAIAssistantCustom() {
-    const input = document.getElementById("aiAssistantQuestion");
-    const answerBox = document.getElementById("aiAssistantAnswerBox");
-    if (!input || !answerBox) return;
+function submitAskAiQuestion(explicitQuestion) {
+    const input = document.getElementById("askAiQuestionInput");
+    const question = (explicitQuestion !== undefined ? explicitQuestion : (input ? input.value : "")).trim();
     
-    const question = input.value.trim();
     if (!question) {
-        showToast("Please enter a question for the AI Assistant.", "warning");
+        showToast("Please enter a question.", "warning");
         return;
     }
     
     if (!currentCaseId) {
-        showToast("Please complete case initialization first.", "warning");
+        showToast("Please initialize or select a patient case first.", "warning");
         return;
     }
     
-    answerBox.style.display = "block";
-    answerBox.innerHTML = '<span class="btn-spinner" style="display:inline-block; width:14px; height:14px; margin-right:6px;"></span> Thinking...';
+    const chatContainer = document.getElementById("askAiChatHistory");
+    const btn = document.getElementById("btnAskAi");
+    const statusNotice = document.getElementById("askAiStatusNotice");
     
-    fetch(`/api/cases/${currentCaseId}/ai-assistant`, {
+    if (!chatContainer) return;
+    chatContainer.style.display = "block";
+    
+    // Append User Question Bubble
+    const userBubble = document.createElement("div");
+    userBubble.className = "ask-ai-msg user-msg mb-3 p-3";
+    userBubble.style.cssText = "background:rgba(197, 231, 16, 0.08); border:1px solid rgba(197, 231, 16, 0.25); border-radius:8px; margin-left:20px;";
+    userBubble.innerHTML = `
+        <div style="font-weight:600; color:var(--cyan-primary); font-size:0.82rem; margin-bottom:4px;">
+            <i class="fa-solid fa-user"></i> Doctor Question
+        </div>
+        <div style="color:var(--text-primary); font-size:0.9rem;">${escapeHtml(question)}</div>
+    `;
+    chatContainer.appendChild(userBubble);
+    
+    // Append Temporary Thinking Bubble
+    const loadingBubble = document.createElement("div");
+    loadingBubble.id = "askAiLoadingBubble";
+    loadingBubble.className = "ask-ai-msg ai-msg mb-3 p-3";
+    loadingBubble.style.cssText = "background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:8px; margin-right:20px;";
+    loadingBubble.innerHTML = `
+        <div style="font-weight:600; color:var(--cyan-primary); font-size:0.82rem; margin-bottom:4px;">
+            <i class="fa-solid fa-brain"></i> AI Assistant
+        </div>
+        <div style="color:var(--text-secondary); font-size:0.88rem;">
+            <span class="btn-spinner" style="display:inline-block; width:14px; height:14px; margin-right:6px;"></span> AI is thinking...
+        </div>
+    `;
+    chatContainer.appendChild(loadingBubble);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    
+    if (input) input.value = "";
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-spinner" style="display:inline-block; width:14px; height:14px; margin-right:4px;"></span> Asking...';
+    }
+    if (statusNotice) {
+        statusNotice.style.display = "block";
+        statusNotice.textContent = "AI is evaluating your question against current case context...";
+    }
+    
+    const payloadConversation = askAiConversationHistory.slice(-6);
+    
+    fetch(`/api/cases/${currentCaseId}/ask-ai`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: question })
+        body: JSON.stringify({
+            question: question,
+            conversation: payloadConversation
+        })
     })
     .then(res => res.json())
     .then(data => {
+        const tempBubble = document.getElementById("askAiLoadingBubble");
+        if (tempBubble) tempBubble.remove();
+        
         if (data.status === "success" && data.answer) {
-            answerBox.innerHTML = `
-                <div style="font-weight:600; color:var(--cyan-primary); margin-bottom:4px;">
-                    <i class="fa-solid fa-robot"></i> ${escapeHtml(data.question)}
+            // Push history
+            askAiConversationHistory.push({ role: "user", content: question });
+            askAiConversationHistory.push({ role: "assistant", content: data.answer });
+            
+            const msgId = "ai-ans-" + Date.now();
+            const aiBubble = document.createElement("div");
+            aiBubble.className = "ask-ai-msg ai-msg mb-3 p-3";
+            aiBubble.style.cssText = "background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:8px; margin-right:20px; position:relative;";
+            
+            aiBubble.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div style="font-weight:600; color:var(--cyan-primary); font-size:0.82rem;">
+                        <i class="fa-solid fa-brain"></i> AI Clinical Assistant
+                    </div>
+                    <button type="button" class="btn-outline btn-xs copy-ai-btn" style="padding:2px 8px; font-size:0.75rem; border-color:rgba(255,255,255,0.2);" onclick="copyAiAnswer(this, '${msgId}')">
+                        <i class="fa-regular fa-copy"></i> Copy
+                    </button>
                 </div>
-                <div style="margin-bottom:8px;">${escapeHtml(data.answer)}</div>
+                <div id="${msgId}" style="color:var(--text-primary); font-size:0.9rem; line-height:1.5; margin-bottom:8px; white-space:pre-wrap;">${escapeHtml(data.answer)}</div>
                 <div style="font-size:0.75rem; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.06); padding-top:6px;">
                     <i class="fa-solid fa-shield-halved"></i> ${escapeHtml(data.disclaimer)}
                 </div>
             `;
+            chatContainer.appendChild(aiBubble);
         } else {
-            answerBox.innerHTML = `<div class="text-danger">Could not fetch AI Assistant response: ${escapeHtml(data.error || 'Failed')}</div>`;
+            const errBubble = document.createElement("div");
+            errBubble.className = "ask-ai-msg err-msg mb-3 p-3";
+            errBubble.style.cssText = "background:rgba(255,71,87,0.1); border:1px solid rgba(255,71,87,0.3); border-radius:8px;";
+            errBubble.innerHTML = `
+                <div style="color:var(--red-critical, #ff4757); font-size:0.88rem;">
+                    <i class="fa-solid fa-circle-exclamation"></i> Unable to generate an AI response right now. Please try again.
+                </div>
+            `;
+            chatContainer.appendChild(errBubble);
         }
+        chatContainer.scrollTop = chatContainer.scrollHeight;
     })
     .catch(err => {
-        console.error("Error asking AI assistant:", err);
-        answerBox.innerHTML = '<div class="text-danger">AI Assistant service temporarily unavailable.</div>';
+        console.error("[Ask AI] Error:", err);
+        const tempBubble = document.getElementById("askAiLoadingBubble");
+        if (tempBubble) tempBubble.remove();
+        
+        const errBubble = document.createElement("div");
+        errBubble.className = "ask-ai-msg err-msg mb-3 p-3";
+        errBubble.style.cssText = "background:rgba(255,71,87,0.1); border:1px solid rgba(255,71,87,0.3); border-radius:8px;";
+        errBubble.innerHTML = `
+            <div style="color:var(--red-critical, #ff4757); font-size:0.88rem;">
+                <i class="fa-solid fa-circle-exclamation"></i> Unable to generate an AI response right now. Please try again.
+            </div>
+        `;
+        chatContainer.appendChild(errBubble);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    })
+    .finally(() => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Ask AI';
+        }
+        if (statusNotice) {
+            statusNotice.style.display = "none";
+        }
     });
+}
+
+function copyAiAnswer(btnEl, elementId) {
+    const textEl = document.getElementById(elementId);
+    if (!textEl) return;
+    const textToCopy = textEl.innerText || textEl.textContent;
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            markCopiedSuccess(btnEl);
+        }).catch(err => {
+            fallbackCopyText(textToCopy, btnEl);
+        });
+    } else {
+        fallbackCopyText(textToCopy, btnEl);
+    }
+}
+
+function fallbackCopyText(text, btnEl) {
+    try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        textarea.style.top = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        const successful = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        if (successful) {
+            markCopiedSuccess(btnEl);
+        } else {
+            showToast("Copied text fallback failed.", "warning");
+        }
+    } catch (err) {
+        console.error("Fallback copy error:", err);
+        showToast("Clipboard copy not supported on this device.", "warning");
+    }
+}
+
+function markCopiedSuccess(btnEl) {
+    if (!btnEl) return;
+    const origHtml = btnEl.innerHTML;
+    btnEl.innerHTML = '<i class="fa-solid fa-check" style="color:var(--cyan-primary);"></i> Copied ✓';
+    btnEl.classList.add("btn-success");
+    setTimeout(() => {
+        btnEl.innerHTML = origHtml;
+        btnEl.classList.remove("btn-success");
+    }, 2000);
 }
 
 function finalizeAndBuildReport() {
@@ -985,8 +1130,9 @@ function finalizeAndBuildReport() {
 // Bind handlers to window for inline onclick execution
 window.refreshAISummary = refreshAISummary;
 window.finalizeAndBuildReport = finalizeAndBuildReport;
-window.askAIAssistantQuick = askAIAssistantQuick;
-window.askAIAssistantCustom = askAIAssistantCustom;
+window.askAiQuick = askAiQuick;
+window.submitAskAiQuestion = submitAskAiQuestion;
+window.copyAiAnswer = copyAiAnswer;
 
 // ── Helpers ─────────────────────────────────────────────────────────
 function escapeHtml(str) {

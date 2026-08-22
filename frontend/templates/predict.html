@@ -320,23 +320,36 @@
         </div>
       </div>
 
-      <!-- AI Clinical Explanation & Doctor Assistant Panel -->
+      <!-- Ask AI Conversational Assistant Panel -->
       <div class="portal-card mb-4" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06);">
-        <div class="portal-section-title"><i class="fa-solid fa-user-doctor"></i> AI Explanation &amp; Doctor Assistant</div>
+        <div class="portal-section-title d-flex justify-content-between align-items-center">
+          <span><i class="fa-solid fa-comments"></i> Ask AI Conversational Assistant</span>
+          <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-shield-halved"></i> Decision Support</span>
+        </div>
         <p style="color:var(--text-secondary); font-size:0.82rem; margin-bottom:12px;">
-          Ask clinical questions regarding the prediction, biomarker significance, or confidence metrics based on the current patient case context.
+          Ask specific clinical questions about this patient's prediction, biomarkers, confidence score, or differential considerations.
         </p>
+
+        <!-- Chat History Container -->
+        <div id="askAiChatHistory" class="mb-3" style="display:none; max-height:400px; overflow-y:auto; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:12px;"></div>
+
+        <!-- Quick Prompt Chips -->
         <div class="d-flex flex-wrap gap-2 mb-3">
-          <button type="button" class="btn-outline btn-sm" onclick="askAIAssistantQuick('Why did the model predict this condition?')">Why predicted?</button>
-          <button type="button" class="btn-outline btn-sm" onclick="askAIAssistantQuick('Explain the significance of these biomarkers.')">Biomarker significance</button>
-          <button type="button" class="btn-outline btn-sm" onclick="askAIAssistantQuick('What does the confidence score mean?')">Confidence score meaning</button>
-          <button type="button" class="btn-outline btn-sm" onclick="askAIAssistantQuick('Explain this condition in simpler clinical terms.')">Simpler clinical terms</button>
+          <button type="button" class="btn-outline btn-sm" onclick="askAiQuick('Why did the model predict this condition?')">Why predicted?</button>
+          <button type="button" class="btn-outline btn-sm" onclick="askAiQuick('What does the confidence score mean?')">Confidence score meaning</button>
+          <button type="button" class="btn-outline btn-sm" onclick="askAiQuick('What does the HbA1c result mean?')">HbA1c significance</button>
+          <button type="button" class="btn-outline btn-sm" onclick="askAiQuick('Which biomarker contributed most to this prediction?')">Top biomarkers</button>
+          <button type="button" class="btn-outline btn-sm" onclick="askAiQuick('Explain this result in simple terms.')">Simple terms</button>
         </div>
-        <div class="d-flex gap-2 mb-3">
-          <input type="text" id="aiAssistantQuestion" class="auth-input" placeholder="Ask a clinical question about this case..." onkeydown="if(event.key==='Enter') askAIAssistantCustom()">
-          <button type="button" class="btn-primary" style="white-space:nowrap; max-width:140px;" onclick="askAIAssistantCustom()">Ask AI</button>
+
+        <!-- Input & Submit Button -->
+        <div class="d-flex gap-2 align-items-center">
+          <input type="text" id="askAiQuestionInput" class="auth-input" placeholder="Ask a clinical question about this case..." onkeydown="if(event.key==='Enter'){ event.preventDefault(); submitAskAiQuestion(); }">
+          <button type="button" id="btnAskAi" class="btn-primary" style="white-space:nowrap; max-width:140px;" onclick="submitAskAiQuestion()">
+            <i class="fa-solid fa-paper-plane"></i> Ask AI
+          </button>
         </div>
-        <div id="aiAssistantAnswerBox" style="display:none; background:rgba(197, 231, 16, 0.04); border:1px solid rgba(197, 231, 16, 0.2); padding:12px; border-radius:8px; font-size:0.88rem; color:var(--text-primary);"></div>
+        <div id="askAiStatusNotice" style="display:none; margin-top:8px; font-size:0.82rem; color:var(--cyan-primary);"></div>
       </div>
 
       <!-- Doctor Notes & Recommendations -->
