@@ -304,6 +304,58 @@
         <table class="prob-table" id="probTable"></table>
       </div>
 
+      <!-- Read-Only Summary Card: Predicted Diagnosis & Patient Symptoms -->
+      <div class="portal-card mb-4" id="predictedDiagnosisSymptomsCard" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:20px; margin-top:16px;">
+        <div class="portal-section-title d-flex justify-content-between align-items-center mb-3">
+          <span style="color:var(--cyan-primary); font-weight:700; text-transform:uppercase; letter-spacing:0.05em; font-size:0.88rem;">
+            <i class="fa-solid fa-notes-medical"></i> Predicted Diagnosis &amp; Patient Symptoms
+          </span>
+          <span class="badge" style="background:rgba(197,231,16,0.1); color:var(--cyan-primary); border:1px solid rgba(197,231,16,0.2); font-size:0.75rem; padding:4px 10px; border-radius:20px;">
+            Read-Only Summary
+          </span>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(197,231,16,0.2); border-radius:8px; padding:14px;">
+              <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">
+                Predicted Disease
+              </div>
+              <div id="summaryCardDiagnosis" style="font-size:1.2rem; font-weight:700; color:var(--cyan-primary);">
+                Pending
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:14px;">
+              <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">
+                Confidence Score
+              </div>
+              <div id="summaryCardConfidence" style="font-size:1.2rem; font-weight:700; color:var(--text-primary);">
+                —
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Patient Presenting Symptoms -->
+        <div style="background:rgba(0,0,0,0.15); border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:14px;">
+          <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">
+            <i class="fa-solid fa-list-check" style="margin-right:6px; color:var(--cyan-primary);"></i> Patient Presenting Symptoms
+          </div>
+          <div id="summaryCardSymptomsList" style="color:var(--text-secondary); font-size:0.88rem;">
+            <span style="color:var(--text-muted); font-style:italic;">Loading patient symptoms...</span>
+          </div>
+        </div>
+
+        <!-- Optional Model & Differential Breakdown -->
+        <div id="summaryCardModelDetails" class="mt-3 pt-3" style="border-top:1px dashed rgba(255,255,255,0.08); font-size:0.8rem; color:var(--text-muted); display:flex; flex-wrap:wrap; gap:16px;">
+          <div><strong style="color:var(--text-secondary);">Model:</strong> <span id="summaryCardModelName">Random Forest</span></div>
+          <div><strong style="color:var(--text-secondary);">Top Differential:</strong> <span id="summaryCardTopDiff">—</span></div>
+        </div>
+      </div>
+
       <!-- Expanded AI Clinical Summary Card -->
       <div class="portal-card mb-4" style="background:rgba(197, 231, 16, 0.02); border:1px solid rgba(197, 231, 16, 0.2); margin-top:12px;">
         <div class="portal-section-title d-flex justify-content-between align-items-center">
@@ -460,5 +512,5 @@
 {% endblock %}
 
 {% block portal_scripts %}
-<script src="{{ url_for('static', filename='js/predict.js') }}?v=20260822_ai_chat_v6"></script>
+<script src="{{ url_for('static', filename='js/predict.js') }}?v=20260822_step6_summary_v7"></script>
 {% endblock %}

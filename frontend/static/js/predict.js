@@ -846,6 +846,62 @@ function renderPredictionResults(data) {
             probTable.appendChild(tr);
         }
     }
+
+    // Populate Read-Only Summary Card: Predicted Diagnosis & Patient Symptoms
+    const sumDiag = document.getElementById("summaryCardDiagnosis");
+    const sumConf = document.getElementById("summaryCardConfidence");
+    const sumModel = document.getElementById("summaryCardModelName");
+    const sumTopDiff = document.getElementById("summaryCardTopDiff");
+
+    if (sumDiag) sumDiag.textContent = data.predicted_diagnosis || "Healthy";
+    if (sumConf) sumConf.textContent = `${data.confidence || 0}%`;
+    if (sumModel) sumModel.textContent = data.prediction_details?.model_used || "random_forest";
+
+    if (sumTopDiff && data.prediction_details?.probabilities) {
+        const probs = data.prediction_details.probabilities;
+        const mainDiag = data.predicted_diagnosis;
+        let highestOtherName = null;
+        let highestOtherScore = -1;
+        for (let cls in probs) {
+            if (cls !== mainDiag && probs[cls] > highestOtherScore) {
+                highestOtherScore = probs[cls];
+                highestOtherName = cls;
+            }
+        }
+        if (highestOtherName && highestOtherScore > 0) {
+            sumTopDiff.textContent = `${highestOtherName} (${highestOtherScore}%)`;
+        } else {
+            sumTopDiff.textContent = "None";
+        }
+    }
+
+    renderSummaryCardSymptoms();
+}
+
+function renderSummaryCardSymptoms() {
+    const listEl = document.getElementById("summaryCardSymptomsList");
+    if (!listEl) return;
+
+    if (!recordedSymptoms || recordedSymptoms.length === 0) {
+        listEl.innerHTML = '<span style="color:var(--text-muted); font-style:italic;">No presenting symptoms entered for this patient.</span>';
+        return;
+    }
+
+    let html = '<ul style="list-style:none; padding-left:0; margin-bottom:0; display:flex; flex-direction:column; gap:6px;">';
+    recordedSymptoms.forEach(sym => {
+        const name = escapeHtml(sym.display_name || sym.name || sym.symptom_name || "Symptom");
+        const severity = sym.severity ? escapeHtml(sym.severity) : "";
+        const dur = (sym.duration_value && sym.duration_unit) ? ` (${escapeHtml(sym.duration_value)} ${escapeHtml(sym.duration_unit)})` : "";
+        
+        html += `
+            <li style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.04);">
+                <span><i class="fa-solid fa-circle" style="font-size:0.4rem; vertical-align:middle; margin-right:8px; color:var(--cyan-primary);"></i> <strong>${name}</strong>${dur}</span>
+                ${severity ? `<span class="badge" style="background:rgba(255,255,255,0.05); color:var(--text-secondary); font-size:0.75rem;">${severity}</span>` : ''}
+            </li>
+        `;
+    });
+    html += '</ul>';
+    listEl.innerHTML = html;
 }
 
 function generateWholeCaseAISummary() {
