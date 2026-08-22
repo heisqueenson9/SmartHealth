@@ -2094,17 +2094,9 @@ def get_investigation_recommendations(case_id):
         
         pa = PreliminaryAssessment.query.filter_by(case_id=case_id).order_by(PreliminaryAssessment.created_at.desc()).first()
         if not pa:
-            catalogs = InvestigationCatalog.query.all()
             return jsonify({
                 "status": "success",
-                "recommendations": [{
-                    "investigation_id": cat.id,
-                    "investigation": cat.to_dict(),
-                    "priority": "Medium",
-                    "reason": "Standard clinical laboratory panel.",
-                    "doctor_selected": True,
-                    "required_for_model": True
-                } for cat in catalogs]
+                "recommendations": []
             }), 200
 
         candidates = pa.candidates.all()
@@ -2125,19 +2117,6 @@ def get_investigation_recommendations(case_id):
                     "source_rule_id": r.id,
                     "doctor_selected": True,
                     "required_for_model": True
-                })
-                
-        all_catalogs = InvestigationCatalog.query.all()
-        for cat in all_catalogs:
-            if cat.id not in seen_inv_ids:
-                seen_inv_ids.add(cat.id)
-                recs.append({
-                    "investigation_id": cat.id,
-                    "investigation": cat.to_dict(),
-                    "priority": "Low",
-                    "reason": "Optional secondary screening test.",
-                    "doctor_selected": False,
-                    "required_for_model": False
                 })
 
         return jsonify({

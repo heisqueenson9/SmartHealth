@@ -313,3 +313,33 @@ class TestStateRestoration:
         assert restored["preliminary_assessment"] is not None
         assert len(restored["preliminary_assessment"]["candidates"]) > 0
 
+    def test_condition_specific_investigations_and_biomarkers(self, app, authenticated_doctor_client):
+        with app.app_context():
+            doc = db.session.get(User, 999)
+            if not doc:
+                doc = User(id=999, username="doctor.test@smarthealth.com", email="doctor.test@smarthealth.com", role="doctor", status="approved", full_name="Dr. Test User")
+                doc.set_password("pass")
+                db.session.add(doc)
+                db.session.commit()
+
+        # Create case for Anemia
+        res_anemia = authenticated_doctor_client.post("/api/cases", json={})
+        case_anemia_id = json.loads(res_anemia.data)["case"]["id"]
+
+        authenticated_doctor_client.post(f"/api/cases/{case_anemia_id}/symptoms", json={
+            "replace": True,
+            "symptoms": [{"display_name": "Severe Fatigue", "raw_text": "fatigue", "severity": "Severe"}]
+        })
+        authenticated_doctor_client.post(f"/api/cases/{case_anemia_id}/pre-assessment", json={})
+
+        recs_resp = authenticated_doctor_client.get(f"/api/cases/{case_anemia_id}/investigation-recommendations")
+        assert recs_resp.status_code == 200
+        recs = json.loads(recs_resp.data)["recommendations"]
+
+        # Verify only condition-relevant investigation is recommended (FBC)
+        inv_codes = [r["investigation"]["code"] for r in recs]
+        assert "INV_FBC" in inv_codes
+        assert "INV_LIPID_PROFILE" not in inv_codes
+        assert "INV_CARDIAC_MARKERS" not in inv_codes
+        assert "INV_GLUCOSE_HBA1C" not in inv_codes
+

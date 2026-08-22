@@ -62,8 +62,8 @@ function navigateToStep(stepNum) {
             fetchInvestigationRecommendations();
         }
     } else if (stepNum === 5) {
-        const activeSelection = selectedInvestigations.filter(r => r.doctor_selected !== false);
-        buildDynamicBiomarkerForm(activeSelection.length > 0 ? activeSelection : selectedInvestigations);
+        const activeSelection = selectedInvestigations.filter(r => r.doctor_selected === true);
+        buildDynamicBiomarkerForm(activeSelection);
     } else if (stepNum === 6) {
         if (latestPrediction) {
             renderPredictionResults(latestPrediction);
@@ -538,7 +538,11 @@ function renderInvestigationRecommendations(recs) {
 }
 
 function toggleInvestigationSelection(invId, isSelected) {
-    const found = selectedInvestigations.find(r => r.investigation_id === invId);
+    const found = selectedInvestigations.find(r => 
+        r.investigation_id === invId || 
+        (r.investigation && r.investigation.id === invId) ||
+        r.id === invId
+    );
     if (found) {
         found.doctor_selected = isSelected;
     }
@@ -597,7 +601,9 @@ const BIOMARKER_META = {
     "Heart Rate": { unit: "bpm", min: 30, max: 200, step: 1, placeholder: "e.g. 72" },
     "Creatinine": { unit: "mg/dL", min: 0.1, max: 10, step: 0.1, placeholder: "e.g. 0.9" },
     "Troponin": { unit: "ng/mL", min: 0, max: 2, step: 0.01, placeholder: "e.g. 0.02" },
-    "C-reactive Protein": { unit: "mg/L", min: 0, max: 100, step: 0.1, placeholder: "e.g. 3" }
+    "C-reactive Protein": { unit: "mg/L", min: 0, max: 100, step: 0.1, placeholder: "e.g. 3" },
+    "Widal O Titer": { unit: "titer ratio", min: 0, max: 640, step: 1, placeholder: "e.g. 160" },
+    "Widal H Titer": { unit: "titer ratio", min: 0, max: 640, step: 1, placeholder: "e.g. 160" }
 };
 
 // ── 6. Dynamic Lab Results Entry Form ───────────────────────────────
@@ -606,14 +612,32 @@ function buildDynamicBiomarkerForm(activeInvestigations) {
     if (!container) return;
     container.innerHTML = "";
     
+    if (!activeInvestigations || activeInvestigations.length === 0) {
+        container.innerHTML = `
+            <div class="col-12 p-4 text-center text-muted portal-card" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06);">
+                <i class="fa-solid fa-flask mb-2" style="font-size:1.5rem; color:var(--amber-warn);"></i>
+                <p style="margin:0;">No investigation panel selected. Please go back to Step 4 and select at least one investigation panel to enter laboratory results.</p>
+            </div>
+        `;
+        return;
+    }
+
     const requiredKeys = new Set();
     activeInvestigations.forEach(inv => {
-        const keys = inv.investigation ? inv.investigation.biomarker_keys : [];
+        const keys = (inv.investigation && Array.isArray(inv.investigation.biomarker_keys)) 
+            ? inv.investigation.biomarker_keys 
+            : (Array.isArray(inv.biomarker_keys) ? inv.biomarker_keys : []);
         keys.forEach(k => requiredKeys.add(k));
     });
 
     if (requiredKeys.size === 0) {
-        ["Glucose", "Hemoglobin", "Platelets", "White Blood Cells", "Red Blood Cells", "HbA1c", "Cholesterol"].forEach(k => requiredKeys.add(k));
+        container.innerHTML = `
+            <div class="col-12 p-4 text-center text-danger portal-card" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06);">
+                <i class="fa-solid fa-circle-exclamation mb-2" style="font-size:1.5rem;"></i>
+                <p style="margin:0;">The selected investigation panel has no biomarker configuration defined.</p>
+            </div>
+        `;
+        return;
     }
     
     const METABOLIC_KEYS = ["Glucose", "HbA1c", "Insulin", "BMI"];
@@ -622,12 +646,19 @@ function buildDynamicBiomarkerForm(activeInvestigations) {
     const LFT_KFT_KEYS = ["ALT", "AST", "Creatinine"];
     const TYPHOID_KEYS = ["Widal O Titer", "Widal H Titer"];
 
+    const categorised = new Set([
+        ...METABOLIC_KEYS, ...CARDIOPULMONARY_KEYS,
+        ...HEMATOLOGY_KEYS, ...LFT_KFT_KEYS, ...TYPHOID_KEYS
+    ]);
+    const OTHER_KEYS = Array.from(requiredKeys).filter(k => !categorised.has(k));
+
     const groups = [
         { title: "Metabolic & Glycemic Indices", keys: METABOLIC_KEYS.filter(k => requiredKeys.has(k)) },
         { title: "Cardiovascular & Inflammatory Markers", keys: CARDIOPULMONARY_KEYS.filter(k => requiredKeys.has(k)) },
         { title: "Full Blood Count (FBC / Hematology)", keys: HEMATOLOGY_KEYS.filter(k => requiredKeys.has(k)) },
         { title: "Hepatic & Renal Markers", keys: LFT_KFT_KEYS.filter(k => requiredKeys.has(k)) },
-        { title: "Special Serology Titers", keys: TYPHOID_KEYS.filter(k => requiredKeys.has(k)) }
+        { title: "Special Serology Titers", keys: TYPHOID_KEYS.filter(k => requiredKeys.has(k)) },
+        { title: "Additional Diagnostic Biomarkers", keys: OTHER_KEYS.filter(k => requiredKeys.has(k)) }
     ];
 
     groups.forEach(group => {

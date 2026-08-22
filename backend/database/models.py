@@ -398,6 +398,7 @@ class CaseInvestigation(db.Model):
             "status": self.status,
             "result_type": self.result_type,
             "required_for_model": self.required_for_model,
+            "investigation": self.investigation.to_dict() if self.investigation else None,
             "results": [r.to_dict() for r in self.results.all()]
         }
 
