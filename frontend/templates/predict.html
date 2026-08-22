@@ -308,7 +308,7 @@
       <div class="portal-card mb-4" style="background:rgba(197, 231, 16, 0.02); border:1px solid rgba(197, 231, 16, 0.2); margin-top:12px;">
         <div class="portal-section-title d-flex justify-content-between align-items-center">
           <span style="color:var(--cyan-primary);"><i class="fa-solid fa-brain"></i> Whole-Case AI Clinical Summary</span>
-          <button class="btn-outline btn-sm" style="border-color:var(--cyan-primary); color:var(--cyan-primary);" onclick="refreshAISummary()">
+          <button id="btnRefreshAISummary" class="btn-outline btn-sm" style="border-color:var(--cyan-primary); color:var(--cyan-primary);" onclick="refreshAISummary()">
             <i class="fa-solid fa-arrows-rotate"></i> Refresh Summary
           </button>
         </div>
@@ -320,17 +320,49 @@
         </div>
       </div>
 
+      <!-- AI Clinical Explanation & Doctor Assistant Panel -->
+      <div class="portal-card mb-4" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06);">
+        <div class="portal-section-title"><i class="fa-solid fa-user-doctor"></i> AI Explanation &amp; Doctor Assistant</div>
+        <p style="color:var(--text-secondary); font-size:0.82rem; margin-bottom:12px;">
+          Ask clinical questions regarding the prediction, biomarker significance, or confidence metrics based on the current patient case context.
+        </p>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <button type="button" class="btn-outline btn-sm" onclick="askAIAssistantQuick('Why did the model predict this condition?')">Why predicted?</button>
+          <button type="button" class="btn-outline btn-sm" onclick="askAIAssistantQuick('Explain the significance of these biomarkers.')">Biomarker significance</button>
+          <button type="button" class="btn-outline btn-sm" onclick="askAIAssistantQuick('What does the confidence score mean?')">Confidence score meaning</button>
+          <button type="button" class="btn-outline btn-sm" onclick="askAIAssistantQuick('Explain this condition in simpler clinical terms.')">Simpler clinical terms</button>
+        </div>
+        <div class="d-flex gap-2 mb-3">
+          <input type="text" id="aiAssistantQuestion" class="auth-input" placeholder="Ask a clinical question about this case..." onkeydown="if(event.key==='Enter') askAIAssistantCustom()">
+          <button type="button" class="btn-primary" style="white-space:nowrap; max-width:140px;" onclick="askAIAssistantCustom()">Ask AI</button>
+        </div>
+        <div id="aiAssistantAnswerBox" style="display:none; background:rgba(197, 231, 16, 0.04); border:1px solid rgba(197, 231, 16, 0.2); padding:12px; border-radius:8px; font-size:0.88rem; color:var(--text-primary);"></div>
+      </div>
+
       <!-- Doctor Notes & Signature -->
       <div class="portal-card mb-4" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.05);">
-        <div class="portal-section-title"><i class="fa-solid fa-signature"></i> Doctor Clinical Remarks &amp; Signature</div>
+        <div class="portal-section-title d-flex justify-content-between align-items-center">
+          <span><i class="fa-solid fa-signature"></i> Doctor Clinical Remarks &amp; Signature</span>
+          {% if session.get('role') == 'admin' %}
+          <a href="/portal?section=dashboard" class="btn-outline btn-sm" style="border-color:var(--cyan-primary); color:var(--cyan-primary); text-decoration:none;">
+            <i class="fa-solid fa-user-shield"></i> Admin Portal
+          </a>
+          {% endif %}
+        </div>
         <div class="row g-3 mt-1">
           <div class="col-12 col-md-6">
             <div class="auth-form-group">
-              <label class="auth-label">Clinical Remarks &amp; Observations</label>
-              <textarea id="doctorClinicalNotes" class="auth-input" rows="3" placeholder="Enter clinical observations, patient counseling, or follow-up plans..."></textarea>
+              <label class="auth-label">Clinical Observations</label>
+              <textarea id="doctorClinicalNotes" class="auth-input" rows="3" placeholder="Enter clinical observations, physical findings, or patient history notes..."></textarea>
             </div>
           </div>
           <div class="col-12 col-md-6">
+            <div class="auth-form-group">
+              <label class="auth-label">Treatment Plan &amp; Guidelines</label>
+              <textarea id="doctorTreatmentPlanInput" class="auth-input" rows="3" placeholder="Enter treatment plan, prescribed medications, or follow-up monitoring..."></textarea>
+            </div>
+          </div>
+          <div class="col-12">
             <div class="auth-form-group">
               <label class="auth-label">Doctor Signature / Identification</label>
               <input type="text" id="doctorSignatureInput" class="auth-input" value="Dr. {{ session.get('full_name', 'Physician') }}" placeholder="Dr. Full Name, MD">

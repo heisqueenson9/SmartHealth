@@ -204,6 +204,25 @@ async function resumeExistingCase() {
             latestPrediction = data.case.result;
         }
 
+        // Restore doctor notes, treatment plan, and AI explanation
+        const obsEl = document.getElementById("doctorClinicalNotes");
+        const treatEl = document.getElementById("doctorTreatmentPlanInput");
+        const sigEl = document.getElementById("doctorSignatureInput");
+        const aiSummaryEl = document.getElementById("caseAISummaryText");
+
+        if (obsEl && (data.case.observations || data.case.doctor_remarks)) {
+            obsEl.value = data.case.observations || data.case.doctor_remarks;
+        }
+        if (treatEl && data.case.treatment_notes) {
+            treatEl.value = data.case.treatment_notes;
+        }
+        if (sigEl && data.case.doctor_signature) {
+            sigEl.value = data.case.doctor_signature;
+        }
+        if (aiSummaryEl && data.case.ai_explanation) {
+            aiSummaryEl.value = data.case.ai_explanation;
+        }
+
         const stageMap = {
             "Draft Case": 1,
             "Symptoms Captured": 2,
@@ -830,47 +849,129 @@ function renderPredictionResults(data) {
 }
 
 function generateWholeCaseAISummary() {
-    const notesInput = document.getElementById("doctorClinicalNotes");
+    const obsInput = document.getElementById("doctorClinicalNotes");
+    const treatInput = document.getElementById("doctorTreatmentPlanInput");
+    const btn = document.getElementById("btnRefreshAISummary");
     
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-spinner" style="display:inline-block; width:14px; height:14px; margin-right:6px;"></span> Refreshing...';
+    }
+
+    const notesText = [
+        obsInput ? obsInput.value.trim() : "",
+        treatInput ? treatInput.value.trim() : ""
+    ].filter(Boolean).join(" | ");
+
     fetch(`/api/cases/${currentCaseId}/ai-summary`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            doctor_notes: notesInput ? notesInput.value.trim() : ""
+            doctor_notes: notesText
         })
     })
     .then(res => res.json())
     .then(data => {
-        if (data.status === "success" && data.ai_summary) {
+        if (data.status === "success" && (data.ai_summary || data.ai_explanation)) {
             const txt = document.getElementById("caseAISummaryText");
-            if (txt) txt.value = data.ai_summary.summary_text;
+            const summaryText = (data.ai_summary && data.ai_summary.summary_text) || data.ai_explanation || "";
+            if (txt) txt.value = summaryText;
+            showToast("AI Clinical Summary refreshed successfully.", "success");
+        } else {
+            showToast("Could not refresh AI Summary. Please try again.", "warning");
         }
     })
-    .catch(err => console.error("Error generating AI summary:", err));
+    .catch(err => {
+        console.error("Error generating AI summary:", err);
+        showToast("AI Summary service currently unavailable.", "error");
+    })
+    .finally(() => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Refresh Summary';
+        }
+    });
 }
 
 function refreshAISummary() {
     generateWholeCaseAISummary();
 }
 
+function askAIAssistantQuick(questionText) {
+    const input = document.getElementById("aiAssistantQuestion");
+    if (input) input.value = questionText;
+    askAIAssistantCustom();
+}
+
+function askAIAssistantCustom() {
+    const input = document.getElementById("aiAssistantQuestion");
+    const answerBox = document.getElementById("aiAssistantAnswerBox");
+    if (!input || !answerBox) return;
+    
+    const question = input.value.trim();
+    if (!question) {
+        showToast("Please enter a question for the AI Assistant.", "warning");
+        return;
+    }
+    
+    if (!currentCaseId) {
+        showToast("Please complete case initialization first.", "warning");
+        return;
+    }
+    
+    answerBox.style.display = "block";
+    answerBox.innerHTML = '<span class="btn-spinner" style="display:inline-block; width:14px; height:14px; margin-right:6px;"></span> Thinking...';
+    
+    fetch(`/api/cases/${currentCaseId}/ai-assistant`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: question })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success" && data.answer) {
+            answerBox.innerHTML = `
+                <div style="font-weight:600; color:var(--cyan-primary); margin-bottom:4px;">
+                    <i class="fa-solid fa-robot"></i> ${escapeHtml(data.question)}
+                </div>
+                <div style="margin-bottom:8px;">${escapeHtml(data.answer)}</div>
+                <div style="font-size:0.75rem; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.06); padding-top:6px;">
+                    <i class="fa-solid fa-shield-halved"></i> ${escapeHtml(data.disclaimer)}
+                </div>
+            `;
+        } else {
+            answerBox.innerHTML = `<div class="text-danger">Could not fetch AI Assistant response: ${escapeHtml(data.error || 'Failed')}</div>`;
+        }
+    })
+    .catch(err => {
+        console.error("Error asking AI assistant:", err);
+        answerBox.innerHTML = '<div class="text-danger">AI Assistant service temporarily unavailable.</div>';
+    });
+}
+
 function finalizeAndBuildReport() {
     const checkboxes = document.querySelectorAll(".report-sec-cb:checked");
     const selectedSections = Array.from(checkboxes).map(cb => cb.value);
     const signatureInput = document.getElementById("doctorSignatureInput");
+    const obsInput = document.getElementById("doctorClinicalNotes");
+    const treatInput = document.getElementById("doctorTreatmentPlanInput");
+    const aiSummaryInput = document.getElementById("caseAISummaryText");
     
     fetch(`/api/cases/${currentCaseId}/reports`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             sections: selectedSections,
-            doctor_signature: signatureInput ? signatureInput.value.trim() : "Dr. Physician"
+            doctor_signature: signatureInput ? signatureInput.value.trim() : "Dr. Physician",
+            observations: obsInput ? obsInput.value.trim() : "",
+            treatment_notes: treatInput ? treatInput.value.trim() : "",
+            ai_explanation: aiSummaryInput ? aiSummaryInput.value.trim() : ""
         })
     })
     .then(res => res.json())
     .then(data => {
         if (data.status === "success") {
             showToast("Report generated and case saved to history successfully!", "success");
-            // Fixed query parameter name from &id= to &record_id=
             setTimeout(() => {
                 window.location.href = `/portal?section=view_record&record_id=${currentCaseId}`;
             }, 1200);
@@ -880,6 +981,12 @@ function finalizeAndBuildReport() {
     })
     .catch(err => console.error("Error generating report:", err));
 }
+
+// Bind handlers to window for inline onclick execution
+window.refreshAISummary = refreshAISummary;
+window.finalizeAndBuildReport = finalizeAndBuildReport;
+window.askAIAssistantQuick = askAIAssistantQuick;
+window.askAIAssistantCustom = askAIAssistantCustom;
 
 // ── Helpers ─────────────────────────────────────────────────────────
 function escapeHtml(str) {

@@ -161,31 +161,40 @@ def generate_case_report_pdf(record, sections, signature, output_path):
         ))
 
     if "AI Clinical Summary" in sections:
-        story.append(Paragraph("AI Clinical Summary", SECTION_STYLE))
+        story.append(Paragraph("AI Simplified Explanation & Summary", SECTION_STYLE))
         ai_summary = record.ai_summaries.order_by(
             AISummary.created_at.desc()
         ).first() if hasattr(record.ai_summaries, "order_by") else None
-        if ai_summary:
-            for line in (ai_summary.summary_text or "").split("\n"):
+        
+        summary_text = None
+        if ai_summary and ai_summary.summary_text:
+            summary_text = ai_summary.summary_text
+        elif record.ai_explanation:
+            summary_text = record.ai_explanation
+
+        if summary_text:
+            for line in summary_text.split("\n"):
                 if line.strip():
                     story.append(Paragraph(line, BODY_STYLE))
         else:
             story.append(Paragraph("No AI summary generated for this case.", BODY_STYLE))
 
-    if "Doctor Notes" in sections and record.doctor_remarks:
-        story.append(Paragraph("Doctor Notes", SECTION_STYLE))
-        story.append(Paragraph(record.doctor_remarks, BODY_STYLE))
-    if "Doctor Notes" in sections and record.observations:
-        story.append(Paragraph("Clinical Recommendations", SECTION_STYLE))
-        story.append(Paragraph(record.observations, BODY_STYLE))
-    if "Doctor Notes" in sections and record.treatment_notes:
-        story.append(Paragraph("Treatment Plan", SECTION_STYLE))
-        story.append(Paragraph(record.treatment_notes, BODY_STYLE))
-    if "AI Clinical Summary" in sections and record.ai_explanation:
-        story.append(Paragraph("AI Simplified Explanation", SECTION_STYLE))
-        for line in record.ai_explanation.split("\n"):
-            if line.strip():
-                story.append(Paragraph(line, BODY_STYLE))
+    if "Doctor Notes" in sections:
+        obs = record.observations or record.doctor_remarks
+        treat = record.treatment_notes
+        if obs:
+            story.append(Paragraph("Observations", SECTION_STYLE))
+            story.append(Paragraph(obs, BODY_STYLE))
+        else:
+            story.append(Paragraph("Observations", SECTION_STYLE))
+            story.append(Paragraph("No clinical observations recorded.", BODY_STYLE))
+
+        if treat:
+            story.append(Paragraph("Treatment Plan", SECTION_STYLE))
+            story.append(Paragraph(treat, BODY_STYLE))
+        else:
+            story.append(Paragraph("Treatment Plan", SECTION_STYLE))
+            story.append(Paragraph("No treatment guidelines recorded.", BODY_STYLE))
 
     if "Doctor Identity/Signature" in sections:
         story.append(Spacer(1, 20))

@@ -343,3 +343,27 @@ class TestStateRestoration:
         assert "INV_CARDIAC_MARKERS" not in inv_codes
         assert "INV_GLUCOSE_HBA1C" not in inv_codes
 
+    def test_step06_report_pdf_and_ai_assistant(self, app, authenticated_doctor_client):
+        res = authenticated_doctor_client.post("/api/cases", json={})
+        case_id = json.loads(res.data)["case"]["id"]
+
+        # Run AI Assistant Q&A
+        res_ai = authenticated_doctor_client.post(f"/api/cases/{case_id}/ai-assistant", json={
+            "question": "Why did the model predict this condition?"
+        })
+        assert res_ai.status_code == 200
+        ai_data = json.loads(res_ai.data)
+        assert ai_data["status"] == "success"
+        assert "disclaimer" in ai_data
+
+        # Generate report with custom observations and treatment plan
+        res_rep = authenticated_doctor_client.post(f"/api/cases/{case_id}/reports", json={
+            "observations": "Patient shows mild pallor and fatigue.",
+            "treatment_notes": "Prescribe oral iron supplements and recheck FBC in 4 weeks.",
+            "doctor_signature": "Dr. Unit Test, MD"
+        })
+        assert res_rep.status_code == 201
+        rep_data = json.loads(res_rep.data)
+        assert rep_data["status"] == "success"
+        assert "download_url" in rep_data
+

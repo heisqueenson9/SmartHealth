@@ -2453,17 +2453,97 @@ def generate_case_ai_summary(case_id):
             doctor_notes=doc_notes
         )
         db.session.add(ais)
+        record.ai_explanation = summary_text
         record.case_status = "Case Reviewed"
         db.session.commit()
 
         return jsonify({
             "status": "success",
             "case_status": record.case_status,
-            "ai_summary": ais.to_dict()
+            "ai_summary": ais.to_dict(),
+            "ai_explanation": summary_text
         }), 200
     except Exception as exc:
         db.session.rollback()
         logger.exception(f"[API] Error in generate_case_ai_summary: {exc}")
+        return jsonify({
+            "error": "Internal server error.",
+            "status": "failed",
+            "details": str(exc) if current_app.debug else None,
+        }), 500
+
+
+@api_bp.route("/cases/<int:case_id>/ai-assistant", methods=["POST"])
+def ask_ai_assistant(case_id):
+    record, err_resp = get_authorized_case(case_id)
+    if err_resp:
+        return err_resp
+
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+        user_question = str(data.get("question", "")).strip()
+        if not user_question:
+            return jsonify({"error": "Question is required."}), 400
+
+        from backend.database.models import PatientCaseSymptom, PreliminaryAssessment, CaseInvestigation
+        symptoms = PatientCaseSymptom.query.filter_by(case_id=case_id).all()
+        sym_str = ", ".join([f"{s.display_name} ({s.severity})" for s in symptoms]) if symptoms else "None reported"
+
+        pa = PreliminaryAssessment.query.filter_by(case_id=case_id).order_by(PreliminaryAssessment.created_at.desc()).first()
+        cand_str = ", ".join([f"{c.condition_name} ({c.score}%)" for c in pa.candidates.all()]) if pa else "None"
+
+        biomarkers = json.loads(record.biomarkers_json) if record.biomarkers_json else {}
+        bio_str = ", ".join([f"{k}: {v}" for k, v in biomarkers.items()]) if biomarkers else "None entered"
+
+        pred_label = record.prediction_label or "Pending"
+        confidence = f"{record.confidence_score:.1f}%" if record.confidence_score else "N/A"
+        model_version = record.model_version or "random_forest"
+
+        q_lower = user_question.lower()
+
+        if "why" in q_lower or "predict" in q_lower or "reason" in q_lower:
+            answer = (
+                f"The ML model ({model_version}) inferred **{pred_label}** with a confidence score of **{confidence}** "
+                f"based on the patient's presenting symptoms ({sym_str}) and laboratory biomarker values ({bio_str}). "
+                f"Preliminary considerations also identified differential probabilities of {cand_str}."
+            )
+        elif "biomarker" in q_lower or "significance" in q_lower or "marker" in q_lower or "lab" in q_lower:
+            answer = (
+                f"The patient's recorded biomarker results are: {bio_str}. "
+                f"In the context of **{pred_label}**, these biomarkers serve as critical physiological indicators evaluated by the model during feature classification."
+            )
+        elif "confidence" in q_lower or "score" in q_lower or "mean" in q_lower:
+            answer = (
+                f"The confidence score of **{confidence}** represents the model's algorithmic probability density for the predicted class ({pred_label}). "
+                "Higher confidence reflects strong alignment between the patient's biomarker inputs and the model's trained pattern clusters."
+            )
+        elif "simpler" in q_lower or "terms" in q_lower or "explain" in q_lower:
+            answer = (
+                f"In simple clinical terms, the patient presented with symptoms ({sym_str}) and lab test results ({bio_str}). "
+                f"The decision-support algorithm analyzed these findings and identified **{pred_label}** as the most likely condition."
+            )
+        else:
+            answer = (
+                f"Regarding your query on Case #{record.id}: The model predicted **{pred_label}** ({confidence} confidence) "
+                f"from presenting symptoms ({sym_str}) and lab results ({bio_str}). Preliminary considerations: {cand_str}."
+            )
+
+        disclaimer = "Clinical Decision-Support Notice: Algorithmic predictions and AI explanations provide decision support only. Final clinical diagnosis remains the sole responsibility of the attending physician."
+
+        return jsonify({
+            "status": "success",
+            "question": user_question,
+            "answer": answer,
+            "disclaimer": disclaimer,
+            "context": {
+                "prediction": pred_label,
+                "confidence": confidence,
+                "symptoms": sym_str,
+                "biomarkers": bio_str
+            }
+        }), 200
+    except Exception as exc:
+        logger.exception(f"[API] Error in ask_ai_assistant: {exc}")
         return jsonify({
             "error": "Internal server error.",
             "status": "failed",
@@ -2485,7 +2565,18 @@ def build_case_report(case_id):
             "Predicted Diagnosis", "AI Clinical Summary", "Doctor Notes", "Doctor Identity/Signature"
         ])
         signature = data.get("doctor_signature", f"Dr. User #{session.get('user_id')}")
-        
+
+        if "observations" in data:
+            record.observations = data["observations"]
+        if "treatment_notes" in data:
+            record.treatment_notes = data["treatment_notes"]
+        if "doctor_remarks" in data:
+            record.doctor_remarks = data["doctor_remarks"]
+        if "final_diagnosis" in data:
+            record.final_diagnosis = data["final_diagnosis"]
+        if "ai_explanation" in data:
+            record.ai_explanation = data["ai_explanation"]
+
         import uuid
         report_uuid = f"REP-{uuid.uuid4().hex[:8].upper()}"
         pdf_filename = f"Report_{report_uuid}.pdf"
