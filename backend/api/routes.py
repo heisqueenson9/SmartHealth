@@ -2555,7 +2555,19 @@ def execute_llm_chat_completion(messages):
             user_msg_lower = m.get("content", "").lower()
             break
 
-    if "food" in user_msg_lower or "eat" in user_msg_lower or "diet" in user_msg_lower or "breakfast" in user_msg_lower:
+    user_msg_clean = user_msg_lower.strip("!.,? ")
+    
+    if user_msg_clean in ("hi", "hello", "hey", "good morning", "good evening", "greetings"):
+        fallback_ans = "Hello! How can I help you today with your health questions or the current patient case?"
+    elif "how are you" in user_msg_lower:
+        fallback_ans = "I'm doing well, thank you! How can I assist you today?"
+    elif "thank" in user_msg_lower:
+        fallback_ans = "You're very welcome! Feel free to ask if you have any other questions."
+    elif "what can you do" in user_msg_lower or "who are you" in user_msg_lower:
+        fallback_ans = "I am SmartHealth AI, your conversational health and wellness assistant. You can ask me general health education questions or questions about the current patient case!"
+    elif "interesting" in user_msg_lower:
+        fallback_ans = "Here is an interesting fact: Your liver is the only organ capable of regenerating lost tissue - as little as 25% of a liver can regenerate back into a full-sized liver!"
+    elif "food" in user_msg_lower or "eat" in user_msg_lower or "diet" in user_msg_lower or "breakfast" in user_msg_lower:
         fallback_ans = "A balanced daily diet emphasizes whole foods: fruits, vegetables, whole grains, lean proteins, healthy fats, and adequate hydration."
     elif "exercise" in user_msg_lower or "workout" in user_msg_lower or "walking" in user_msg_lower:
         fallback_ans = "Aim for at least 150 minutes of moderate-intensity exercise per week, such as brisk walking, cycling, or swimming."
@@ -2564,7 +2576,7 @@ def execute_llm_chat_completion(messages):
     elif "hba1c" in user_msg_lower:
         fallback_ans = "HbA1c measures glycated hemoglobin, evaluating average blood glucose control over the preceding 8-12 weeks. In clinical practice, an HbA1c >= 6.5% indicates Diabetes."
     elif "platelet" in user_msg_lower:
-        fallback_ans = "Platelet count evaluates hemostatic capability and hemostasis. Normal reference range is 150–450 x10³/µL."
+        fallback_ans = "Platelet count evaluates hemostatic capability and hemostasis. Normal reference range is 150-450 x10^3/uL."
     elif "creatinine" in user_msg_lower:
         fallback_ans = "Serum creatinine reflects glomerular filtration efficiency and renal clearance capacity."
     elif "confidence" in user_msg_lower or "score" in user_msg_lower:
@@ -2572,7 +2584,7 @@ def execute_llm_chat_completion(messages):
     elif "why" in user_msg_lower or "predict" in user_msg_lower:
         fallback_ans = "The prediction engine analyzed the combination of presenting symptoms and laboratory biomarkers to classify the primary clinical candidate."
     else:
-        fallback_ans = "Regarding your health inquiry: Maintaining regular physical activity, balanced nutrition, adequate sleep, and routine medical checkups supports overall wellness."
+        fallback_ans = "I am here to help! Feel free to ask general health questions or questions about the current patient case."
 
     return fallback_ans, None, None
 
@@ -2670,11 +2682,12 @@ def ask_ai_case(case_id):
             "BEHAVIOR RULES:\n"
             "1. Mode A (Case-Specific Questions): When questions concern the current patient case or refer to 'this patient', 'the result', 'the prediction', 'this biomarker', or case details, use the supplied patient case context accurately.\n"
             "2. Mode B (General Health & Wellness Questions): When questions ask about general health topics (e.g., nutrition, exercise, sleep, hydration, stress, general disease prevention, medical terms), answer naturally as a general health educator WITHOUT forcing them into the patient's case or starting responses with 'Based on the patient's prediction...'.\n"
-            "3. Multi-Turn Context: Maintain natural, continuous conversation context across follow-up questions.\n"
-            "4. Fact Precision: Never invent patient data, laboratory values, symptoms, diagnoses, or treatment facts not present in the supplied case.\n"
-            "5. Clinical Distinction: Clearly distinguish between ML model pattern predictions ('The ML model predicted...') and confirmed clinical diagnoses.\n"
-            "6. Emergency / Urgent Symptoms: If potentially life-threatening or urgent symptoms (e.g. severe chest pain, sudden paralysis, loss of consciousness) are mentioned, recommend immediate emergency medical care.\n"
-            "7. Directness: Answer the user's exact question first. Do not repeat the entire case summary unless specifically requested.\n\n"
+            "3. Greetings & Casual Conversation: If the user says 'Hi', 'Hello', 'How are you?', or engages in casual conversation, respond warmly and naturally as an intelligent conversational assistant WITHOUT bringing up patient diagnosis or ML predictions.\n"
+            "4. Multi-Turn Context: Maintain natural, continuous conversation context across follow-up questions.\n"
+            "5. Fact Precision: Never invent patient data, laboratory values, symptoms, diagnoses, or treatment facts not present in the supplied case.\n"
+            "6. Clinical Distinction: Clearly distinguish between ML model pattern predictions ('The ML model predicted...') and confirmed clinical diagnoses.\n"
+            "7. Emergency / Urgent Symptoms: If potentially life-threatening or urgent symptoms (e.g. severe chest pain, sudden paralysis, loss of consciousness) are mentioned, recommend immediate emergency medical care.\n"
+            "8. Directness: Answer the user's exact question first. Do not repeat the entire case summary unless specifically requested.\n\n"
             f"CURRENT PATIENT CASE CONTEXT (Use ONLY when question relates to current patient case):\n"
             f"- Case ID: #{case_id}\n"
             f"- Presenting Symptoms: {sym_str}\n"
