@@ -1776,11 +1776,27 @@ def create_case():
 
 @api_bp.route("/cases/<int:case_id>", methods=["GET"])
 def get_case(case_id):
-    """Fetch case details by ID for workflow resumption."""
+    """Fetch full case details — including all recorded sub-step data —
+    for workflow resumption."""
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
-    return jsonify({"status": "success", "case": record.to_dict()}), 200
+    from backend.database.models import PreliminaryAssessment
+    symptoms = [s.to_dict() for s in record.case_symptoms.all()]
+    latest_assessment = record.preliminary_assessments.order_by(
+        PreliminaryAssessment.created_at.desc()
+    ).first()
+    assessment_dict = latest_assessment.to_dict() if latest_assessment else None
+    investigations = [ci.to_dict() for ci in record.case_investigations.all()]
+    biomarkers = json.loads(record.biomarkers_json) if record.biomarkers_json else {}
+    return jsonify({
+        "status": "success",
+        "case": record.to_dict(),
+        "symptoms": symptoms,
+        "preliminary_assessment": assessment_dict,
+        "investigations": investigations,
+        "biomarkers": biomarkers,
+    }), 200
 
 
 @api_bp.route("/cases/<int:case_id>/symptoms", methods=["POST"])

@@ -264,3 +264,37 @@ class TestEmailNotifications:
             with patch.dict(os.environ, {"RESEND_API_KEY": "test_key_abc"}, clear=False):
                 resp = _approve_as_admin(client, pending_doctor, "reject")
                 assert resp.status_code == 200
+
+
+class TestAdminLogin:
+    def test_admin_portal_view(self, client):
+        resp = client.get("/system-access-portal")
+        assert resp.status_code == 200
+
+    def test_public_login_rejects_admin(self, client, app):
+        with app.app_context():
+            from backend.database.models import db, User
+            admin = User.query.filter_by(role="admin").first()
+            if not admin:
+                admin = User(username="admin_t1@test.com", email="admin_t1@test.com", role="admin", status="approved")
+                admin.set_password("AdminPass123!")
+                db.session.add(admin)
+                db.session.commit()
+            email = admin.email
+            
+        resp = client.post("/api/auth/login", data=json.dumps({"email": email, "password": "AdminPassword2026"}), content_type="application/json")
+        assert resp.status_code == 403
+
+    def test_admin_login_success(self, client, app):
+        with app.app_context():
+            from backend.database.models import db, User
+            admin = User.query.filter_by(role="admin").first()
+            if not admin:
+                admin = User(username="admin_t2@test.com", email="admin_t2@test.com", role="admin", status="approved")
+                admin.set_password("AdminPassword2026")
+                db.session.add(admin)
+                db.session.commit()
+            email = admin.email
+            
+        resp = client.post("/api/auth/admin-login", data=json.dumps({"email": email, "password": "AdminPassword2026"}), content_type="application/json")
+        assert resp.status_code == 200
