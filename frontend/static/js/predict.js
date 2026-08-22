@@ -144,6 +144,7 @@ async function resumeExistingCase() {
     const hidden = document.getElementById("resumeCaseId");
     const caseId = hidden && hidden.value ? parseInt(hidden.value, 10) : null;
     if (!caseId) return;
+
     try {
         const res = await fetch(`/api/cases/${caseId}`);
         const data = await res.json();
@@ -151,40 +152,11 @@ async function resumeExistingCase() {
             showToast("Could not load that case — it may no longer exist.", "error");
             return;
         }
+
         currentCaseId = caseId;
         const caseHidden = document.getElementById("currentCaseId");
         if (caseHidden) caseHidden.value = caseId;
-        // Restore Step 2: symptoms
-        if (Array.isArray(data.symptoms) && data.symptoms.length > 0) {
-            recordedSymptoms = data.symptoms.map(s => ({
-                standard_symptom_id: s.standard_symptom_id,
-                display_name: s.display_name,
-                raw_text: s.raw_text,
-                source: s.source,
-                severity: s.severity,
-                duration_value: s.duration_value,
-                duration_unit: s.duration_unit,
-                notes: s.notes || ""
-            }));
-            renderSymptomChips();
-        }
-        // Restore Step 3: preliminary assessment
-        if (data.preliminary_assessment) {
-            preliminaryCandidates = data.preliminary_assessment.candidates || [];
-            const container = document.getElementById("preliminaryCandidatesContainer");
-            if (container) renderPreliminaryCandidates(preliminaryCandidates);
-        }
-        // Restore Step 4/5: investigations + any entered results
-        if (Array.isArray(data.investigations) && data.investigations.length > 0) {
-            selectedInvestigations = data.investigations;
-            const activeInvestigations = selectedInvestigations.filter(item => item.doctor_selected);
-            if (activeInvestigations.length > 0) {
-                buildDynamicBiomarkerForm(activeInvestigations);
-            }
-        }
-        if (data.biomarkers && Object.keys(data.biomarkers).length > 0) {
-            biomarkerValues = data.biomarkers;
-        }
+
         const stageMap = {
             "Draft Case": 1,
             "Symptoms Captured": 2,
@@ -195,9 +167,10 @@ async function resumeExistingCase() {
             "Case Reviewed": 6,
             "Reported/Archived": 6
         };
+
         const targetStep = stageMap[data.case.case_status] || 2;
         navigateToStep(targetStep);
-        showToast(`Resumed case ${data.case.patient_reference || '#' + caseId} — your previous data has been restored.`, "info");
+        showToast(`Resumed case ${data.case.patient_reference || '#' + caseId}.`, "info");
     } catch (err) {
         console.error("[SmartHealth] Failed to resume case:", err);
         showToast("Could not resume the case. Starting fresh.", "warning");

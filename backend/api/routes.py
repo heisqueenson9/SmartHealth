@@ -5,12 +5,11 @@ Authors: Enock Queenson Eduafo & Christabel Araba Edumadze | University of Ghana
 
 import json
 import logging
-import math
 import os
 from flask import Blueprint, request, jsonify, session, current_app
 
 from backend.database.models import db, DiagnosticRecord, User, Patient, DoctorPatientConnection, DoctorTechnicianConnection
-from backend.ml.model_manager import model_manager, FEATURE_ORDER
+from backend.ml.model_manager import model_manager
 from backend.ml.preprocessing.normalization import normalize_input
 
 
@@ -159,38 +158,57 @@ def predict():
 
         category = str(data.get("category", "all")).lower().strip()
 
-        # Healthy Baseline raw clinical features for unentered biomarkers
-        RAW_HEALTHY_BASELINE = {
-            "Glucose": 85.0, "Cholesterol": 180.0, "Hemoglobin": 15.0,
-            "Platelets": 250.0, "White Blood Cells": 7.0, "Red Blood Cells": 4.8,
-            "Hematocrit": 42.0, "Mean Corpuscular Volume": 88.0,
-            "Mean Corpuscular Hemoglobin": 30.0, "Mean Corpuscular Hemoglobin Concentration": 33.5,
-            "Insulin": 10.0, "BMI": 22.0, "Systolic Blood Pressure": 120.0,
-            "Diastolic Blood Pressure": 80.0, "Triglycerides": 110.0,
-            "HbA1c": 5.2, "LDL Cholesterol": 90.0, "HDL Cholesterol": 55.0,
-            "ALT": 24.0, "AST": 22.0, "Heart Rate": 72.0, "Creatinine": 0.9,
-            "Troponin": 0.01, "C-reactive Protein": 2.0,
+        # Healthy Baseline features for blending missing values
+        HEALTHY_BASELINE = {
+            "Glucose": 0.12, "Cholesterol": 0.15, "Hemoglobin": 0.65,
+            "Platelets": 0.55, "White Blood Cells": 0.45, "Red Blood Cells": 0.60,
+            "Hematocrit": 0.58, "Mean Corpuscular Volume": 0.52,
+            "Mean Corpuscular Hemoglobin": 0.55, "Mean Corpuscular Hemoglobin Concentration": 0.50,
+            "Insulin": 0.15, "BMI": 0.22, "Systolic Blood Pressure": 0.65,
+            "Diastolic Blood Pressure": 0.45, "Triglycerides": 0.18,
+            "HbA1c": 0.10, "LDL Cholesterol": 0.14, "HDL Cholesterol": 0.65,
+            "ALT": 0.15, "AST": 0.14, "Heart Rate": 0.18, "Creatinine": 0.15,
+            "Troponin": 0.05, "C-reactive Protein": 0.08,
         }
 
-        # Construct raw clinical features for model input (StandardScaler in model_manager performs scaling)
-        raw_features = RAW_HEALTHY_BASELINE.copy()
-        for feature in FEATURE_ORDER:
-            value = features_dict.get(feature)
-            if value is None or value == "":
+        # Validate that raw entered values are numeric
+        for f_name, f_val in features_dict.items():
+            try:
+                float(f_val)
+            except (ValueError, TypeError):
+                return jsonify({
+                    "error": f"Biomarker '{f_name}' must be a numeric value.",
+                    "status": "failed"
+                }), 400
+
+        # Normalise raw inputs to 0-1 using approximated clinical reference ranges.
+        # These ranges are approximated from standard clinical references since the original
+        # training data's normalization parameters were not preserved, which is a documented
+        # limitation of the system.
+        normalized_inputs = normalize_input(features_dict)
+
+        # Merge normalised input features with healthy baseline (which is already normalised)
+        full_features = HEALTHY_BASELINE.copy()
+        for k, v in normalized_inputs.items():
+            full_features[k] = v
+
+        # Validate biomarker ranges (post-normalization check):
+        for f_name, f_val in full_features.items():
+            # If the user specifically entered Typhoid titers, skip 24-feature validation bound checks
+            if f_name in ("Widal O Titer", "Widal H Titer") and category == "typhoid":
                 continue
             try:
-                numeric_val = float(value)
-            except (TypeError, ValueError):
+                val_f = float(f_val)
+                if val_f < 0.0 or val_f > 1.0:
+                    return jsonify({
+                        "error": f"Normalised biomarker '{f_name}' value {f_val} is out of bounds (must be between 0.0 and 1.0).",
+                        "status": "failed"
+                    }), 400
+            except (ValueError, TypeError):
                 return jsonify({
-                    "error": f"Invalid numeric value for {feature}",
+                    "error": f"Biomarker '{f_name}' must be a numeric value.",
                     "status": "failed"
                 }), 400
-            if not math.isfinite(numeric_val):
-                return jsonify({
-                    "error": f"Invalid numeric value for {feature}",
-                    "status": "failed"
-                }), 400
-            raw_features[feature] = numeric_val
 
         model_key = "random_forest"
         patient_ref = str(data.get("patient_reference", "")).strip() or None
@@ -356,7 +374,7 @@ def predict():
                 "status": "success",
             }
         else:
-            result = model_manager.predict(raw_features, model_key)
+            result = model_manager.predict(full_features, model_key)
 
         user_id = session.get("user_id")
         if user_id:
@@ -1758,27 +1776,11 @@ def create_case():
 
 @api_bp.route("/cases/<int:case_id>", methods=["GET"])
 def get_case(case_id):
-    """Fetch full case details — including all recorded sub-step data —
-    for workflow resumption."""
+    """Fetch case details by ID for workflow resumption."""
     record, err_resp = get_authorized_case(case_id)
     if err_resp:
         return err_resp
-    from backend.database.models import PreliminaryAssessment
-    symptoms = [s.to_dict() for s in record.case_symptoms.all()]
-    latest_assessment = record.preliminary_assessments.order_by(
-        PreliminaryAssessment.created_at.desc()
-    ).first()
-    assessment_dict = latest_assessment.to_dict() if latest_assessment else None
-    investigations = [ci.to_dict() for ci in record.case_investigations.all()]
-    biomarkers = json.loads(record.biomarkers_json) if record.biomarkers_json else {}
-    return jsonify({
-        "status": "success",
-        "case": record.to_dict(),
-        "symptoms": symptoms,
-        "preliminary_assessment": assessment_dict,
-        "investigations": investigations,
-        "biomarkers": biomarkers,
-    }), 200
+    return jsonify({"status": "success", "case": record.to_dict()}), 200
 
 
 @api_bp.route("/cases/<int:case_id>/symptoms", methods=["POST"])
@@ -2332,38 +2334,28 @@ def run_case_prediction(case_id):
         if not biomarkers:
             return jsonify({"error": "No biomarker investigation results available to run prediction."}), 400
             
-        RAW_HEALTHY_BASELINE = {
-            "Glucose": 85.0, "Cholesterol": 180.0, "Hemoglobin": 15.0,
-            "Platelets": 250.0, "White Blood Cells": 7.0, "Red Blood Cells": 4.8,
-            "Hematocrit": 42.0, "Mean Corpuscular Volume": 88.0,
-            "Mean Corpuscular Hemoglobin": 30.0, "Mean Corpuscular Hemoglobin Concentration": 33.5,
-            "Insulin": 10.0, "BMI": 22.0, "Systolic Blood Pressure": 120.0,
-            "Diastolic Blood Pressure": 80.0, "Triglycerides": 110.0,
-            "HbA1c": 5.2, "LDL Cholesterol": 90.0, "HDL Cholesterol": 55.0,
-            "ALT": 24.0, "AST": 22.0, "Heart Rate": 72.0, "Creatinine": 0.9,
-            "Troponin": 0.01, "C-reactive Protein": 2.0,
+        HEALTHY_BASELINE = {
+            "Glucose": 0.12, "Cholesterol": 0.15, "Hemoglobin": 0.65,
+            "Platelets": 0.55, "White Blood Cells": 0.45, "Red Blood Cells": 0.60,
+            "Hematocrit": 0.58, "Mean Corpuscular Volume": 0.52,
+            "Mean Corpuscular Hemoglobin": 0.55, "Mean Corpuscular Hemoglobin Concentration": 0.50,
+            "Insulin": 0.15, "BMI": 0.22, "Systolic Blood Pressure": 0.65,
+            "Diastolic Blood Pressure": 0.45, "Triglycerides": 0.18,
+            "HbA1c": 0.10, "LDL Cholesterol": 0.14, "HDL Cholesterol": 0.65,
+            "ALT": 0.15, "AST": 0.14, "Heart Rate": 0.18, "Creatinine": 0.15,
+            "Troponin": 0.05, "C-reactive Protein": 0.08,
         }
 
-        raw_features = RAW_HEALTHY_BASELINE.copy()
-        entered_keys = []
-        for feature in FEATURE_ORDER:
-            value = biomarkers.get(feature)
-            if value is None or value == "":
-                continue
-            try:
-                numeric_val = float(value)
-            except (TypeError, ValueError):
-                return jsonify({"error": f"Invalid value for {feature}"}), 400
-            if not math.isfinite(numeric_val):
-                return jsonify({"error": f"Invalid numeric value for {feature}"}), 400
-            raw_features[feature] = numeric_val
-            entered_keys.append(feature)
+        normalized_inputs = normalize_input(biomarkers)
+        full_features = HEALTHY_BASELINE.copy()
+        for k, v in normalized_inputs.items():
+            full_features[k] = v
 
-        res = model_manager.predict(raw_features, model_key)
+        res = model_manager.predict(full_features, model_key)
 
-        features_actually_entered = sorted(entered_keys)
-        features_defaulted = sorted(set(RAW_HEALTHY_BASELINE.keys()) - set(entered_keys))
-        coverage_pct = round(len(features_actually_entered) / len(RAW_HEALTHY_BASELINE) * 100, 1)
+        features_actually_entered = sorted(normalized_inputs.keys())
+        features_defaulted = sorted(set(HEALTHY_BASELINE.keys()) - set(normalized_inputs.keys()))
+        coverage_pct = round(len(features_actually_entered) / len(HEALTHY_BASELINE) * 100, 1)
 
         from backend.database.models import ModelPrediction
         mp = ModelPrediction(

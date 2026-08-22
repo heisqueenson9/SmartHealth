@@ -15,8 +15,6 @@ from werkzeug.utils import secure_filename
 
 from backend.database.models import db, User, Patient
 
-from backend.factory import limiter
-
 logger = logging.getLogger("smarthealth.auth")
 auth_bp = Blueprint("auth", __name__)
 
@@ -61,7 +59,6 @@ def _set_user_session(user, patient_profile=None):
 
 # ── POST /register ───────────────────────────────────────────
 @auth_bp.route("/register", methods=["POST"])
-@limiter.limit("10 per minute")
 def register():
     try:
         account_type = request.form.get("account_type", "doctor").strip().lower()
@@ -200,7 +197,6 @@ def _register_patient(email, full_name, password):
 
 # ── POST /login ──────────────────────────────────────────────
 @auth_bp.route("/login", methods=["POST"])
-@limiter.limit("10 per minute")
 def login():
     try:
         data = request.get_json(force=True, silent=True) or {}
@@ -216,9 +212,6 @@ def login():
         user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
             return jsonify({"error": "Invalid email address or password."}), 401
-
-        if user.role == "admin":
-            return jsonify({"error": "Administrator accounts must sign in through the admin portal."}), 403
 
         patient_profile = None
         if user.role == "patient":
@@ -241,32 +234,6 @@ def login():
 
     except Exception as e:
         logger.exception(f"[Auth] Error during login: {e}")
-        return jsonify({"error": "Internal server error during login."}), 500
-
-
-@auth_bp.route("/admin-login", methods=["POST"])
-@limiter.limit("10 per minute")
-def admin_login():
-    try:
-        data = request.get_json(force=True, silent=True) or {}
-        email = data.get("email", "").strip().lower()
-        password = data.get("password", "")
-        if not email or not password:
-            return jsonify({"error": "Email and password are required."}), 400
-        user = User.query.filter_by(email=email).first()
-        if not user or not user.check_password(password):
-            return jsonify({"error": "Invalid credentials."}), 401
-        if user.role != "admin":
-            logger.warning(f"[Auth] Non-admin login attempt via admin portal: {email}")
-            return jsonify({"error": "This portal is for administrator accounts only."}), 403
-        _set_user_session(user, None)
-        logger.info(f"[Auth] Admin logged in via dedicated portal: {email}")
-        return jsonify({
-            "status": "success",
-            "user": {"id": user.id, "email": user.email, "full_name": user.full_name, "role": "admin"},
-        }), 200
-    except Exception as e:
-        logger.exception(f"[Auth] Error during admin login: {e}")
         return jsonify({"error": "Internal server error during login."}), 500
 
 

@@ -69,7 +69,7 @@ class Config:
 
     # Rate limiting
     RATELIMIT_STORAGE_URI = os.environ.get("REDIS_URL", "memory://")
-    RATELIMIT_DEFAULT = "2000 per day;500 per hour;60 per minute"
+    RATELIMIT_DEFAULT = "200 per day;50 per hour;10 per minute"
 
     # Logging
     LOG_LEVEL        = os.environ.get("LOG_LEVEL", "INFO")

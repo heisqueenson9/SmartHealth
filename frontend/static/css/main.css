@@ -5,16 +5,16 @@
 
 /* ── CSS Variables ────────────────────────────────────────────── */
 :root {
-  --bg-void:       #000000;
-  --bg-surface:    #0a0a0a;
-  --bg-elevated:   #141414;
-  --bg-border:     rgba(185, 253, 80, 0.14);
+  --bg-void:       #010A00;
+  --bg-surface:    #050e04;
+  --bg-elevated:   #0c1a01;
+  --bg-border:     rgba(197, 231, 16, 0.14);
 
-  --cyan-primary:  #B9FD50;
-  --cyan-glow:     rgba(185, 253, 80, 0.2);
-  --cyan-dim:      #8FA05C;
+  --cyan-primary:  #C5E710;
+  --cyan-glow:     rgba(197, 231, 16, 0.2);
+  --cyan-dim:      #8E9630;
 
-  --green-ok:      #B9FD50;
+  --green-ok:      #C5E710;
   --amber-warn:    #F4DF6B;
   --red-critical:  #ff4757;
   --purple-neural: #a855f7;
@@ -2400,23 +2400,4 @@ body.no-scroll {
         width: 90%;
         max-height: 320px;
     }
-}
-
-/* ── Light Theme: Home / About / Results / Login only ─────────── */
-body.light-page {
-  --bg-void:      #f6f8f5;
-  --bg-surface:   #ffffff;
-  --bg-elevated:  #ffffff;
-  --bg-border:    rgba(20, 40, 10, 0.12);
-  --text-primary:   #16210f;
-  --text-secondary: #45543c;
-  --text-muted:     #5c6b53;
-  --cyan-primary: #4c7a17;
-  --cyan-glow:    rgba(76, 122, 23, 0.18);
-  --cyan-dim:     #6b8a4a;
-  --green-ok:     #4c7a17;
-}
-body.light-page .submit-btn,
-body.light-page .auth-btn {
-  color: #0d1608;
 }

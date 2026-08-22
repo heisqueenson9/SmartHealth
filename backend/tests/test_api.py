@@ -86,15 +86,15 @@ class TestMetadata:
 # ── Prediction ───────────────────────────────────────────────
 class TestPrediction:
     HEALTHY_FEATURES = {
-        "Glucose": 85.0, "Cholesterol": 180.0, "Hemoglobin": 15.0,
-        "Platelets": 250.0, "White Blood Cells": 7.0, "Red Blood Cells": 4.8,
-        "Hematocrit": 42.0, "Mean Corpuscular Volume": 88.0,
-        "Mean Corpuscular Hemoglobin": 30.0, "Mean Corpuscular Hemoglobin Concentration": 33.5,
-        "Insulin": 10.0, "BMI": 22.0, "Systolic Blood Pressure": 120.0,
-        "Diastolic Blood Pressure": 80.0, "Triglycerides": 110.0,
-        "HbA1c": 5.2, "LDL Cholesterol": 90.0, "HDL Cholesterol": 55.0,
-        "ALT": 24.0, "AST": 22.0, "Heart Rate": 72.0, "Creatinine": 0.9,
-        "Troponin": 0.01, "C-reactive Protein": 2.0,
+        "Glucose": 0.12, "Cholesterol": 0.15, "Hemoglobin": 0.65,
+        "Platelets": 0.55, "White Blood Cells": 0.45, "Red Blood Cells": 0.60,
+        "Hematocrit": 0.58, "Mean Corpuscular Volume": 0.52,
+        "Mean Corpuscular Hemoglobin": 0.55, "Mean Corpuscular Hemoglobin Concentration": 0.50,
+        "Insulin": 0.15, "BMI": 0.22, "Systolic Blood Pressure": 0.65,
+        "Diastolic Blood Pressure": 0.45, "Triglycerides": 0.18,
+        "HbA1c": 0.10, "LDL Cholesterol": 0.14, "HDL Cholesterol": 0.65,
+        "ALT": 0.15, "AST": 0.14, "Heart Rate": 0.18, "Creatinine": 0.15,
+        "Troponin": 0.05, "C-reactive Protein": 0.08,
     }
 
     def test_predict_valid_input(self, authenticated_doctor_client):
@@ -264,42 +264,3 @@ class TestEmailNotifications:
             with patch.dict(os.environ, {"RESEND_API_KEY": "test_key_abc"}, clear=False):
                 resp = _approve_as_admin(client, pending_doctor, "reject")
                 assert resp.status_code == 200
-
-
-class TestAdminLogin:
-    def test_admin_portal_view(self, client):
-        resp = client.get("/system-access-portal")
-        assert resp.status_code == 200
-
-    def test_direct_admin_route_redirects_unauthenticated(self, client):
-        resp = client.get("/admin")
-        assert resp.status_code == 302
-        assert "/system-access-portal" in resp.headers.get("Location", "")
-
-    def test_public_login_rejects_admin(self, client, app):
-        with app.app_context():
-            from backend.database.models import db, User
-            admin = User.query.filter_by(role="admin").first()
-            if not admin:
-                admin = User(username="admin_t1@test.com", email="admin_t1@test.com", role="admin", status="approved")
-                admin.set_password("AdminPass123!")
-                db.session.add(admin)
-                db.session.commit()
-            email = admin.email
-            
-        resp = client.post("/api/auth/login", data=json.dumps({"email": email, "password": "AdminPassword2026"}), content_type="application/json")
-        assert resp.status_code == 403
-
-    def test_admin_login_success(self, client, app):
-        with app.app_context():
-            from backend.database.models import db, User
-            admin = User.query.filter_by(role="admin").first()
-            if not admin:
-                admin = User(username="admin_t2@test.com", email="admin_t2@test.com", role="admin", status="approved")
-                admin.set_password("AdminPassword2026")
-                db.session.add(admin)
-                db.session.commit()
-            email = admin.email
-            
-        resp = client.post("/api/auth/admin-login", data=json.dumps({"email": email, "password": "AdminPassword2026"}), content_type="application/json")
-        assert resp.status_code == 200
