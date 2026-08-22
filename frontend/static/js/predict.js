@@ -847,34 +847,6 @@ function renderPredictionResults(data) {
         }
     }
 
-    // Populate Read-Only Summary Card: Predicted Diagnosis & Patient Symptoms
-    const sumDiag = document.getElementById("summaryCardDiagnosis");
-    const sumConf = document.getElementById("summaryCardConfidence");
-    const sumModel = document.getElementById("summaryCardModelName");
-    const sumTopDiff = document.getElementById("summaryCardTopDiff");
-
-    if (sumDiag) sumDiag.textContent = data.predicted_diagnosis || "Healthy";
-    if (sumConf) sumConf.textContent = `${data.confidence || 0}%`;
-    if (sumModel) sumModel.textContent = data.prediction_details?.model_used || "random_forest";
-
-    if (sumTopDiff && data.prediction_details?.probabilities) {
-        const probs = data.prediction_details.probabilities;
-        const mainDiag = data.predicted_diagnosis;
-        let highestOtherName = null;
-        let highestOtherScore = -1;
-        for (let cls in probs) {
-            if (cls !== mainDiag && probs[cls] > highestOtherScore) {
-                highestOtherScore = probs[cls];
-                highestOtherName = cls;
-            }
-        }
-        if (highestOtherName && highestOtherScore > 0) {
-            sumTopDiff.textContent = `${highestOtherName} (${highestOtherScore}%)`;
-        } else {
-            sumTopDiff.textContent = "None";
-        }
-    }
-
     renderSummaryCardSymptoms();
 }
 
