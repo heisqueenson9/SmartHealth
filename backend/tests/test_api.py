@@ -271,6 +271,11 @@ class TestAdminLogin:
         resp = client.get("/system-access-portal")
         assert resp.status_code == 200
 
+    def test_direct_admin_route_redirects_unauthenticated(self, client):
+        resp = client.get("/admin")
+        assert resp.status_code == 302
+        assert "/system-access-portal" in resp.headers.get("Location", "")
+
     def test_public_login_rejects_admin(self, client, app):
         with app.app_context():
             from backend.database.models import db, User

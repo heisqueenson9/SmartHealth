@@ -86,6 +86,21 @@ def login_page():
     return render_template("login.html")
 
 
+@views_bp.route("/admin")
+def admin_portal():
+    """Permanent direct entry point for administrator accounts."""
+    role = session.get("role")
+    user_id = session.get("user_id")
+
+    if not user_id or not role:
+        return redirect(url_for("views.admin_login_page"))
+
+    if role != "admin":
+        return redirect(url_for("views.portal_page"))
+
+    return redirect(url_for("views.portal_page", section="dashboard"))
+
+
 @views_bp.route("/system-access-portal")
 def admin_login_page():
     """Dedicated admin login — not linked from the public site."""
