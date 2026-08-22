@@ -87,6 +87,7 @@ def login_page():
 
 
 @views_bp.route("/admin")
+@views_bp.route("/admin/")
 def admin_portal():
     """Permanent direct entry point for administrator accounts."""
     role = session.get("role")
