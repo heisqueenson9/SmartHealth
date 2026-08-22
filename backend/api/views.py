@@ -89,10 +89,9 @@ def login_page():
 @views_bp.route("/system-access-portal")
 @views_bp.route("/admin")
 def admin_login_page():
-    """Dedicated admin login — not linked from the public site."""
     if session.get("role") == "admin":
-        return redirect(url_for("views.portal_page"))
-    return render_template("admin_login.html")
+        return redirect(url_for("views.portal_page", section="dashboard"))
+    return redirect(url_for("views.login_page"))
 
 
 @views_bp.route("/register")

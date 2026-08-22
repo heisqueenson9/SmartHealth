@@ -213,19 +213,25 @@ def login():
         if not user or not user.check_password(password):
             return jsonify({"error": "Invalid email address or password."}), 401
 
-        if user.role == "admin":
-            return jsonify({"error": "Administrator accounts must sign in through the admin portal."}), 403
-
         patient_profile = None
         if user.role == "patient":
             patient_profile = Patient.query.filter_by(user_id=user.id).first()
 
         _set_user_session(user, patient_profile)
 
+        redirect_url = "/portal"
+        if user.role == "admin":
+            redirect_url = "/portal?section=dashboard"
+        elif user.role == "patient":
+            redirect_url = "/portal?section=records"
+        elif user.role == "doctor":
+            redirect_url = "/portal?section=history"
+
         logger.info(f"[Auth] User logged in: {email} (role: {user.role})")
         return jsonify({
             "status": "success",
             "message": "Login successful.",
+            "redirect_url": redirect_url,
             "user": {
                 "id": user.id,
                 "email": user.email,

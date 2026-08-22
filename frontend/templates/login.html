@@ -122,7 +122,7 @@
         }
 
         // Redirect to Portal dashboard
-        window.location.href = "/portal";
+        window.location.href = data.redirect_url || "/portal";
       } catch (err) {
         alertBox.textContent = "Network error: Could not reach the authentication server.";
         alertBox.classList.remove("d-none");
