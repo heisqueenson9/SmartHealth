@@ -809,50 +809,13 @@ function renderPredictionResults(data) {
     const modelLbl = document.getElementById("modelUsedLabel");
     const probTable = document.getElementById("probTable");
 
-    if (diagName) diagName.textContent = data.predicted_diagnosis || "Healthy";
-    if (confLarge) confLarge.textContent = `${data.confidence || 0}%`;
-    if (confBar) confBar.style.width = `${data.confidence || 0}%`;
-    if (modelLbl) modelLbl.textContent = `Model: ${data.prediction_details?.model_used || 'random_forest'}`;
+    const predLabel = data.predicted_diagnosis || data.prediction || "Prediction result unavailable";
+    const confVal = (data.confidence !== undefined && data.confidence !== null) ? data.confidence : (data.confidence_score !== undefined ? data.confidence_score : 0);
 
-    const coverageEl = document.getElementById("dataCoverageNotice");
-    if (coverageEl && data.data_coverage) {
-        const cov = data.data_coverage;
-        if (cov.coverage_pct < 100) {
-            coverageEl.style.display = "block";
-            coverageEl.innerHTML = `<i class="fa-solid fa-circle-info"></i> This prediction used ${cov.entered_count} of ${cov.total_count} biomarkers from actual entered results (${cov.coverage_pct}% coverage). The remaining values were assumed within normal range. Entering results for more investigations will improve prediction reliability.`;
-        } else {
-            coverageEl.style.display = "none";
-        }
-    }
-    
-    if (desc) {
-        desc.textContent = data.prediction_details?.description || "Algorithmic inference completed based on normalised biomarker profile.";
-    }
-    
-    if (probTable && data.prediction_details?.probabilities) {
-        probTable.innerHTML = "";
-        const probs = data.prediction_details.probabilities;
-        for (let cls in probs) {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td style="padding:6px; color:var(--text-primary); font-weight:600;">${escapeHtml(cls)}</td>
-                <td style="padding:6px; width:60%;">
-                  <div style="background:rgba(255,255,255,0.05); height:8px; border-radius:4px; overflow:hidden;">
-                    <div style="width:${probs[cls]}%; height:100%; background:var(--cyan-primary);"></div>
-                  </div>
-                </td>
-                <td style="padding:6px; text-align:right; font-family:var(--font-mono); font-size:0.85rem; color:var(--cyan-primary);">${probs[cls]}%</td>
-            `;
-            probTable.appendChild(tr);
-        }
-    }
-
-    // Populate Summary Card Disease & Confidence Score
-    const sumDiag = document.getElementById("summaryCardDiagnosis");
-    const sumConf = document.getElementById("summaryCardConfidence");
-
-    if (sumDiag) sumDiag.textContent = data.predicted_diagnosis || "Healthy";
-    if (sumConf) sumConf.textContent = `${data.confidence || 0}%`;
+    if (diagName) diagName.textContent = predLabel;
+    if (confLarge) confLarge.textContent = `${confVal}%`;
+    if (confBar) confBar.style.width = `${confVal}%`;
+    if (modelLbl) modelLbl.textContent = `Model: ${data.prediction_details?.model_used || data.model_version || 'random_forest'}`;
 
     renderSummaryCardSymptoms();
 }

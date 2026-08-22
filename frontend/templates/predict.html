@@ -260,36 +260,36 @@
         <h3 class="form-section-title">Predicted Diagnosis &amp; Clinical Report Builder</h3>
       </div>
 
-      <!-- ML Prediction Verdict Panel -->
-      <div class="result-panel mb-2" id="resultsPanel" style="display:block;">
-        <div class="result-header">
+      <!-- ML Prediction Verdict Panel: PREDICTED DIAGNOSIS -->
+      <div class="result-panel mb-3" id="resultsPanel" style="display:block; padding:18px 20px; margin-top:0;">
+        <div class="result-header mb-2">
           <div>
-            <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">
-              ML Verdict
+            <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">
+              <i class="fa-solid fa-square-poll-vertical" style="color:var(--cyan-primary); margin-right:4px;"></i> Predicted Disease
             </div>
             <!-- Standardized ML Output Label: Predicted Diagnosis -->
-            <div class="result-diagnosis" id="diagnosisName" style="color:var(--cyan-primary);">Predicted Diagnosis</div>
+            <div class="result-diagnosis" id="diagnosisName" style="color:var(--cyan-primary); font-size:1.35rem; font-weight:700;">Pending</div>
           </div>
           <div style="text-align:right;">
-            <div class="confidence-value-large" id="confidenceLarge">—</div>
-            <div class="confidence-label-small">Confidence Score</div>
-            <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);margin-top:3px;" id="modelUsedLabel"></div>
+            <div class="confidence-value-large" id="confidenceLarge" style="font-size:1.35rem;">—</div>
+            <div class="confidence-label-small" style="font-size:0.7rem;">Confidence Score</div>
+            <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);margin-top:2px;" id="modelUsedLabel"></div>
           </div>
         </div>
 
-        <div class="confidence-bar mb-3">
+        <div class="confidence-bar mb-2">
           <div class="confidence-fill" id="confidenceBar" style="width:0%;"></div>
         </div>
-        <div id="dataCoverageNotice" class="auth-field-hint mb-3" style="display:none;"></div>
+        <div id="dataCoverageNotice" class="auth-field-hint mb-2" style="display:none;"></div>
 
-        <p class="result-description" id="diagnosisDescription" style="color:var(--text-secondary); margin-bottom:20px; font-size:0.9rem;">
+        <p class="result-description mb-2" id="diagnosisDescription" style="color:var(--text-secondary); font-size:0.85rem;">
           Evaluating biomarker features...
         </p>
 
         <!-- Preview Classifier Models -->
-        <div class="d-flex align-items-center gap-2 mb-3">
-          <label class="auth-label mb-0" style="font-size:0.8rem;">Classifier Model:</label>
-          <select id="previewModelSelect" class="auth-input" style="width:auto; padding:4px 10px; font-size:0.85rem;" onchange="switchClassifierModel(this.value)">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <label class="auth-label mb-0" style="font-size:0.78rem;">Classifier Model:</label>
+          <select id="previewModelSelect" class="auth-input" style="width:auto; padding:3px 8px; font-size:0.8rem;" onchange="switchClassifierModel(this.value)">
             <option value="random_forest" selected>Random Forest (Default)</option>
             <option value="decision_tree">Decision Tree</option>
             <option value="svm">Support Vector Machine (SVM)</option>
@@ -298,71 +298,38 @@
         </div>
 
         <!-- Weighted Probabilities -->
-        <div class="form-section-header" style="margin-top:16px;">
-          <h3 class="form-section-title" style="font-size:0.8rem;">Class Probability Breakdown</h3>
-        </div>
-        <table class="prob-table" id="probTable"></table>
+        <table class="prob-table" id="probTable" style="margin-top:6px;"></table>
       </div>
 
-      <!-- Read-Only Summary Card: Predicted Diagnosis & Patient Symptoms -->
-      <div class="portal-card mb-4" id="predictedDiagnosisSymptomsCard" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:20px; margin-top:16px;">
-        <div class="portal-section-title d-flex justify-content-between align-items-center mb-3">
-          <span style="color:var(--cyan-primary); font-weight:700; text-transform:uppercase; letter-spacing:0.05em; font-size:0.88rem;">
-            <i class="fa-solid fa-notes-medical"></i> Predicted Diagnosis &amp; Patient Symptoms
+      <!-- PATIENT PRESENTING SYMPTOMS CARD -->
+      <div class="portal-card mb-3" id="patientSymptomsCard" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:16px 20px;">
+        <div class="portal-section-title d-flex justify-content-between align-items-center mb-2">
+          <span style="color:var(--cyan-primary); font-weight:700; text-transform:uppercase; letter-spacing:0.05em; font-size:0.85rem;">
+            <i class="fa-solid fa-list-check" style="margin-right:6px;"></i> Patient Presenting Symptoms
           </span>
-          <span class="badge" style="background:rgba(197,231,16,0.1); color:var(--cyan-primary); border:1px solid rgba(197,231,16,0.2); font-size:0.75rem; padding:4px 10px; border-radius:20px;">
-            Read-Only Summary
+          <span class="badge" style="background:rgba(197,231,16,0.1); color:var(--cyan-primary); border:1px solid rgba(197,231,16,0.2); font-size:0.72rem; padding:3px 8px; border-radius:20px;">
+            Clinical Case Context
           </span>
         </div>
 
-        <div class="row g-3 mb-3">
-          <div class="col-md-6">
-            <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(197,231,16,0.2); border-radius:8px; padding:14px;">
-              <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">
-                Predicted Disease
-              </div>
-              <div id="summaryCardDiagnosis" style="font-size:1.25rem; font-weight:700; color:var(--cyan-primary);">
-                Pending
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:14px;">
-              <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">
-                Confidence Score
-              </div>
-              <div id="summaryCardConfidence" style="font-size:1.25rem; font-weight:700; color:var(--text-primary);">
-                —
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Patient Presenting Symptoms List -->
-        <div style="background:rgba(0,0,0,0.15); border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:14px;">
-          <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">
-            <i class="fa-solid fa-list-check" style="margin-right:6px; color:var(--cyan-primary);"></i> Patient Presenting Symptoms
-          </div>
-          <div id="summaryCardSymptomsList" style="color:var(--text-secondary); font-size:0.88rem;">
-            <span style="color:var(--text-muted); font-style:italic;">Loading patient symptoms...</span>
-          </div>
+        <div id="summaryCardSymptomsList" style="color:var(--text-secondary); font-size:0.88rem;">
+          <span style="color:var(--text-muted); font-style:italic;">Loading patient symptoms...</span>
         </div>
       </div>
 
-      <!-- Expanded AI Clinical Summary Card -->
-      <div class="portal-card mb-4" style="background:rgba(197, 231, 16, 0.02); border:1px solid rgba(197, 231, 16, 0.2); margin-top:12px;">
-        <div class="portal-section-title d-flex justify-content-between align-items-center">
+      <!-- WHOLE-CASE AI CLINICAL SUMMARY CARD -->
+      <div class="portal-card mb-3" style="background:rgba(197, 231, 16, 0.02); border:1px solid rgba(197, 231, 16, 0.2); padding:16px 20px;">
+        <div class="portal-section-title d-flex justify-content-between align-items-center mb-1">
           <span style="color:var(--cyan-primary);"><i class="fa-solid fa-brain"></i> Whole-Case AI Clinical Summary</span>
           <button id="btnRefreshAISummary" class="btn-outline btn-sm" style="border-color:var(--cyan-primary); color:var(--cyan-primary);" onclick="refreshAISummary()">
             <i class="fa-solid fa-arrows-rotate"></i> Refresh Summary
           </button>
         </div>
-        <p style="color:var(--text-secondary); font-size:0.82rem; margin-bottom:12px;">
+        <p style="color:var(--text-secondary); font-size:0.8rem; margin-bottom:10px;">
           Synthesizes presenting symptoms, pre-assessment findings, ordered investigations, lab results, and ML predicted diagnosis.
         </p>
         <div class="auth-form-group">
-          <textarea id="caseAISummaryText" class="auth-input" rows="6" placeholder="AI clinical summary will generate here..."></textarea>
+          <textarea id="caseAISummaryText" class="auth-input" rows="5" placeholder="AI clinical summary will generate here..."></textarea>
         </div>
       </div>
 
@@ -506,5 +473,5 @@
 {% endblock %}
 
 {% block portal_scripts %}
-<script src="{{ url_for('static', filename='js/predict.js') }}?v=20260822_step6_summary_v9"></script>
+<script src="{{ url_for('static', filename='js/predict.js') }}?v=20260822_step6_spacing_v10"></script>
 {% endblock %}
