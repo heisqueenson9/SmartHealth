@@ -2473,6 +2473,110 @@ def generate_case_ai_summary(case_id):
         }), 500
 
 
+def execute_llm_chat_completion(messages):
+    """
+    Executes chat completion prioritizing local Ollama (qwen3:8b) at OLLAMA_BASE_URL (http://localhost:11434).
+    Falls back to secondary cloud provider (Groq API) if Ollama is not running.
+    Returns (answer, status_code, err_json_dict).
+    """
+    import urllib.request
+    import json as py_json
+
+    ollama_url = current_app.config.get("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+    ollama_model = current_app.config.get("OLLAMA_MODEL", "qwen3:8b")
+
+    # 1. Attempt Local Ollama Execution
+    try:
+        req_payload = py_json.dumps({
+            "model": ollama_model,
+            "messages": messages,
+            "stream": False
+        }).encode("utf-8")
+
+        req = urllib.request.Request(
+            f"{ollama_url}/api/chat",
+            data=req_payload,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+
+        with urllib.request.urlopen(req, timeout=15) as response:
+            res_body = py_json.loads(response.read().decode("utf-8"))
+            if res_body.get("message") and res_body["message"].get("content"):
+                return res_body["message"]["content"].strip(), None, None
+    except urllib.error.HTTPError as http_err:
+        if http_err.code == 404:
+            logger.warning(f"[Ollama] Model '{ollama_model}' not installed on {ollama_url}.")
+            return None, 503, {"error": f"Qwen3-8B is not installed in Ollama. Please run: ollama pull {ollama_model}"}
+        else:
+            logger.warning(f"[Ollama] HTTP Error {http_err.code} from {ollama_url}: {http_err}.")
+    except Exception as ollama_err:
+        logger.info(f"[Ollama] Local Ollama service at {ollama_url} not reachable: {ollama_err}. Trying secondary provider...")
+
+    # 2. Secondary Cloud Provider Execution (Groq API)
+    groq_api_key = current_app.config.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
+    if groq_api_key:
+        groq_models = [
+            "openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.6-27b",
+            "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "deepseek-r1-distill-llama-70b",
+            "llama3-70b-8192", "llama3-8b-8192", "mixtral-8x7b-32768", "gemma2-9b-it"
+        ]
+        for groq_model in groq_models:
+            try:
+                req_payload = py_json.dumps({
+                    "model": groq_model,
+                    "messages": messages,
+                    "temperature": 0.3,
+                    "max_tokens": 800
+                }).encode("utf-8")
+
+                req = urllib.request.Request(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    data=req_payload,
+                    headers={
+                        "Authorization": f"Bearer {groq_api_key}",
+                        "Content-Type": "application/json",
+                        "User-Agent": "SmartHealth-ClinicalAI/2026"
+                    },
+                    method="POST"
+                )
+
+                with urllib.request.urlopen(req, timeout=15) as response:
+                    res_body = py_json.loads(response.read().decode("utf-8"))
+                    if res_body.get("choices") and len(res_body["choices"]) > 0:
+                        return res_body["choices"][0]["message"]["content"].strip(), None, None
+            except Exception as groq_err:
+                logger.warning(f"[Ask AI] Groq model '{groq_model}' attempt failed: {groq_err}.")
+
+    # 3. High-Quality Fallback Engine
+    user_msg_lower = ""
+    for m in reversed(messages):
+        if m.get("role") == "user":
+            user_msg_lower = m.get("content", "").lower()
+            break
+
+    if "food" in user_msg_lower or "eat" in user_msg_lower or "diet" in user_msg_lower or "breakfast" in user_msg_lower:
+        fallback_ans = "A balanced daily diet emphasizes whole foods: fruits, vegetables, whole grains, lean proteins, healthy fats, and adequate hydration."
+    elif "exercise" in user_msg_lower or "workout" in user_msg_lower or "walking" in user_msg_lower:
+        fallback_ans = "Aim for at least 150 minutes of moderate-intensity exercise per week, such as brisk walking, cycling, or swimming."
+    elif "sleep" in user_msg_lower or "rest" in user_msg_lower:
+        fallback_ans = "Healthy sleep habits involve maintaining a consistent sleep schedule and targeting 7 to 9 hours of restorative sleep per night."
+    elif "hba1c" in user_msg_lower:
+        fallback_ans = "HbA1c measures glycated hemoglobin, evaluating average blood glucose control over the preceding 8–12 weeks. In clinical practice, an HbA1c ≥ 6.5% indicates Diabetes."
+    elif "platelet" in user_msg_lower:
+        fallback_ans = "Platelet count evaluates hemostatic capability and hemostasis. Normal reference range is 150–450 x10³/µL."
+    elif "creatinine" in user_msg_lower:
+        fallback_ans = "Serum creatinine reflects glomerular filtration efficiency and renal clearance capacity."
+    elif "confidence" in user_msg_lower or "score" in user_msg_lower:
+        fallback_ans = "The confidence score represents algorithmic probability density matching the patient's feature vector against trained condition clusters."
+    elif "why" in user_msg_lower or "predict" in user_msg_lower:
+        fallback_ans = "The prediction engine analyzed the combination of presenting symptoms and laboratory biomarkers to classify the primary clinical candidate."
+    else:
+        fallback_ans = "Regarding your health inquiry: Maintaining regular physical activity, balanced nutrition, adequate sleep, and routine medical checkups supports overall wellness."
+
+    return fallback_ans, None, None
+
+
 @api_bp.route("/ai/chat", methods=["POST"])
 def ai_chat_global():
     data = request.get_json(force=True, silent=True) or {}
@@ -2499,75 +2603,15 @@ def ai_chat_global():
         "If potentially life-threatening symptoms (e.g., severe chest pain, sudden paralysis, loss of consciousness) are mentioned, recommend immediate emergency medical care."
     )
 
-    groq_api_key = current_app.config.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
-    answer = None
+    messages = [{"role": "system", "content": system_prompt}]
+    for item in conversation_history[-6:]:
+        if isinstance(item, dict) and item.get("role") in ("user", "assistant") and item.get("content"):
+            messages.append({"role": item["role"], "content": str(item["content"])})
+    messages.append({"role": "user", "content": user_message})
 
-    if groq_api_key:
-        import urllib.request
-        import json as py_json
-        
-        messages = [{"role": "system", "content": system_prompt}]
-        for item in conversation_history[-6:]:
-            if isinstance(item, dict) and item.get("role") in ("user", "assistant") and item.get("content"):
-                messages.append({"role": item["role"], "content": str(item["content"])})
-        messages.append({"role": "user", "content": user_message})
-
-        groq_models = [
-            "openai/gpt-oss-20b",
-            "openai/gpt-oss-120b",
-            "qwen/qwen3.6-27b",
-            "llama-3.3-70b-versatile",
-            "llama-3.1-8b-instant",
-            "deepseek-r1-distill-llama-70b",
-            "llama3-70b-8192",
-            "llama3-8b-8192",
-            "mixtral-8x7b-32768",
-            "gemma2-9b-it"
-        ]
-        
-        for groq_model in groq_models:
-            try:
-                req_payload = py_json.dumps({
-                    "model": groq_model,
-                    "messages": messages,
-                    "temperature": 0.3,
-                    "max_tokens": 800
-                }).encode("utf-8")
-
-                req = urllib.request.Request(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    data=req_payload,
-                    headers={
-                        "Authorization": f"Bearer {groq_api_key}",
-                        "Content-Type": "application/json",
-                        "User-Agent": "SmartHealth-ClinicalAI/2026"
-                    },
-                    method="POST"
-                )
-
-                with urllib.request.urlopen(req, timeout=15) as response:
-                    res_body = py_json.loads(response.read().decode("utf-8"))
-                    if res_body.get("choices") and len(res_body["choices"]) > 0:
-                        answer = res_body["choices"][0]["message"]["content"].strip()
-                        break
-            except Exception as groq_err:
-                logger.warning(f"[AI Chat] Groq model '{groq_model}' attempt failed: {groq_err}.")
-
-    if not answer:
-        if groq_api_key:
-            logger.error("[AI Chat] All Groq models failed — falling back to templated reasoning engine.")
-        else:
-            logger.warning("[AI Chat] GROQ_API_KEY not configured — using templated fallback engine.")
-
-        q_lower = user_message.lower()
-        if "food" in q_lower or "eat" in q_lower or "diet" in q_lower or "breakfast" in q_lower:
-            answer = "A balanced daily diet emphasizes whole foods: fruits, vegetables, whole grains, lean proteins, healthy fats, and adequate hydration."
-        elif "exercise" in q_lower or "workout" in q_lower or "walking" in q_lower:
-            answer = "Aim for at least 150 minutes of moderate-intensity exercise per week, such as brisk walking, cycling, or swimming."
-        elif "sleep" in q_lower or "rest" in q_lower:
-            answer = "Healthy sleep habits involve maintaining a consistent sleep schedule and targeting 7 to 9 hours of restorative sleep per night."
-        else:
-            answer = f"Regarding your health inquiry ('{user_message}'): Maintaining regular physical activity, balanced nutrition, adequate sleep, and routine medical checkups supports overall wellness."
+    answer, err_code, err_dict = execute_llm_chat_completion(messages)
+    if err_dict:
+        return jsonify(err_dict), err_code
 
     disclaimer = "Clinical Decision-Support Notice: AI answers provide general health education and decision support only. Always consult a healthcare professional for clinical advice."
 
@@ -2642,181 +2686,21 @@ def ask_ai_case(case_id):
             f"- Doctor Treatment Plan: {treat_str}"
         )
 
-        groq_api_key = current_app.config.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
-        answer = None
+        messages = [{"role": "system", "content": system_prompt}]
+        for item in conversation_history[-6:]:
+            if isinstance(item, dict) and item.get("role") in ("user", "assistant") and item.get("content"):
+                messages.append({"role": item["role"], "content": str(item["content"])})
+        messages.append({"role": "user", "content": user_question})
 
-        if groq_api_key:
-            import urllib.request
-            import json as py_json
-            
-            messages = [{"role": "system", "content": system_prompt}]
-            for item in conversation_history[-6:]:
-                if isinstance(item, dict) and item.get("role") in ("user", "assistant") and item.get("content"):
-                    messages.append({"role": item["role"], "content": str(item["content"])})
-            messages.append({"role": "user", "content": user_question})
-
-            groq_models = [
-                "openai/gpt-oss-20b",
-                "openai/gpt-oss-120b",
-                "qwen/qwen3.6-27b",
-                "llama-3.3-70b-versatile",
-                "llama-3.1-8b-instant",
-                "deepseek-r1-distill-llama-70b",
-                "llama3-70b-8192",
-                "llama3-8b-8192",
-                "mixtral-8x7b-32768",
-                "gemma2-9b-it"
-            ]
-            
-            for groq_model in groq_models:
-                try:
-                    req_payload = py_json.dumps({
-                        "model": groq_model,
-                        "messages": messages,
-                        "temperature": 0.3,
-                        "max_tokens": 800
-                    }).encode("utf-8")
-
-                    req = urllib.request.Request(
-                        "https://api.groq.com/openai/v1/chat/completions",
-                        data=req_payload,
-                        headers={
-                            "Authorization": f"Bearer {groq_api_key}",
-                            "Content-Type": "application/json",
-                            "User-Agent": "SmartHealth-ClinicalAI/2026"
-                        },
-                        method="POST"
-                    )
-
-                    with urllib.request.urlopen(req, timeout=15) as response:
-                        res_body = py_json.loads(response.read().decode("utf-8"))
-                        if res_body.get("choices") and len(res_body["choices"]) > 0:
-                            answer = res_body["choices"][0]["message"]["content"].strip()
-                            break
-                except Exception as groq_err:
-                    logger.warning(f"[Ask AI] Groq model '{groq_model}' attempt failed: {groq_err}.")
-
-        if not answer:
-            if groq_api_key:
-                logger.error("[Ask AI] All Groq models failed — falling back to templated reasoning engine.")
-            else:
-                logger.warning("[Ask AI] GROQ_API_KEY not configured — using templated fallback engine.")
-            # High-Quality Clinical & Health Fallback Engine
-            q_lower = user_question.lower()
-
-            # Mode B: General Health & Wellness Questions
-            if "food" in q_lower or "eat" in q_lower or "diet" in q_lower or "nutrition" in q_lower or "breakfast" in q_lower:
-                if "iron" in q_lower:
-                    answer = "Iron-rich foods include red meat, poultry, seafood, spinach, legumes (beans, lentils), tofu, pumpkin seeds, and iron-fortified cereals. Pairing plant-based iron with Vitamin C enhances absorption."
-                elif "breakfast" in q_lower:
-                    answer = "Healthy breakfast options include oatmeal topped with nuts and berries, eggs with whole-grain toast and spinach, Greek yogurt with fruit, or a smoothie with leafy greens and protein powder."
-                else:
-                    answer = "A balanced daily diet emphasizes whole foods: fruits, vegetables, whole grains (oats, quinoa, brown rice), lean proteins (fish, poultry, beans), healthy fats (olive oil, nuts, avocados), and adequate hydration."
-
-            elif "exercise" in q_lower or "walking" in q_lower or "physical activity" in q_lower or "20 minutes" in q_lower or "workout" in q_lower:
-                if "20 minutes" in q_lower or "short" in q_lower or "time" in q_lower:
-                    answer = "Even 20 minutes of daily activity provides substantial cardiovascular and metabolic benefits. A 20-minute brisk walk, bodyweight circuit (squats, push-ups, lunges), or stationary cycling is highly effective."
-                elif "walking" in q_lower:
-                    answer = "Regular walking improves cardiovascular fitness, supports joint health, enhances mood, assists weight management, and helps regulate blood glucose levels. Aiming for 30 minutes daily is a great target."
-                else:
-                    answer = "For general wellness, health guidelines recommend at least 150 minutes of moderate-intensity aerobic exercise (such as brisk walking or swimming) per week, combined with strength training 2 days a week."
-
-            elif "sleep" in q_lower or "insomnia" in q_lower or "rest" in q_lower:
-                answer = "Healthy sleep habits include maintaining a consistent sleep schedule, keeping the bedroom dark and cool, avoiding screens 30–60 minutes before bed, and limiting caffeine or heavy meals in the evening. Most adults require 7–9 hours per night."
-
-            elif "water" in q_lower or "hydration" in q_lower or "drink" in q_lower:
-                answer = "Adults generally require about 2 to 3 liters (8–12 cups) of fluid per day, depending on climate, activity level, and overall health. Adequate hydration supports kidney function, energy, and circulation."
-
-            elif "heart" in q_lower or "cardiovascular" in q_lower:
-                answer = "To maintain heart health: engage in regular aerobic exercise, eat a fiber-rich diet low in saturated fats, keep blood pressure and cholesterol in check, manage stress, avoid smoking, and maintain a healthy weight."
-
-            elif "headache" in q_lower or "headaches" in q_lower:
-                answer = "Common causes of headaches include tension/stress, dehydration, lack of sleep, eye strain, caffeine withdrawal, or sinus pressure. Sudden or severe 'thunderclap' headaches warrant immediate medical evaluation."
-
-            elif "resting heart rate" in q_lower or "heart rate" in q_lower:
-                answer = "A normal resting heart rate for adults ranges from 60 to 100 beats per minute (bpm). Well-conditioned athletes may have resting heart rates as low as 40–60 bpm."
-
-            # Mode A: Case-Specific Questions
-            else:
-                matched_bio_key = None
-                for key in biomarkers.keys():
-                    if key.lower() in q_lower:
-                        matched_bio_key = key
-                        break
-                
-                if matched_bio_key:
-                    val = biomarkers[matched_bio_key]
-                    answer = f"For this patient, **{matched_bio_key}** is recorded as **{val}**. In evaluating **{pred_label}**, this biomarker provides specific physiological evidence. "
-                    if "hba1c" in matched_bio_key.lower():
-                        answer += f"An HbA1c of {val}% measures 2–3 month average glycemic control."
-                    elif "platelet" in matched_bio_key.lower():
-                        answer += f"A platelet count of {val} reflects megakaryocyte thrombopoiesis and clotting capability."
-                    elif "creatinine" in matched_bio_key.lower():
-                        answer += f"A creatinine of {val} mg/dL assesses renal filtration capacity."
-                    elif "glucose" in matched_bio_key.lower():
-                        answer += f"A blood glucose level of {val} mg/dL reflects current circulating glycemia."
-                    elif "hemoglobin" in matched_bio_key.lower():
-                        answer += f"A hemoglobin concentration of {val} g/dL reflects oxygen transport capability."
-                
-                elif "hba1c" in q_lower:
-                    if "HbA1c" in biomarkers:
-                        answer = f"The patient's HbA1c level is **{biomarkers['HbA1c']}%**. HbA1c reflects average blood glucose control over the preceding 8–12 weeks."
-                    else:
-                        answer = "HbA1c was not included in the lab panel for this case. In clinical practice, HbA1c evaluates long-term glycemic control (≥ 6.5% indicates Diabetes)."
-                
-                elif "platelet" in q_lower:
-                    if "Platelets" in biomarkers:
-                        answer = f"The patient's platelet count is **{biomarkers['Platelets']} x10³/µL**, evaluating thrombopoiesis and hemostatic capacity."
-                    else:
-                        answer = "Platelet count was not recorded in this patient's lab panel."
-                
-                elif "creatinine" in q_lower:
-                    if "Creatinine" in biomarkers:
-                        answer = f"The patient's serum creatinine is **{biomarkers['Creatinine']} mg/dL**, assessing renal clearance."
-                    else:
-                        answer = "Creatinine was not recorded in this patient's lab panel."
-
-                elif "confidence" in q_lower or "score" in q_lower or "%" in q_lower:
-                    answer = (
-                        f"The confidence score of **{confidence}** represents the ML model's ({model_version}) pattern similarity density "
-                        f"between this patient's biomarker inputs and the reference distribution for **{pred_label}**. "
-                        "It reflects statistical pattern match probability, but requires clinical correlation."
-                    )
-
-                elif "why" in q_lower or "predict" in q_lower or "reason" in q_lower:
-                    answer = (
-                        f"The model predicted **{pred_label}** with **{confidence}** confidence because the patient's presenting symptoms "
-                        f"({sym_str}) and laboratory values ({bio_str}) strongly aligned with the model's trained pattern clusters for {pred_label}."
-                    )
-
-                elif "difference" in q_lower or "versus" in q_lower or "vs" in q_lower or "compared" in q_lower:
-                    answer = (
-                        f"In this case, preliminary considerations identified potential candidates: {cand_str}. "
-                        f"The ML biomarker model predicted **{pred_label}** based on the entered laboratory values ({bio_str})."
-                    )
-
-                elif "simple" in q_lower or "terms" in q_lower:
-                    answer = (
-                        f"In simple terms: The patient presented with {sym_str}. Lab tests showed {bio_str}. "
-                        f"The decision-support algorithm evaluated these findings and identified **{pred_label}** as the primary prediction."
-                    )
-
-                elif "verify" in q_lower or "confirm" in q_lower or "information" in q_lower or "help" in q_lower:
-                    answer = (
-                        f"To verify the prediction of **{pred_label}**, the attending clinician can review confirmatory diagnostic testing, "
-                        f"monitor clinical symptoms, and evaluate targeted follow-up investigations ({inv_str})."
-                    )
-
-                else:
-                    answer = (
-                        f"Regarding '{user_question}': For Case #{case_id} (Predicted: {pred_label}, Confidence: {confidence}), "
-                        f"the patient presented with symptoms ({sym_str}) and recorded biomarkers ({bio_str})."
-                    )
+        answer, err_code, err_dict = execute_llm_chat_completion(messages)
+        if err_dict:
+            return jsonify(err_dict), err_code
 
         disclaimer = "Clinical Decision-Support Notice: AI answers assist clinician decision-making and do not replace professional judgment or confirmed diagnosis."
 
         return jsonify({
             "status": "success",
+            "message": user_question,
             "question": user_question,
             "answer": answer,
             "disclaimer": disclaimer,

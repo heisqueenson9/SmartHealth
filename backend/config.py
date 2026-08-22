@@ -77,6 +77,10 @@ class Config:
     # Groq API
     GROQ_API_KEY     = os.environ.get("GROQ_API_KEY", "")
 
+    # Ollama Local LLM Configuration
+    OLLAMA_BASE_URL  = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+    OLLAMA_MODEL     = os.environ.get("OLLAMA_MODEL", "qwen3:8b")
+
     # Admin seed credentials
     ADMIN_EMAIL      = os.environ.get("ADMIN_EMAIL", "admin@smarthealth.com")
     ADMIN_USERNAME   = os.environ.get("ADMIN_USERNAME", "admin@smarthealth.com")
