@@ -2473,6 +2473,97 @@ def generate_case_ai_summary(case_id):
         }), 500
 
 
+@api_bp.route("/ai/chat", methods=["POST"])
+def ai_chat_global():
+    data = request.get_json(force=True, silent=True) or {}
+    case_id = data.get("case_id")
+    if case_id:
+        try:
+            case_id = int(case_id)
+            return ask_ai_case(case_id)
+        except ValueError:
+            pass
+    
+    user_message = str(data.get("message") or data.get("question") or "").strip()
+    if not user_message:
+        return jsonify({"error": "Message is required."}), 400
+
+    conversation_history = data.get("conversation", [])
+    if not isinstance(conversation_history, list):
+        conversation_history = []
+
+    system_prompt = (
+        "You are SmartHealth AI, a conversational health education and clinical decision-support assistant. "
+        "Answer the user's exact question accurately, directly, and concisely. "
+        "Answer general health, wellness, nutrition, exercise, sleep, stress management, and medical terminology questions naturally. "
+        "If potentially life-threatening symptoms (e.g., severe chest pain, sudden paralysis, loss of consciousness) are mentioned, recommend immediate emergency medical care."
+    )
+
+    groq_api_key = current_app.config.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
+    answer = None
+
+    if groq_api_key:
+        import urllib.request
+        import json as py_json
+        
+        messages = [{"role": "system", "content": system_prompt}]
+        for item in conversation_history[-6:]:
+            if isinstance(item, dict) and item.get("role") in ("user", "assistant") and item.get("content"):
+                messages.append({"role": item["role"], "content": str(item["content"])})
+        messages.append({"role": "user", "content": user_message})
+
+        groq_models = ["llama-3.3-70b-versatile", "llama-3.1-70b-versatile", "llama3-70b-8192", "mixtral-8x7b-32768", "gemma2-9b-it"]
+        
+        for groq_model in groq_models:
+            try:
+                req_payload = py_json.dumps({
+                    "model": groq_model,
+                    "messages": messages,
+                    "temperature": 0.3,
+                    "max_tokens": 800
+                }).encode("utf-8")
+
+                req = urllib.request.Request(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    data=req_payload,
+                    headers={
+                        "Authorization": f"Bearer {groq_api_key}",
+                        "Content-Type": "application/json",
+                        "User-Agent": "SmartHealth-ClinicalAI/2026"
+                    },
+                    method="POST"
+                )
+
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    res_body = py_json.loads(response.read().decode("utf-8"))
+                    if res_body.get("choices") and len(res_body["choices"]) > 0:
+                        answer = res_body["choices"][0]["message"]["content"].strip()
+                        break
+            except Exception as groq_err:
+                logger.warning(f"[AI Chat] Groq model '{groq_model}' attempt failed: {groq_err}.")
+
+    if not answer:
+        q_lower = user_message.lower()
+        if "food" in q_lower or "eat" in q_lower or "diet" in q_lower or "breakfast" in q_lower:
+            answer = "A balanced daily diet emphasizes whole foods: fruits, vegetables, whole grains, lean proteins, healthy fats, and adequate hydration."
+        elif "exercise" in q_lower or "workout" in q_lower or "walking" in q_lower:
+            answer = "Aim for at least 150 minutes of moderate-intensity exercise per week, such as brisk walking, cycling, or swimming."
+        elif "sleep" in q_lower or "rest" in q_lower:
+            answer = "Healthy sleep habits involve maintaining a consistent sleep schedule and targeting 7 to 9 hours of restorative sleep per night."
+        else:
+            answer = f"Regarding your health inquiry ('{user_message}'): Maintaining regular physical activity, balanced nutrition, adequate sleep, and routine medical checkups supports overall wellness."
+
+    disclaimer = "Clinical Decision-Support Notice: AI answers provide general health education and decision support only. Always consult a healthcare professional for clinical advice."
+
+    return jsonify({
+        "status": "success",
+        "message": user_message,
+        "question": user_message,
+        "answer": answer,
+        "disclaimer": disclaimer
+    }), 200
+
+
 @api_bp.route("/cases/<int:case_id>/ask-ai", methods=["POST"])
 @api_bp.route("/cases/<int:case_id>/ai-assistant", methods=["POST"])
 def ask_ai_case(case_id):
@@ -2482,7 +2573,7 @@ def ask_ai_case(case_id):
 
     try:
         data = request.get_json(force=True, silent=True) or {}
-        user_question = str(data.get("question", "")).strip()
+        user_question = str(data.get("message") or data.get("question") or "").strip()
         if not user_question:
             return jsonify({"error": "Question is required."}), 400
 

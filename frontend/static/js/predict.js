@@ -966,11 +966,13 @@ function submitAskAiQuestion(explicitQuestion) {
     
     const payloadConversation = askAiConversationHistory.slice(-6);
     
-    fetch(`/api/cases/${currentCaseId}/ask-ai`, {
+    fetch(`/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+            message: question,
             question: question,
+            case_id: currentCaseId,
             conversation: payloadConversation
         })
     })

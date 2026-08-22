@@ -403,3 +403,14 @@ class TestStateRestoration:
         assert d3["status"] == "success"
         assert "answer" in d3
 
+        # Question 4: Dedicated /api/ai/chat endpoint with message and case_id
+        res_q4 = authenticated_doctor_client.post("/api/ai/chat", json={
+            "message": "How can I keep my heart healthy?",
+            "case_id": case_id,
+            "conversation": []
+        })
+        assert res_q4.status_code == 200
+        d4 = json.loads(res_q4.data)
+        assert d4["status"] == "success"
+        assert "answer" in d4
+
