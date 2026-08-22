@@ -2512,7 +2512,15 @@ def ai_chat_global():
                 messages.append({"role": item["role"], "content": str(item["content"])})
         messages.append({"role": "user", "content": user_message})
 
-        groq_models = ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.6-27b", "llama-3.3-70b-versatile", "llama3-8b-8192"]
+        groq_models = [
+            "llama-3.3-70b-versatile",
+            "llama-3.1-8b-instant",
+            "deepseek-r1-distill-llama-70b",
+            "llama3-70b-8192",
+            "llama3-8b-8192",
+            "mixtral-8x7b-32768",
+            "gemma2-9b-it"
+        ]
         
         for groq_model in groq_models:
             try:
@@ -2644,7 +2652,15 @@ def ask_ai_case(case_id):
                     messages.append({"role": item["role"], "content": str(item["content"])})
             messages.append({"role": "user", "content": user_question})
 
-            groq_models = ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.6-27b", "llama-3.3-70b-versatile", "llama3-8b-8192"]
+            groq_models = [
+                "llama-3.3-70b-versatile",
+                "llama-3.1-8b-instant",
+                "deepseek-r1-distill-llama-70b",
+                "llama3-70b-8192",
+                "llama3-8b-8192",
+                "mixtral-8x7b-32768",
+                "gemma2-9b-it"
+            ]
             
             for groq_model in groq_models:
                 try:
