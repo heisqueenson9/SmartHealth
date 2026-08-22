@@ -847,6 +847,13 @@ function renderPredictionResults(data) {
         }
     }
 
+    // Populate Summary Card Disease & Confidence Score
+    const sumDiag = document.getElementById("summaryCardDiagnosis");
+    const sumConf = document.getElementById("summaryCardConfidence");
+
+    if (sumDiag) sumDiag.textContent = data.predicted_diagnosis || "Healthy";
+    if (sumConf) sumConf.textContent = `${data.confidence || 0}%`;
+
     renderSummaryCardSymptoms();
 }
 
