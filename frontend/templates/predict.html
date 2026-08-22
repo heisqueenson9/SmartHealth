@@ -339,10 +339,10 @@
         <div id="aiAssistantAnswerBox" style="display:none; background:rgba(197, 231, 16, 0.04); border:1px solid rgba(197, 231, 16, 0.2); padding:12px; border-radius:8px; font-size:0.88rem; color:var(--text-primary);"></div>
       </div>
 
-      <!-- Doctor Notes & Signature -->
+      <!-- Doctor Notes & Recommendations -->
       <div class="portal-card mb-4" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.05);">
         <div class="portal-section-title d-flex justify-content-between align-items-center">
-          <span><i class="fa-solid fa-signature"></i> Doctor Clinical Remarks &amp; Signature</span>
+          <span><i class="fa-solid fa-notes-medical"></i> Doctor Notes &amp; Recommendations</span>
           {% if session.get('role') == 'admin' %}
           <a href="/portal?section=dashboard" class="btn-outline btn-sm" style="border-color:var(--cyan-primary); color:var(--cyan-primary); text-decoration:none;">
             <i class="fa-solid fa-user-shield"></i> Admin Portal
@@ -352,14 +352,14 @@
         <div class="row g-3 mt-1">
           <div class="col-12 col-md-6">
             <div class="auth-form-group">
-              <label class="auth-label">Clinical Observations</label>
-              <textarea id="doctorClinicalNotes" class="auth-input" rows="3" placeholder="Enter clinical observations, physical findings, or patient history notes..."></textarea>
+              <label class="auth-label">Observations (Optional)</label>
+              <textarea id="doctorClinicalNotes" class="auth-input" rows="3" placeholder="Enter clinical observations or additional notes..."></textarea>
             </div>
           </div>
           <div class="col-12 col-md-6">
             <div class="auth-form-group">
-              <label class="auth-label">Treatment Plan &amp; Guidelines</label>
-              <textarea id="doctorTreatmentPlanInput" class="auth-input" rows="3" placeholder="Enter treatment plan, prescribed medications, or follow-up monitoring..."></textarea>
+              <label class="auth-label">Treatment Plan (Optional)</label>
+              <textarea id="doctorTreatmentPlanInput" class="auth-input" rows="3" placeholder="Enter treatment plan or clinical recommendations..."></textarea>
             </div>
           </div>
           <div class="col-12">

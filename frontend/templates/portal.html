@@ -114,14 +114,14 @@
   <div class="row g-3 mt-2">
     <div class="col-12 col-md-6">
       <div class="auth-form-group">
-        <label class="auth-label">Clinical Observations</label>
-        <textarea id="modalObservations" class="auth-input" rows="3" placeholder="Symptoms, lab presentation notes..."></textarea>
+        <label class="auth-label">Observations (Optional)</label>
+        <textarea id="modalObservations" class="auth-input" rows="3" placeholder="Enter clinical observations or additional notes...">{{ record.observations or record.doctor_remarks or '' }}</textarea>
       </div>
     </div>
     <div class="col-12 col-md-6">
       <div class="auth-form-group">
-        <label class="auth-label">Treatment & Prescription Notes</label>
-        <textarea id="modalTreatmentNotes" class="auth-input" rows="3" placeholder="Medication plans, clinical diet, exercise advice..."></textarea>
+        <label class="auth-label">Treatment Plan (Optional)</label>
+        <textarea id="modalTreatmentNotes" class="auth-input" rows="3" placeholder="Enter treatment plan or clinical recommendations...">{{ record.treatment_notes or '' }}</textarea>
       </div>
     </div>
   </div>

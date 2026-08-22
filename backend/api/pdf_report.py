@@ -180,21 +180,21 @@ def generate_case_report_pdf(record, sections, signature, output_path):
             story.append(Paragraph("No AI summary generated for this case.", BODY_STYLE))
 
     if "Doctor Notes" in sections:
-        obs = record.observations or record.doctor_remarks
-        treat = record.treatment_notes
-        if obs:
-            story.append(Paragraph("Observations", SECTION_STYLE))
-            story.append(Paragraph(obs, BODY_STYLE))
-        else:
-            story.append(Paragraph("Observations", SECTION_STYLE))
-            story.append(Paragraph("No clinical observations recorded.", BODY_STYLE))
-
-        if treat:
-            story.append(Paragraph("Treatment Plan", SECTION_STYLE))
-            story.append(Paragraph(treat, BODY_STYLE))
-        else:
-            story.append(Paragraph("Treatment Plan", SECTION_STYLE))
-            story.append(Paragraph("No treatment guidelines recorded.", BODY_STYLE))
+        obs = (record.observations or record.doctor_remarks or "").strip()
+        treat = (record.treatment_notes or "").strip()
+        if obs or treat:
+            story.append(Paragraph("Doctor Notes & Recommendations", SECTION_STYLE))
+            if obs:
+                story.append(Paragraph("<b>Observations</b>", BODY_STYLE))
+                for line in obs.split("\n"):
+                    if line.strip():
+                        story.append(Paragraph(line, BODY_STYLE))
+                story.append(Spacer(1, 4))
+            if treat:
+                story.append(Paragraph("<b>Treatment Plan</b>", BODY_STYLE))
+                for line in treat.split("\n"):
+                    if line.strip():
+                        story.append(Paragraph(line, BODY_STYLE))
 
     if "Doctor Identity/Signature" in sections:
         story.append(Spacer(1, 20))
