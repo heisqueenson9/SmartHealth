@@ -394,3 +394,12 @@ class TestStateRestoration:
         assert d2["status"] == "success"
         assert "HbA1c" in d2["answer"] or "hba1c" in d2["answer"].lower()
 
+        # Question 3: Mode B - General Health Question
+        res_q3 = authenticated_doctor_client.post(f"/api/cases/{case_id}/ask-ai", json={
+            "question": "What are some healthy foods to eat for breakfast?"
+        })
+        assert res_q3.status_code == 200
+        d3 = json.loads(res_q3.data)
+        assert d3["status"] == "success"
+        assert "answer" in d3
+
