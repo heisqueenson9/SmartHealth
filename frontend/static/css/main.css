@@ -2401,3 +2401,22 @@ body.no-scroll {
         max-height: 320px;
     }
 }
+
+/* ── Light Theme: Home / About / Results / Login only ─────────── */
+body.light-page {
+  --bg-void:      #f6f8f5;
+  --bg-surface:   #ffffff;
+  --bg-elevated:  #ffffff;
+  --bg-border:    rgba(20, 40, 10, 0.12);
+  --text-primary:   #16210f;
+  --text-secondary: #45543c;
+  --text-muted:     #5c6b53;
+  --cyan-primary: #4c7a17;
+  --cyan-glow:    rgba(76, 122, 23, 0.18);
+  --cyan-dim:     #6b8a4a;
+  --green-ok:     #4c7a17;
+}
+body.light-page .submit-btn,
+body.light-page .auth-btn {
+  color: #0d1608;
+}
