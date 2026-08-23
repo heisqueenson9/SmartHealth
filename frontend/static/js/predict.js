@@ -243,6 +243,43 @@ async function resumeExistingCase() {
     }
 }
 
+let cachedSymptomCatalog = null;
+let isFetchingCatalog = false;
+
+async function ensureSymptomCatalogLoaded() {
+    if (cachedSymptomCatalog) return cachedSymptomCatalog;
+    if (isFetchingCatalog) {
+        while (isFetchingCatalog) {
+            await new Promise(r => setTimeout(r, 20));
+        }
+        return cachedSymptomCatalog || [];
+    }
+
+    isFetchingCatalog = true;
+    try {
+        const res = await fetch("/api/symptoms?query=");
+        const data = await res.json();
+        if (data.symptoms && Array.isArray(data.symptoms)) {
+            cachedSymptomCatalog = data.symptoms.map(sym => {
+                const synonymsStr = Array.isArray(sym.synonyms) ? sym.synonyms.join(' ') : (sym.synonyms_json || '');
+                const searchStr = `${sym.display_name} ${sym.category || ''} ${sym.code || ''} ${synonymsStr}`.toLowerCase();
+                return {
+                    ...sym,
+                    _searchKey: searchStr
+                };
+            });
+        } else {
+            cachedSymptomCatalog = [];
+        }
+    } catch (err) {
+        console.error("Error preloading symptom catalog:", err);
+        cachedSymptomCatalog = [];
+    } finally {
+        isFetchingCatalog = false;
+    }
+    return cachedSymptomCatalog;
+}
+
 // ── 3. Symptom Capture & Searchable Multi-Select ─────────────────────
 function initSymptomSearch() {
     const input = document.getElementById("symptomSearchInput");
@@ -250,49 +287,49 @@ function initSymptomSearch() {
     
     if (!input || !menu) return;
     
-    let debounceTimer;
-    input.addEventListener("input", () => {
-        clearTimeout(debounceTimer);
+    // Preload full catalog once when Step 02 initializes so search is instant
+    ensureSymptomCatalogLoaded();
+
+    input.addEventListener("input", async () => {
         const q = input.value.trim();
         if (q.length < 1) {
             menu.style.display = "none";
             return;
         }
         
-        debounceTimer = setTimeout(() => {
-            fetch(`/api/symptoms?query=${encodeURIComponent(q)}`)
-            .then(res => res.json())
-            .then(data => {
-                menu.innerHTML = "";
-                if (data.symptoms && data.symptoms.length > 0) {
-                    menu.style.display = "block";
-                    data.symptoms.forEach(sym => {
-                        const item = document.createElement("div");
-                        item.className = "dropdown-item p-2";
-                        item.style.cursor = "pointer";
-                        item.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
-                        item.innerHTML = `<strong>${escapeHtml(sym.display_name)}</strong> <span style="font-size:0.75rem; color:var(--text-secondary);">(${escapeHtml(sym.category || 'General')})</span>`;
-                        item.onclick = () => {
-                            const txtInput = document.getElementById("customSymptomText");
-                            if (txtInput) {
-                                txtInput.value = sym.display_name;
-                                txtInput.dataset.catalogId = sym.id;
-                                txtInput.dataset.source = "selected";
-                                txtInput.focus();
-                            }
-                            input.value = "";
-                            menu.style.display = "none";
-                            showToast(`"${sym.display_name}" selected — set severity & duration below, then click Add.`, "info");
-                        };
-                        menu.appendChild(item);
-                    });
-                } else {
-                    menu.style.display = "block";
-                    menu.innerHTML = `<div class="p-2 text-muted" style="font-size:0.85rem;">No catalog match for "${escapeHtml(q)}". <a href="#" onclick="addCustomSymptomFromQuery('${escapeHtml(q)}'); return false;" style="color:var(--cyan-primary);">Add as custom symptom</a></div>`;
-                }
-            })
-            .catch(err => console.error("Error fetching symptoms:", err));
-        }, 250);
+        const catalog = await ensureSymptomCatalogLoaded();
+        const normQ = q.toLowerCase();
+
+        // Instant local filtering (limit to top 50 matches for performance)
+        const matches = catalog.filter(sym => sym._searchKey.includes(normQ)).slice(0, 50);
+
+        menu.innerHTML = "";
+        if (matches.length > 0) {
+            menu.style.display = "block";
+            matches.forEach(sym => {
+                const item = document.createElement("div");
+                item.className = "dropdown-item p-2";
+                item.style.cursor = "pointer";
+                item.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+                item.innerHTML = `<strong>${escapeHtml(sym.display_name)}</strong> <span style="font-size:0.75rem; color:var(--text-secondary);">(${escapeHtml(sym.category || 'General')})</span>`;
+                item.onclick = () => {
+                    const txtInput = document.getElementById("customSymptomText");
+                    if (txtInput) {
+                        txtInput.value = sym.display_name;
+                        txtInput.dataset.catalogId = sym.id;
+                        txtInput.dataset.source = "selected";
+                        txtInput.focus();
+                    }
+                    input.value = "";
+                    menu.style.display = "none";
+                    showToast(`"${sym.display_name}" selected — set severity & duration below, then click Add.`, "info");
+                };
+                menu.appendChild(item);
+            });
+        } else {
+            menu.style.display = "block";
+            menu.innerHTML = `<div class="p-2 text-muted" style="font-size:0.85rem;">No catalog match for "${escapeHtml(q)}". <a href="#" onclick="addCustomSymptomFromQuery('${escapeHtml(q)}'); return false;" style="color:var(--cyan-primary);">Add as custom symptom</a></div>`;
+        }
     });
 
     document.addEventListener("click", (e) => {

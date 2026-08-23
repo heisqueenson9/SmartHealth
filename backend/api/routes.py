@@ -1638,13 +1638,13 @@ def search_symptoms():
     from backend.database.models import SymptomCatalog
     
     if not query_str:
-        symptoms = SymptomCatalog.query.limit(20).all()
+        symptoms = SymptomCatalog.query.order_by(SymptomCatalog.display_name.asc()).all()
     else:
         symptoms = SymptomCatalog.query.filter(
             SymptomCatalog.display_name.ilike(f"%{query_str}%") |
             SymptomCatalog.code.ilike(f"%{query_str}%") |
             SymptomCatalog.synonyms_json.ilike(f"%{query_str}%")
-        ).limit(30).all()
+        ).limit(50).all()
         
     return jsonify({
         "status": "success",
