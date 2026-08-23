@@ -234,12 +234,29 @@ async function resumeExistingCase() {
             "Reported/Archived": 6
         };
 
-        const targetStep = stageMap[data.case.case_status] || 2;
+        const savedStatus = data.case.case_status || "Draft Case";
+        const targetStep = Object.prototype.hasOwnProperty.call(stageMap, savedStatus)
+            ? stageMap[savedStatus]
+            : 1;
+
+        // Restore content for rendered steps
+        renderSymptomChips();
+        if (preliminaryCandidates && preliminaryCandidates.length > 0) {
+            renderPreliminaryCandidates(preliminaryCandidates);
+        }
+        if (selectedInvestigations && selectedInvestigations.length > 0) {
+            renderSelectedInvestigations();
+            buildBiomarkerForm(selectedInvestigations);
+        }
+        if (latestPrediction) {
+            renderPredictionResults(latestPrediction);
+        }
+
         navigateToStep(targetStep);
         showToast(`Resumed case ${data.case.patient_reference || '#' + caseId}.`, "info");
     } catch (err) {
         console.error("[SmartHealth] Failed to resume case:", err);
-        showToast("Could not resume the case. Starting fresh.", "warning");
+        showToast(`Failed to resume case: ${err.message || err}`, "error");
     }
 }
 

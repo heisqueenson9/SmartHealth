@@ -998,6 +998,15 @@ def get_patient_drafts(patient_id):
 
 # ── Patient CRUD Endpoints for Doctors ─────────────────────────
 
+def generate_unique_patient_uuid():
+    import secrets
+    from backend.database.models import Patient
+    while True:
+        candidate = "PAT-" + secrets.token_hex(4).upper()
+        existing = Patient.query.filter_by(patient_uuid=candidate).first()
+        if not existing:
+            return candidate
+
 @api_bp.route("/patients", methods=["POST"])
 def create_patient():
     user_id = session.get("user_id")
@@ -1026,11 +1035,33 @@ def create_patient():
 
     age_val = today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
 
-    patient_uuid = data.get("patient_uuid", "").strip()
-    if not patient_uuid:
-        import random
-        rand_suffix = "".join(random.choices("0123456789ABCDEF", k=6))
-        patient_uuid = f"PAT-{rand_suffix}"
+    # Check for duplicate patient matching doctor, full_name, date_of_birth, and gender
+    existing_patient = Patient.query.filter_by(
+        doctor_id=user_id,
+        full_name=full_name,
+        date_of_birth=date_of_birth,
+        gender=gender
+    ).first()
+
+    if existing_patient:
+        return jsonify({
+            "status": "existing_patient",
+            "message": "A patient with these identifying details already exists.",
+            "patient": {
+                "id": existing_patient.id,
+                "patient_uuid": existing_patient.patient_uuid,
+                "full_name": existing_patient.full_name,
+                "date_of_birth": existing_patient.date_of_birth.strftime('%Y-%m-%d') if existing_patient.date_of_birth else None,
+                "age": existing_patient.age,
+                "gender": existing_patient.gender,
+                "clinical_notes": existing_patient.clinical_notes,
+                "is_archived": existing_patient.is_archived,
+                "created_at": existing_patient.created_at.strftime('%Y-%m-%d %H:%M:%S') if existing_patient.created_at else None
+            }
+        }), 200
+
+    # Generate server-side unique PAT-XXXXXXXX UUID
+    patient_uuid = generate_unique_patient_uuid()
 
     names = full_name.split(None, 1)
     first_name = names[0] if names else "Unknown"

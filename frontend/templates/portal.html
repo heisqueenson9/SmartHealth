@@ -1019,18 +1019,33 @@
             {% endif %}
           </td>
           <td>{{ r.patient_reference or ('SHS-' ~ r.id) }}</td>
-          <td><strong style="color:var(--cyan-primary);">{{ r.prediction_label }}</strong></td>
+          <td>
+            {% set is_pending = r.case_status != 'Reported/Archived' %}
+            {% if is_pending and (r.prediction_label == 'Pending Assessment' or r.prediction_label == 'Pending') %}
+            <span class="status-badge status-pending" style="background:rgba(197,231,16,0.1); color:var(--cyan-primary); border:1px solid rgba(197,231,16,0.2);">Pending Assessment</span>
+            {% else %}
+            <strong style="color:var(--cyan-primary);">{{ r.prediction_label }}</strong>
+            {% endif %}
+          </td>
           <td>{{ '%.1f' | format(r.confidence_score or 0) }}%</td>
           <td>{{ (r.model_version or '—') | replace('_', ' ') | title }}</td>
-          <td><span class="status-badge status-{{ r.status }}">{{ r.status }}</span></td>
           <td>
-            {% if r.status == 'draft' and r.case_status not in ('Reported/Archived',) %}
+            {% set is_pending = r.case_status != 'Reported/Archived' %}
+            {% if is_pending %}
+            <span class="status-badge status-pending" style="background:rgba(255,193,7,0.15); color:#ffc107; border:1px solid rgba(255,193,7,0.3);">{{ r.case_status or 'Pending Assessment' }}</span>
+            {% else %}
+            <span class="status-badge status-{{ r.status }}">{{ r.case_status or r.status }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.case_status != 'Reported/Archived' %}
             <a href="/predict?case_id={{ r.id }}" class="btn-action-verify btn-approve">
-              <i class="fa-solid fa-arrow-right"></i> Continue Case
+              <i class="fa-solid fa-arrow-right"></i> Continue Assessment
             </a>
             {% else %}
-            <a href="/portal?section=view_record&record_id={{ r.id }}" class="btn-action-verify btn-approve"><i
-                class="fa-solid fa-eye"></i> Details</a>
+            <a href="/portal?section=view_record&record_id={{ r.id }}" class="btn-action-verify btn-approve">
+              <i class="fa-solid fa-eye"></i> Details
+            </a>
             {% endif %}
           </td>
         </tr>

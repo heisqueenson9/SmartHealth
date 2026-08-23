@@ -37,23 +37,21 @@ def normalize_input(raw_values: dict) -> dict:
     """
     Min-max normalizes raw clinical values to 0-1 range based on standard clinical ranges.
     Clips values outside the min/max bounds so they don't produce values below 0 or above 1.
-    Any non-biomarker values (like Widal titers) are passed through unchanged.
+    Any non-biomarker values are passed through unchanged.
     """
     normalized = {}
-    for k, v in raw_values.items():
-        if k in CLINICAL_RANGES:
-            try:
-                val = float(v)
-                min_val, max_val = CLINICAL_RANGES[k]
-                if max_val == min_val:
-                    norm_val = 0.0
-                else:
-                    norm_val = (val - min_val) / (max_val - min_val)
-                # Clip to 0-1
-                norm_val = max(0.0, min(1.0, norm_val))
-                normalized[k] = norm_val
-            except (ValueError, TypeError):
-                normalized[k] = v
-        else:
-            normalized[k] = v
+    for key, value in raw_values.items():
+        if key not in CLINICAL_RANGES:
+            normalized[key] = value
+            continue
+        try:
+            val = float(value)
+            min_val, max_val = CLINICAL_RANGES[key]
+            if max_val == min_val:
+                normalized[key] = 0.0
+                continue
+            norm_val = (val - min_val) / (max_val - min_val)
+            normalized[key] = max(0.0, min(1.0, norm_val))
+        except (ValueError, TypeError):
+            raise ValueError(f"Invalid clinical value for {key}: {value}")
     return normalized
