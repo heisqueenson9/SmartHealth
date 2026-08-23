@@ -182,6 +182,16 @@ def fuse_clinical_evidence(
     supporting_biomarkers = []
     conflicting_evidence = []
 
+    sym_strings = [
+        s if isinstance(s, str) else (s.get("display_name") or s.get("name") or "")
+        for s in (symptoms or [])
+        if s
+    ]
+    if sym_strings:
+        supporting_symptoms = sym_strings
+    elif predicted_diagnosis == "Healthy":
+        supporting_symptoms.append("No significant disease-specific symptoms.")
+
     platelets = float(raw_features.get("Platelets", 250.0))
     glucose = float(raw_features.get("Glucose", 90.0))
     hba1c = float(raw_features.get("HbA1c", 5.2))
@@ -192,8 +202,6 @@ def fuse_clinical_evidence(
     if predicted_diagnosis == "Thrombocytopenia":
         if platelets < 150.0:
             supporting_biomarkers.append(f"Platelet count ({platelets:.1f} x10^3/uL) is in thrombocytopenia range (< 150 x10^3/uL).")
-        if stage_a_symptom["Thrombocytopenia"] > 20:
-            supporting_symptoms.append("Hemorrhagic and mucosal bleeding signs recorded.")
 
     elif predicted_diagnosis == "Diabetes":
         if glucose > 126.0 or hba1c > 6.5:
