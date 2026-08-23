@@ -164,8 +164,17 @@ window.initOrCreateCase = initOrCreateCase;
 
 async function resumeExistingCase() {
     const hidden = document.getElementById("resumeCaseId");
-    const caseId = hidden && hidden.value ? parseInt(hidden.value, 10) : null;
-    if (!caseId) return;
+    let caseId = hidden && hidden.value ? parseInt(hidden.value, 10) : null;
+
+    if (!caseId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paramCaseId = urlParams.get("case_id");
+        if (paramCaseId) {
+            caseId = parseInt(paramCaseId, 10);
+        }
+    }
+
+    if (!caseId || isNaN(caseId)) return;
 
     try {
         const res = await fetch(`/api/cases/${caseId}`);
@@ -179,6 +188,19 @@ async function resumeExistingCase() {
         const caseHidden = document.getElementById("currentCaseId");
         if (caseHidden) caseHidden.value = caseId;
 
+        // Restore patient selection
+        if (data.case.patient_id || data.case.patient) {
+            const patId = data.case.patient_id || (data.case.patient ? data.case.patient.id : null);
+            const selectEl = document.getElementById("linkPatientSelect");
+            const refInput = document.getElementById("patientReferenceInput");
+            if (selectEl && patId) {
+                selectEl.value = patId;
+            }
+            if (refInput && data.case.patient_reference) {
+                refInput.value = data.case.patient_reference;
+            }
+        }
+
         // Restore symptoms
         if (Array.isArray(data.case.symptoms) && data.case.symptoms.length > 0) {
             recordedSymptoms = data.case.symptoms;
@@ -191,7 +213,10 @@ async function resumeExistingCase() {
 
         // Restore investigations
         if (Array.isArray(data.case.investigations) && data.case.investigations.length > 0) {
-            selectedInvestigations = data.case.investigations;
+            selectedInvestigations = data.case.investigations.map(inv => ({
+                ...inv,
+                doctor_selected: inv.doctor_selected !== false
+            }));
         }
 
         // Restore biomarkers
@@ -246,7 +271,8 @@ async function resumeExistingCase() {
         }
         if (selectedInvestigations && selectedInvestigations.length > 0) {
             renderSelectedInvestigations();
-            buildBiomarkerForm(selectedInvestigations);
+            const activeSel = selectedInvestigations.filter(r => r.doctor_selected !== false);
+            buildDynamicBiomarkerForm(activeSel.length > 0 ? activeSel : selectedInvestigations);
         }
         if (latestPrediction) {
             renderPredictionResults(latestPrediction);
