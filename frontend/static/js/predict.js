@@ -161,6 +161,8 @@ async function proceedToStep2() {
 window.navigateToStep = navigateToStep;
 window.proceedToStep2 = proceedToStep2;
 window.initOrCreateCase = initOrCreateCase;
+window.renderInvestigationRecommendations = renderInvestigationRecommendations;
+window.renderSelectedInvestigations = renderSelectedInvestigations;
 
 async function resumeExistingCase() {
     const hidden = document.getElementById("resumeCaseId");
@@ -270,7 +272,7 @@ async function resumeExistingCase() {
             renderPreliminaryCandidates(preliminaryCandidates);
         }
         if (selectedInvestigations && selectedInvestigations.length > 0) {
-            renderSelectedInvestigations();
+            renderInvestigationRecommendations(selectedInvestigations);
             const activeSel = selectedInvestigations.filter(r => r.doctor_selected !== false);
             buildDynamicBiomarkerForm(activeSel.length > 0 ? activeSel : selectedInvestigations);
         }
@@ -601,39 +603,62 @@ function fetchInvestigationRecommendations() {
     .catch(err => console.error("Error fetching recommendations:", err));
 }
 
-function renderInvestigationRecommendations(recs) {
+function renderInvestigationRecommendations(recs = []) {
     const container = document.getElementById("investigationsListContainer");
     if (!container) return;
     container.innerHTML = "";
     
-    selectedInvestigations = recs;
+    const list = Array.isArray(recs) ? recs : [];
+    selectedInvestigations = list;
     
-    recs.forEach((rec) => {
-        const inv = rec.investigation;
+    if (list.length === 0) {
+        container.innerHTML = `
+            <div class="col-12 p-4 text-center text-muted portal-card" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06);">
+                <i class="fa-solid fa-flask mb-2" style="font-size:1.5rem; color:var(--amber-warn);"></i>
+                <p style="margin:0;">No investigation panel selected for this case yet.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    list.forEach((rec) => {
+        const inv = rec.investigation || rec;
+        const invId = inv.id || rec.investigation_id || rec.id;
+        const name = inv.name || inv.investigation_name || rec.recommended_code || "Investigation Panel";
+        const category = inv.category || "Laboratory";
+        const priority = rec.priority || "High";
+        const reason = rec.reason || "Recommended based on clinical assessment and symptoms.";
+        const bioKeys = inv.biomarker_keys || (Array.isArray(inv.biomarker_keys) ? inv.biomarker_keys : []);
+        const isChecked = rec.doctor_selected !== false;
+
         const col = document.createElement("div");
         col.className = "col-12 col-md-6";
         
         let prioColor = "var(--cyan-primary)";
-        if (rec.priority === "High") prioColor = "var(--red-critical)";
-        if (rec.priority === "Medium") prioColor = "var(--amber-warn)";
+        if (priority === "High") prioColor = "var(--red-critical)";
+        if (priority === "Medium") prioColor = "var(--amber-warn)";
         
         col.innerHTML = `
             <div class="portal-card h-100" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08);">
               <div class="d-flex justify-content-between align-items-start mb-2">
                 <label class="d-flex align-items-center gap-2" style="cursor:pointer; font-weight:600; font-size:0.95rem; color:var(--text-primary);">
-                  <input type="checkbox" class="inv-checkbox" data-inv-id="${inv.id}" ${rec.doctor_selected ? 'checked' : ''} onchange="toggleInvestigationSelection(${inv.id}, this.checked)">
-                  ${escapeHtml(inv.name)}
+                  <input type="checkbox" class="inv-checkbox" data-inv-id="${invId}" ${isChecked ? 'checked' : ''} onchange="toggleInvestigationSelection(${invId}, this.checked)">
+                  ${escapeHtml(name)}
                 </label>
-                <span style="font-size:0.75rem; color:${prioColor}; border:1px solid ${prioColor}; padding:2px 8px; border-radius:10px;">${rec.priority} Priority</span>
+                <span style="font-size:0.75rem; color:${prioColor}; border:1px solid ${prioColor}; padding:2px 8px; border-radius:10px;">${escapeHtml(priority)} Priority</span>
               </div>
               <p style="color:var(--text-secondary); font-size:0.82rem; line-height:1.5; margin-bottom:8px;">
-                ${escapeHtml(rec.reason)}
+                ${escapeHtml(reason)}
               </p>
-              <div style="font-size:0.75rem; color:var(--text-muted);">Category: ${escapeHtml(inv.category)} · Biomarkers: ${inv.biomarker_keys ? inv.biomarker_keys.length : 0} markers</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Category: ${escapeHtml(category)} · Biomarkers: ${bioKeys.length} markers</div>
             </div>
         `;
         container.appendChild(col);
     });
+}
+
+function renderSelectedInvestigations(recs = []) {
+    return renderInvestigationRecommendations(recs);
 }
 
 function toggleInvestigationSelection(invId, isSelected) {
