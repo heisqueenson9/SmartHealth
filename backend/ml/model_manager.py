@@ -281,10 +281,17 @@ class ModelManager:
         }
 
     # ── Inference ────────────────────────────────────────────
-    def predict(self, features_dict: dict, model_key: str = "random_forest") -> dict:
+    def predict(
+        self,
+        features_dict: dict,
+        model_key: str = "random_forest",
+        symptoms: list = None,
+        preliminary_candidates: list = None
+    ) -> dict:
         """
         Run inference on a raw clinical features dictionary.
         Clinical values are normalized via normalize_input ONCE before scaling.
+        Integrates Two-Stage Clinical Evidence Fusion (Stage A Symptoms + Stage B Biomarkers).
         """
         model_key = self._normalise_key(model_key)
         model = self.get_model(model_key)
@@ -346,19 +353,31 @@ class ModelManager:
             raise RuntimeError(f"Model returned unsupported class: {pred_label}")
 
         # 5. Probabilities Map matching exact class labels
-        probabilities = {}
-        confidence = 0.0
+        raw_probabilities = {}
         if hasattr(model, "predict_proba"):
             proba = model.predict_proba(X)[0]
-            confidence = float(np.max(proba)) * 100
             for model_class_index, probability in zip(model.classes_, proba):
                 try:
                     label = self.label_encoder.inverse_transform([model_class_index])[0]
                 except Exception:
                     label = str(model_class_index)
-                probabilities[label] = round(float(probability) * 100, 2)
+                raw_probabilities[label] = round(float(probability) * 100, 2)
+        else:
+            raw_probabilities = {c: (100.0 if c == pred_label else 0.0) for c in ALLOWED_CLASSES}
 
-        # 6. Feature Importances
+        # 6. Two-Stage Clinical Evidence Fusion Pipeline
+        from backend.ml.clinical_fusion import fuse_clinical_evidence
+        fusion_res = fuse_clinical_evidence(
+            symptoms=symptoms or [],
+            raw_features=features_dict,
+            raw_probabilities=raw_probabilities,
+            preliminary_candidates=preliminary_candidates or []
+        )
+
+        final_prediction = fusion_res["predictedDiagnosis"]
+        final_confidence = fusion_res["confidence"]
+
+        # 7. Feature Importances
         feature_importance = {}
         if hasattr(model, "feature_importances_"):
             importances = model.feature_importances_
@@ -374,22 +393,29 @@ class ModelManager:
                     for name, imp in pairs
                 }
 
-        # 7. Generate clinical explanations using REAL raw clinical values
-        explanations = self._generate_explanation(features_dict, pred_label)
+        # 8. Generate clinical explanations using REAL raw clinical values
+        explanations = self._generate_explanation(features_dict, final_prediction)
 
         return {
-            "prediction":        pred_label,
-            "confidence":        round(confidence, 2),
-            "probabilities":     probabilities,
-            "feature_importance": feature_importance,
-            "description":       CLASS_DESCRIPTIONS.get(pred_label, "Diagnostic data under clinical review."),
-            "explanations":      explanations,
-            "recommendations":   (
-                CLASS_RECOMMENDATIONS.get(pred_label, []) + GENERIC_RECOMMENDATIONS
+            "predictedDiagnosis":   final_prediction,
+            "prediction":           final_prediction,
+            "confidence":           round(final_confidence, 2),
+            "symptomEvidence":      fusion_res["symptomEvidence"],
+            "biomarkerEvidence":    fusion_res["biomarkerEvidence"],
+            "combinedEvidence":     fusion_res["combinedEvidence"],
+            "supportingSymptoms":   fusion_res["supportingSymptoms"],
+            "supportingBiomarkers": fusion_res["supportingBiomarkers"],
+            "conflictingEvidence":  fusion_res["conflictingEvidence"],
+            "probabilities":        fusion_res["combinedEvidence"],
+            "feature_importance":   feature_importance,
+            "description":          CLASS_DESCRIPTIONS.get(final_prediction, "Diagnostic data under clinical review."),
+            "explanations":         explanations,
+            "recommendations":      (
+                CLASS_RECOMMENDATIONS.get(final_prediction, []) + GENERIC_RECOMMENDATIONS
             ),
-            "model_used":        model_key,
-            "fallback_used":     fallback_used,
-            "status":            "success",
+            "model_used":           model_key,
+            "fallback_used":        fallback_used,
+            "status":               "success",
         }
 
     def _generate_explanation(self, features: dict, prediction: str) -> list:

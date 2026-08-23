@@ -914,13 +914,51 @@ function renderPredictionResults(data) {
     const modelLbl = document.getElementById("modelUsedLabel");
     const probTable = document.getElementById("probTable");
 
-    const predLabel = data.predicted_diagnosis || data.prediction || "Prediction result unavailable";
+    const predLabel = data.predictedDiagnosis || data.predicted_diagnosis || data.prediction || "Prediction result unavailable";
     const confVal = (data.confidence !== undefined && data.confidence !== null) ? data.confidence : (data.confidence_score !== undefined ? data.confidence_score : 0);
 
     if (diagName) diagName.textContent = predLabel;
     if (confLarge) confLarge.textContent = `${confVal}%`;
     if (confBar) confBar.style.width = `${confVal}%`;
-    if (modelLbl) modelLbl.textContent = `Model: ${data.prediction_details?.model_used || data.model_version || 'random_forest'}`;
+    if (desc) desc.textContent = data.description || "Diagnostic clinical decision support result.";
+    if (modelLbl) modelLbl.textContent = `Model: ${data.model_used || data.model_version || 'random_forest'}`;
+
+    if (probTable && (data.combinedEvidence || data.probabilities)) {
+        const probs = data.combinedEvidence || data.probabilities || {};
+        const symProbs = data.symptomEvidence || {};
+        const bioProbs = data.biomarkerEvidence || {};
+
+        let tableHtml = `
+            <thead>
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.1); font-size:0.75rem; color:var(--text-muted);">
+                    <th style="padding:6px 8px; text-align:left;">Condition Class</th>
+                    <th style="padding:6px 8px; text-align:right;">Symptom Evidence</th>
+                    <th style="padding:6px 8px; text-align:right;">Biomarker Model</th>
+                    <th style="padding:6px 8px; text-align:right;">Combined Score</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+
+        Object.keys(probs).forEach(cls => {
+            const isWinner = cls === predLabel;
+            const combVal = probs[cls] !== undefined ? probs[cls] : 0;
+            const symVal = symProbs[cls] !== undefined ? symProbs[cls] : '—';
+            const bioVal = bioProbs[cls] !== undefined ? bioProbs[cls] : '—';
+
+            tableHtml += `
+                <tr style="${isWinner ? 'background:rgba(197,231,16,0.08); font-weight:bold; color:var(--cyan-primary);' : 'color:var(--text-secondary);'} font-size:0.82rem;">
+                    <td style="padding:6px 8px;">${escapeHtml(cls)} ${isWinner ? '<i class="fa-solid fa-crown" style="margin-left:4px; font-size:0.7rem;"></i>' : ''}</td>
+                    <td style="padding:6px 8px; text-align:right;">${typeof symVal === 'number' ? symVal.toFixed(1) + '%' : symVal}</td>
+                    <td style="padding:6px 8px; text-align:right;">${typeof bioVal === 'number' ? bioVal.toFixed(1) + '%' : bioVal}</td>
+                    <td style="padding:6px 8px; text-align:right; font-weight:700;">${typeof combVal === 'number' ? combVal.toFixed(1) + '%' : combVal}</td>
+                </tr>
+            `;
+        });
+
+        tableHtml += `</tbody>`;
+        probTable.innerHTML = tableHtml;
+    }
 
     renderSummaryCardSymptoms();
 }
