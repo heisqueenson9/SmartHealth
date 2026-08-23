@@ -2,8 +2,8 @@
   "model_version": "v2.0.0-clean",
   "best_model": "Decision Tree",
   "best_model_key": "decision_tree",
-  "accuracy": 0.7658,
-  "f1_score": 0.7704,
+  "accuracy": 0.7297,
+  "f1_score": 0.7288,
   "train_samples": 440,
   "test_samples": 111,
   "classes": [
@@ -12,7 +12,7 @@
     "Healthy",
     "Heart Disease",
     "Thalassemia",
-    "Thrombocytopenia"
+    "Thyroid"
   ],
   "features": [
     "Glucose",
@@ -40,5 +40,5 @@
     "Troponin",
     "C-reactive Protein"
   ],
-  "trained_at": "2026-08-21T00:27:43.199707"
+  "trained_at": "2026-08-23T14:33:02.920797+00:00"
 }

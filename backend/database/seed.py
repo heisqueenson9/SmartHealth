@@ -165,11 +165,11 @@ DEFAULT_INVESTIGATIONS = [
         "description": "Assesses hepatic transaminases, kidney filtration, and body composition index."
     },
     {
-        "code": "INV_WIDAL_TYPHOID",
-        "name": "Widal Agglutination Serology Test",
-        "category": "Special Test",
-        "biomarker_keys": ["Widal O Titer", "Widal H Titer"],
-        "description": "Serological test measuring somatic (O) and flagellar (H) antibodies against Salmonella enterica serovar Typhi."
+        "code": "INV_THYROID_PANEL",
+        "name": "Thyroid Function Panel (TSH, Free T4, Free T3)",
+        "category": "Laboratory",
+        "biomarker_keys": ["TSH", "Free T4", "Free T3"],
+        "description": "Measures thyroid stimulating hormone and peripheral thyroid hormone levels."
     }
 ]
 
@@ -205,22 +205,10 @@ DEFAULT_RULES = [
         "reason": "Red cell indices (MCV, MCH) on Full Blood Count evaluate microcytic hypochromic erythrocyte patterns."
     },
     {
-        "condition_name": "Thrombocytopenia",
-        "recommended_code": "INV_FBC",
+        "condition_name": "Thyroid",
+        "recommended_code": "INV_THYROID_PANEL",
         "priority": "High",
-        "reason": "Platelet counts from Full Blood Count directly quantify clotting deficit and hemorrhage risk."
-    },
-    {
-        "condition_name": "Typhoid Fever",
-        "recommended_code": "INV_WIDAL_TYPHOID",
-        "priority": "High",
-        "reason": "Widal agglutination serology detects active or past Salmonella Typhi antibody response."
-    },
-    {
-        "condition_name": "Typhoid Fever",
-        "recommended_code": "INV_LFT_KFT",
-        "priority": "Medium",
-        "reason": "Liver enzymes (ALT/AST) evaluate systemic hepatic involvement in Salmonella infections."
+        "reason": "Thyroid Function Panel (TSH, Free T4/T3) directly evaluates thyroid gland function."
     }
 ]
 

@@ -2637,5 +2637,1286 @@
     "category": "General",
     "synonyms": [],
     "description": null
+  },
+  {
+    "code": "SYM_EXERCISE_INTOLERANCE",
+    "display_name": "Exercise Intolerance",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_REDUCED_EXERCISE_TOLERANCE",
+    "display_name": "Reduced Exercise Tolerance",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_REDUCED_PHYSICAL_ENDURANCE",
+    "display_name": "Reduced Physical Endurance",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_RAPID_BREATHING_DURING_EXERCISE",
+    "display_name": "Rapid Breathing During Exercise",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_COLD_HANDS",
+    "display_name": "Cold Hands",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_COLD_FEET",
+    "display_name": "Cold Feet",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_BRITTLE_NAILS",
+    "display_name": "Brittle Nails",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_SPOON_SHAPED_NAILS",
+    "display_name": "Spoon Shaped Nails",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_KOILONYCHIA",
+    "display_name": "Koilonychia",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_HAIR_LOSS",
+    "display_name": "Hair Loss",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_HAIR_THINNING",
+    "display_name": "Hair Thinning",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_PICA",
+    "display_name": "Pica",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_ICE_CRAVING",
+    "display_name": "Ice Craving",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_RESTLESS_LEGS",
+    "display_name": "Restless Legs",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_DIFFICULTY_CONCENTRATING",
+    "display_name": "Difficulty Concentrating",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_BRAIN_FOG",
+    "display_name": "Brain Fog",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_PALE_CONJUNCTIVA",
+    "display_name": "Pale Conjunctiva",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_PALE_NAIL_BEDS",
+    "display_name": "Pale Nail Beds",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_PALE_PALMS",
+    "display_name": "Pale Palms",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_BLUE_LIPS",
+    "display_name": "Blue Lips",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_BLUE_SKIN",
+    "display_name": "Blue Skin",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_BLUE_FINGERTIPS",
+    "display_name": "Blue Fingertips",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_CHEST_PAIN_ON_EXERTION",
+    "display_name": "Chest Pain On Exertion",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_RAPID_HEARTBEAT_DURING_EXERCISE",
+    "display_name": "Rapid Heartbeat During Exercise",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_LIGHTHEADEDNESS_ON_STANDING",
+    "display_name": "Lightheadedness On Standing",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_FAINTNESS_ON_STANDING",
+    "display_name": "Faintness On Standing",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_REDUCED_WORK_CAPACITY",
+    "display_name": "Reduced Work Capacity",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_EXERCISE_RELATED_HEADACHE",
+    "display_name": "Exercise Related Headache",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_SHORTNESS_OF_BREATH_ON_EXERTION",
+    "display_name": "Shortness Of Breath On Exertion",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Anemia assessment."
+  },
+  {
+    "code": "SYM_SLOW_HEALING_WOUNDS",
+    "display_name": "Slow Healing Wounds",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_SLOW_HEALING_CUTS",
+    "display_name": "Slow Healing Cuts",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_SLOW_HEALING_SORES",
+    "display_name": "Slow Healing Sores",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_RECURRENT_INFECTIONS",
+    "display_name": "Recurrent Infections",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_RECURRENT_URINARY_TRACT_INFECTIONS",
+    "display_name": "Recurrent Urinary Tract Infections",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_RECURRENT_SKIN_INFECTIONS",
+    "display_name": "Recurrent Skin Infections",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_RECURRENT_YEAST_INFECTIONS",
+    "display_name": "Recurrent Yeast Infections",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_GENITAL_ITCHING",
+    "display_name": "Genital Itching",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_DRY_MOUTH",
+    "display_name": "Dry Mouth",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_BLURRED_VISION",
+    "display_name": "Blurred Vision",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_TINGLING_IN_HANDS",
+    "display_name": "Tingling In Hands",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_TINGLING_IN_FEET",
+    "display_name": "Tingling In Feet",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_NUMBNESS_IN_HANDS",
+    "display_name": "Numbness In Hands",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_NUMBNESS_IN_FEET",
+    "display_name": "Numbness In Feet",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_BURNING_FEET",
+    "display_name": "Burning Feet",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_BURNING_SENSATION_IN_FEET",
+    "display_name": "Burning Sensation In Feet",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_DIABETIC_NERVE_PAIN",
+    "display_name": "Diabetic Nerve Pain",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_LOSS_OF_SENSATION_IN_FEET",
+    "display_name": "Loss Of Sensation In Feet",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_LOSS_OF_SENSATION_IN_HANDS",
+    "display_name": "Loss Of Sensation In Hands",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_FRUITY_SMELLING_BREATH",
+    "display_name": "Fruity Smelling Breath",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_FRUITY_BREATH",
+    "display_name": "Fruity Breath",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_DEEP_RAPID_BREATHING",
+    "display_name": "Deep Rapid Breathing",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_DEHYDRATION",
+    "display_name": "Dehydration",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_ABDOMINAL_PAIN_DURING_DIABETIC_KETOACIDOSIS",
+    "display_name": "Abdominal Pain During Diabetic Ketoacidosis",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_NAUSEA_DURING_DIABETIC_KETOACIDOSIS",
+    "display_name": "Nausea During Diabetic Ketoacidosis",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_VOMITING_DURING_DIABETIC_KETOACIDOSIS",
+    "display_name": "Vomiting During Diabetic Ketoacidosis",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_CONFUSION_DURING_SEVERE_HYPERGLYCEMIA",
+    "display_name": "Confusion During Severe Hyperglycemia",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_REDUCED_CONSCIOUSNESS_DURING_SEVERE_HYPERGLYCEMIA",
+    "display_name": "Reduced Consciousness During Severe Hyperglycemia",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_MUSCLE_WEAKNESS_DURING_SEVERE_HYPERGLYCEMIA",
+    "display_name": "Muscle Weakness During Severe Hyperglycemia",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_SWEET_TASTE_IN_MOUTH",
+    "display_name": "Sweet Taste In Mouth",
+    "category": "Endocrine / Metabolic",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Diabetes assessment."
+  },
+  {
+    "code": "SYM_CHEST_PRESSURE",
+    "display_name": "Chest Pressure",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_CHEST_HEAVINESS",
+    "display_name": "Chest Heaviness",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_CHEST_SQUEEZING",
+    "display_name": "Chest Squeezing",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_CHEST_DISCOMFORT",
+    "display_name": "Chest Discomfort",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_CHEST_PAIN_RADIATING_TO_ARM",
+    "display_name": "Chest Pain Radiating To Arm",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_CHEST_PAIN_RADIATING_TO_JAW",
+    "display_name": "Chest Pain Radiating To Jaw",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_CHEST_PAIN_RADIATING_TO_NECK",
+    "display_name": "Chest Pain Radiating To Neck",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_CHEST_PAIN_RADIATING_TO_BACK",
+    "display_name": "Chest Pain Radiating To Back",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_CHEST_PAIN_DURING_EXERCISE",
+    "display_name": "Chest Pain During Exercise",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_CHEST_PAIN_RELIEVED_BY_REST",
+    "display_name": "Chest Pain Relieved By Rest",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_SHORTNESS_OF_BREATH_WHEN_LYING_DOWN",
+    "display_name": "Shortness Of Breath When Lying Down",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_DIFFICULTY_BREATHING_WHEN_LYING_DOWN",
+    "display_name": "Difficulty Breathing When Lying Down",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_WAKING_UP_GASPING_FOR_AIR",
+    "display_name": "Waking Up Gasping For Air",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_ORTHOPNEA",
+    "display_name": "Orthopnea",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_PAROXYSMAL_NOCTURNAL_DYSPNEA",
+    "display_name": "Paroxysmal Nocturnal Dyspnea",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_COLD_SWEATS",
+    "display_name": "Cold Sweats",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_SUDDEN_SWEATING_DURING_CHEST_PAIN",
+    "display_name": "Sudden Sweating During Chest Pain",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_WEAKNESS_DURING_EXERTION",
+    "display_name": "Weakness During Exertion",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_LIGHTHEADEDNESS_DURING_EXERTION",
+    "display_name": "Lightheadedness During Exertion",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_DIFFICULTY_CLIMBING_STAIRS_DUE_TO_BREATHLESSNESS",
+    "display_name": "Difficulty Climbing Stairs Due To Breathlessness",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_DIFFICULTY_WALKING_DUE_TO_BREATHLESSNESS",
+    "display_name": "Difficulty Walking Due To Breathlessness",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_SWELLING_OF_BOTH_LEGS",
+    "display_name": "Swelling Of Both Legs",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_SWELLING_OF_BOTH_ANKLES",
+    "display_name": "Swelling Of Both Ankles",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_ABDOMINAL_FLUID_ACCUMULATION",
+    "display_name": "Abdominal Fluid Accumulation",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_SUDDEN_WEIGHT_GAIN_FROM_FLUID_RETENTION",
+    "display_name": "Sudden Weight Gain From Fluid Retention",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_PERSISTENT_COUGH_DUE_TO_HEART_FAILURE",
+    "display_name": "Persistent Cough Due To Heart Failure",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_PINK_FROTHY_SPUTUM",
+    "display_name": "Pink Frothy Sputum",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_BLOOD_TINGED_FROTHY_SPUTUM",
+    "display_name": "Blood Tinged Frothy Sputum",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_BLUISH_LIPS",
+    "display_name": "Bluish Lips",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_BLUISH_FINGERTIPS",
+    "display_name": "Bluish Fingertips",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_COLD_EXTREMITIES",
+    "display_name": "Cold Extremities",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_WEAK_PULSE",
+    "display_name": "Weak Pulse",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_BOUNDING_PULSE",
+    "display_name": "Bounding Pulse",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_REDUCED_PERIPHERAL_PULSE",
+    "display_name": "Reduced Peripheral Pulse",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_CARDIAC_EXERCISE_INTOLERANCE",
+    "display_name": "Cardiac Exercise Intolerance",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_REDUCED_CARDIAC_OUTPUT_SYMPTOMS",
+    "display_name": "Reduced Cardiac Output Symptoms",
+    "category": "Cardiovascular",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Heart Disease assessment."
+  },
+  {
+    "code": "SYM_ENLARGED_SPLEEN",
+    "display_name": "Enlarged Spleen",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_SPLENOMEGALY",
+    "display_name": "Splenomegaly",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_ENLARGED_LIVER",
+    "display_name": "Enlarged Liver",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_HEPATOMEGALY",
+    "display_name": "Hepatomegaly",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_ABDOMINAL_FULLNESS_FROM_ENLARGED_SPLEEN",
+    "display_name": "Abdominal Fullness From Enlarged Spleen",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_ABDOMINAL_FULLNESS_FROM_ENLARGED_LIVER",
+    "display_name": "Abdominal Fullness From Enlarged Liver",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_DELAYED_GROWTH",
+    "display_name": "Delayed Growth",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_SHORT_STATURE",
+    "display_name": "Short Stature",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_DELAYED_PUBERTY",
+    "display_name": "Delayed Puberty",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_DELAYED_PHYSICAL_DEVELOPMENT",
+    "display_name": "Delayed Physical Development",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_BONE_DEFORMITIES",
+    "display_name": "Bone Deformities",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_FACIAL_BONE_CHANGES",
+    "display_name": "Facial Bone Changes",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_PROMINENT_FOREHEAD",
+    "display_name": "Prominent Forehead",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_PROMINENT_CHEEKBONES",
+    "display_name": "Prominent Cheekbones",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_ENLARGED_UPPER_JAW",
+    "display_name": "Enlarged Upper Jaw",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_DENTAL_MALOCCLUSION",
+    "display_name": "Dental Malocclusion",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_BONE_DEFORMITY_OF_THE_FACE",
+    "display_name": "Bone Deformity Of The Face",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_BONE_FRACTURES",
+    "display_name": "Bone Fractures",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_FRAGILE_BONES",
+    "display_name": "Fragile Bones",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_OSTEOPOROSIS",
+    "display_name": "Osteoporosis",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_DARK_URINE",
+    "display_name": "Dark Urine",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_GALLSTONES",
+    "display_name": "Gallstones",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_IRON_OVERLOAD_SYMPTOMS",
+    "display_name": "Iron Overload Symptoms",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_BRONZE_SKIN",
+    "display_name": "Bronze Skin",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_GRAY_SKIN_PIGMENTATION",
+    "display_name": "Gray Skin Pigmentation",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_LIVER_DYSFUNCTION",
+    "display_name": "Liver Dysfunction",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_IRON_OVERLOAD_RELATED_HEART_PROBLEMS",
+    "display_name": "Iron Overload Related Heart Problems",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_IRON_OVERLOAD_RELATED_DIABETES",
+    "display_name": "Iron Overload Related Diabetes",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_GROWTH_RETARDATION",
+    "display_name": "Growth Retardation",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_ABDOMINAL_FULLNESS_FROM_ORGAN_ENLARGEMENT",
+    "display_name": "Abdominal Fullness From Organ Enlargement",
+    "category": "Hematological",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thalassemia assessment."
+  },
+  {
+    "code": "SYM_MEMORY_PROBLEMS",
+    "display_name": "Memory Problems",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_SLOW_THINKING",
+    "display_name": "Slow Thinking",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_SLOW_SPEECH",
+    "display_name": "Slow Speech",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_PUFFY_FACE",
+    "display_name": "Puffy Face",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_FACIAL_PUFFINESS",
+    "display_name": "Facial Puffiness",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_SWELLING_AROUND_THE_EYES",
+    "display_name": "Swelling Around The Eyes",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_COARSE_SKIN",
+    "display_name": "Coarse Skin",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_BRITTLE_HAIR",
+    "display_name": "Brittle Hair",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_THINNING_OUTER_EYEBROWS",
+    "display_name": "Thinning Outer Eyebrows",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_REDUCED_SWEATING",
+    "display_name": "Reduced Sweating",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_LOW_BODY_TEMPERATURE",
+    "display_name": "Low Body Temperature",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_SLOW_MOVEMENTS",
+    "display_name": "Slow Movements",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_SLOW_REFLEXES",
+    "display_name": "Slow Reflexes",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_MUSCLE_CRAMPS",
+    "display_name": "Muscle Cramps",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_MUSCLE_ACHES",
+    "display_name": "Muscle Aches",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_JOINT_ACHES",
+    "display_name": "Joint Aches",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_REDUCED_SEX_DRIVE",
+    "display_name": "Reduced Sex Drive",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_HEAVY_MENSTRUAL_PERIODS",
+    "display_name": "Heavy Menstrual Periods",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_CARPAL_TUNNEL_SYMPTOMS",
+    "display_name": "Carpal Tunnel Symptoms",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_ENLARGED_TONGUE",
+    "display_name": "Enlarged Tongue",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_PUFFY_HANDS",
+    "display_name": "Puffy Hands",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_PUFFY_FEET",
+    "display_name": "Puffy Feet",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_HEAT_INTOLERANCE",
+    "display_name": "Heat Intolerance",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_FINE_HAND_TREMOR",
+    "display_name": "Fine Hand Tremor",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_HAND_TREMOR",
+    "display_name": "Hand Tremor",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_NERVOUSNESS",
+    "display_name": "Nervousness",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_INCREASED_RESTLESSNESS",
+    "display_name": "Increased Restlessness",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_MUSCLE_WASTING",
+    "display_name": "Muscle Wasting",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_MUSCLE_ATROPHY",
+    "display_name": "Muscle Atrophy",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_INCREASED_BOWEL_MOVEMENTS",
+    "display_name": "Increased Bowel Movements",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_FREQUENT_BOWEL_MOVEMENTS",
+    "display_name": "Frequent Bowel Movements",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_EYE_BULGING",
+    "display_name": "Eye Bulging",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_PROTRUDING_EYES",
+    "display_name": "Protruding Eyes",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_EYE_PAIN_FROM_THYROID_DISEASE",
+    "display_name": "Eye Pain From Thyroid Disease",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_EYE_PRESSURE",
+    "display_name": "Eye Pressure",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_LIGHT_SENSITIVITY",
+    "display_name": "Light Sensitivity",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_EYE_DRYNESS",
+    "display_name": "Eye Dryness",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_GRITTY_EYE_SENSATION",
+    "display_name": "Gritty Eye Sensation",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_DIFFICULTY_CLOSING_EYES",
+    "display_name": "Difficulty Closing Eyes",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_REDUCED_MENSTRUAL_FLOW",
+    "display_name": "Reduced Menstrual Flow",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_BOUNDING_HEARTBEAT",
+    "display_name": "Bounding Heartbeat",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_THYROID_RELATED_ANXIETY",
+    "display_name": "Thyroid Related Anxiety",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_REDUCED_CONCENTRATION",
+    "display_name": "Reduced Concentration",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_EMOTIONAL_INSTABILITY",
+    "display_name": "Emotional Instability",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_GOITER",
+    "display_name": "Goiter",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_ENLARGED_THYROID",
+    "display_name": "Enlarged Thyroid",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_THYROID_ENLARGEMENT",
+    "display_name": "Thyroid Enlargement",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_THYROID_NODULE",
+    "display_name": "Thyroid Nodule",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_THYROID_LUMP",
+    "display_name": "Thyroid Lump",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_MULTIPLE_THYROID_NODULES",
+    "display_name": "Multiple Thyroid Nodules",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_VISIBLE_NECK_ENLARGEMENT",
+    "display_name": "Visible Neck Enlargement",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_NECK_FULLNESS",
+    "display_name": "Neck Fullness",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_NECK_PRESSURE",
+    "display_name": "Neck Pressure",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_NECK_TIGHTNESS_FROM_THYROID_ENLARGEMENT",
+    "display_name": "Neck Tightness From Thyroid Enlargement",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_DIFFICULTY_BREATHING_DUE_TO_THYROID_ENLARGEMENT",
+    "display_name": "Difficulty Breathing Due To Thyroid Enlargement",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_DIFFICULTY_SWALLOWING_DUE_TO_THYROID_ENLARGEMENT",
+    "display_name": "Difficulty Swallowing Due To Thyroid Enlargement",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_PERSISTENT_COUGH_DUE_TO_THYROID_ENLARGEMENT",
+    "display_name": "Persistent Cough Due To Thyroid Enlargement",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
+  },
+  {
+    "code": "SYM_SENSATION_OF_PRESSURE_IN_THE_THROAT",
+    "display_name": "Sensation Of Pressure In The Throat",
+    "category": "Endocrine",
+    "synonyms": [],
+    "description": "Clinical symptom associated with Thyroid assessment."
   }
 ]

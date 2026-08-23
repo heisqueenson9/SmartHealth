@@ -1304,19 +1304,11 @@ def generate_explanation(record_id):
             "We recommend immediate consultation with a cardiologist, limiting saturated fats and sodium in your meals, "
             "and regularly monitoring blood pressure levels."
         )
-    elif "typhoid" in diag_lower:
+    elif "thyroid" in diag_lower:
         explanation = (
-            "Your Widal O and H Titer results show a flagellar or somatic antibody reaction above safe baseline thresholds. "
-            "This indicates a Typhoid Fever infection. "
-            "It is highly important to take your complete course of prescribed antibiotics, drink clean/boiled water, "
-            "maintain hand hygiene, and rest until you recover fully."
-        )
-    elif "thromboc" in diag_lower:
-        explanation = (
-            "Your platelet count is significantly lower than the normal baseline. "
-            "This indicates Thrombocytopenia, which means your blood may have difficulty clotting. "
-            "We advise avoiding medications like aspirin/ibuprofen (which thin the blood), monitoring for abnormal bruising or bleeding, "
-            "and consulting a haematologist."
+            "Your clinical biomarkers indicate thyroid gland function changes or hormone level variations. "
+            "We recommend consulting an endocrinologist for a full thyroid function panel (TSH, Free T4, Free T3), "
+            "monitoring symptoms like fatigue or temperature sensitivity, and following targeted medical advice."
         )
     else:
         explanation = (
@@ -1999,20 +1991,20 @@ def run_pre_assessment(case_id):
                 "supported_by_biomarker_model": True
             })
 
-        # 4. Thrombocytopenia
-        thromb_matches = [s for s in all_sym_strings if any(t in s for t in ["bruising", "bleeding", "petechiae", "purpura", "gums", "nosebleed"])]
-        if thromb_matches:
-            score = round(55.0 + len(thromb_matches) * 20.0, 1)
-            score = min(92.0, score)
+        # 4. Thyroid
+        thyroid_matches = [s for s in all_sym_strings if any(t in s for t in ["thyroid", "goiter", "neck", "tremor", "puffiness", "swelling", "intolerance", "cold", "sluggish", "slowness", "hair loss", "brittle", "speech", "thinking", "eye"])]
+        if thyroid_matches:
+            score = round(45.0 + len(thyroid_matches) * 20.0, 1)
+            score = min(90.0, score)
             candidates_scores.append({
-                "condition_name": "Thrombocytopenia",
+                "condition_name": "Thyroid",
                 "score": score,
-                "rationale": f"Hemorrhagic and mucosal bleeding signs ({', '.join(set(thromb_matches))}) suggest platelet depletion or clotting dysfunction.",
+                "rationale": f"Endocrine and glandular indicators ({', '.join(set(thyroid_matches))}) warrant thyroid gland function screening.",
                 "supported_by_biomarker_model": True
             })
 
         # 5. Thalassemia
-        thal_matches = [s for s in all_sym_strings if any(t in s for t in ["fatigue", "pallor", "jaundice", "yellow"])]
+        thal_matches = [s for s in all_sym_strings if any(t in s for t in ["fatigue", "pallor", "jaundice", "yellow", "spleen", "bone"])]
         if len(thal_matches) >= 2:
             score = round(35.0 + len(thal_matches) * 15.0, 1)
             candidates_scores.append({
@@ -2020,18 +2012,6 @@ def run_pre_assessment(case_id):
                 "score": score,
                 "rationale": f"Chronic anemia signs with possible hemolytic presentation suggest hereditary hemoglobinopathy.",
                 "supported_by_biomarker_model": True
-            })
-
-        # 6. Typhoid Fever (Not supported by biomarker classifier model)
-        typhoid_matches = [s for s in all_sym_strings if any(t in s for t in ["fever", "abdominal", "headache", "diarrhea", "cramps"])]
-        if any("fever" in m for m in typhoid_matches) and len(typhoid_matches) >= 2:
-            score = round(50.0 + len(typhoid_matches) * 15.0, 1)
-            score = min(93.0, score)
-            candidates_scores.append({
-                "condition_name": "Typhoid Fever",
-                "score": score,
-                "rationale": f"Febrile gastroenteritis cluster ({', '.join(set(typhoid_matches))}) indicates possible systemic Salmonella enterica infection.",
-                "supported_by_biomarker_model": False
             })
 
         if not candidates_scores and symptoms:
