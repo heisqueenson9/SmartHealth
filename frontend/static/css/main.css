@@ -382,6 +382,10 @@ body {
 }
 .workflow-step:last-child { border-right: none; }
 .workflow-step:hover { background: var(--bg-elevated); }
+@media (max-width: 767px) {
+  .workflow-step { border-right: none; border-bottom: 1px solid var(--bg-border); }
+  .workflow-step:last-child { border-bottom: none; }
+}
 .step-number {
   font-family: var(--font-mono);
   font-size: 2.8rem;
@@ -592,6 +596,11 @@ body {
   background: var(--bg-elevated);
 }
 
+.duration-val-input { width: 80px; min-width: 60px; flex-shrink: 0; }
+@media (max-width: 400px) {
+  .duration-val-input { width: 64px; padding-left: 8px; padding-right: 4px; }
+}
+
 /* Submit Button */
 .submit-btn-wrap {
   display: flex;
@@ -768,6 +777,9 @@ body {
 }
 
 .matrix-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 60px; }
+@media (min-width: 992px) {
+  .matrix-grid { grid-template-columns: repeat(2, 1fr); }
+}
 .matrix-card {
   background: var(--bg-surface);
   border: 1px solid var(--bg-border);
@@ -2030,212 +2042,6 @@ body.portal-page #cold-start-overlay {
     max-width: 960px !important;
 }
 
-.register-step-num {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 1px solid var(--bg-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  flex-shrink: 0;
-}
-.register-step-hint.active .register-step-num {
-  border-color: var(--cyan-primary);
-  color: var(--cyan-primary);
-  background: rgba(197, 231, 16, 0.08);
-}
-
-.upload-dropzone {
-  border: 2px dashed var(--bg-border);
-  border-radius: var(--radius-md);
-  background: var(--bg-void);
-  min-height: 180px;
-  cursor: pointer;
-  transition: var(--transition);
-  overflow: hidden;
-}
-.upload-dropzone.drag-over {
-  border-color: var(--cyan-primary);
-  background: rgba(197, 231, 16, 0.04);
-}
-.upload-dropzone-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 20px;
-  text-align: center;
-  min-height: 180px;
-}
-.upload-dropzone-empty i {
-  font-size: 2.2rem;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-}
-.upload-dropzone-empty p {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-}
-.upload-dropzone-empty p span {
-  color: var(--cyan-primary);
-  text-decoration: underline;
-}
-.upload-dropzone-empty small {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-}
-.upload-preview-wrap {
-  padding: 16px;
-  text-align: center;
-}
-.upload-image-preview {
-  max-width: 100%;
-  max-height: 220px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--bg-border);
-  object-fit: contain;
-  margin-bottom: 12px;
-}
-.upload-file-preview {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 24px;
-  margin-bottom: 12px;
-}
-.upload-file-preview i {
-  font-size: 3rem;
-  color: var(--cyan-primary);
-}
-.upload-file-preview span {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-  word-break: break-all;
-}
-.upload-change-btn {
-  background: transparent;
-  border: 1px solid var(--bg-border);
-  color: var(--text-secondary);
-  font-size: 0.78rem;
-  padding: 6px 14px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: var(--transition);
-}
-.upload-change-btn:hover {
-  border-color: var(--cyan-primary);
-  color: var(--cyan-primary);
-}
-
-@media (max-width: 767px) {
-  .auth-split-section { padding: 88px 0 40px; }
-  .auth-btn-row { flex-direction: column; }
-  .auth-btn-row .auth-btn-outline { width: 100%; }
-}
-
-@media (max-width: 991px) {
-  .dashboard-sidebar { transform: translateX(-100%); }
-  .dashboard-sidebar.open { transform: translateX(0); box-shadow: 4px 0 30px rgba(0,0,0,0.5); }
-  .dashboard-main { margin-left: 0; }
-  body.portal-page .sidebar-toggle-floating { display: block; }
-}
-
-/* Hide site footer inside dashboard */
-body.portal-page .dashboard-layout ~ .site-footer,
-body.portal-page .site-footer { display: none; }
-body.portal-page .predict-main {
-  padding: 0 0 40px;
-}
-
-body.portal-page #cold-start-overlay {
-  display: none !important;
-}
-
-/* Split Modal Styling */
-.modal-split-container {
-    display: flex;
-    gap: 20px;
-    height: 100%;
-    min-height: 480px;
-}
-.modal-left-details {
-    flex: 3;
-    overflow-y: auto;
-    padding-right: 15px;
-}
-.modal-right-chat {
-    flex: 1;
-    border-left: 1px solid var(--bg-border);
-    padding-left: 15px;
-    display: flex;
-    flex-direction: column;
-}
-.ai-chat-box {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    height: 100%;
-    min-height: 250px;
-}
-.ai-chat-history {
-    flex: 1;
-    overflow-y: auto;
-    max-height: 320px;
-    font-size: 0.85rem;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    border: 1px solid var(--bg-border);
-    border-radius: var(--radius-sm);
-    padding: 10px;
-    background: var(--bg-void);
-}
-.biomarkers-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 12px;
-    margin-top: 15px;
-}
-.biomarker-item {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--bg-border);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-}
-.biomarker-name {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-.biomarker-val {
-    font-family: var(--font-mono);
-    font-weight: 700;
-    color: var(--text-primary);
-    font-size: 0.95rem;
-}
-.model-predictions-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-}
-.model-predictions-table th, .model-predictions-table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid var(--bg-border);
-}
-.model-predictions-table th {
-    font-family: var(--font-display);
-    font-weight: 700;
-    color: var(--text-secondary);
-}
-.modal-wide {
-    max-width: 960px !important;
-}
 
 /* ── Notifications Panel Popover ── */
 .notifications-panel-popover {
@@ -2243,6 +2049,7 @@ body.portal-page #cold-start-overlay {
     top: 80px;
     left: 270px;
     width: 320px;
+    max-width: calc(100vw - 32px);
     max-height: 400px;
     background: rgba(5, 14, 4, 0.95);
     border: 1px solid rgba(197, 231, 16, 0.15);
@@ -2391,7 +2198,7 @@ body.no-scroll {
     overflow: hidden !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 991px) {
     .notifications-panel-popover {
         position: fixed;
         left: 5%;
@@ -2400,4 +2207,140 @@ body.no-scroll {
         width: 90%;
         max-height: 320px;
     }
+}
+
+@media (max-width: 400px) {
+  .title-name-row { flex-wrap: wrap; }
+  .title-name-row .auth-form-group { flex: 1 1 100% !important; }
+}
+
+@media (max-width: 576px) {
+  #adminDoctorSearch { width: 100% !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE OVERHAUL — full-device pass (desktop / laptop /
+   tablet / mobile). Added after the UI audit; keep at end of
+   file so these rules win the cascade over earlier component
+   styles without needing !important everywhere.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Universal safety net ─────────────────────────────────────── */
+img, svg, video, canvas { max-width: 100%; height: auto; }
+table { max-width: 100%; }
+h1, h2, h3, h4, h5, h6, p, span, a, li, td, th, label, input, textarea, select, button {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.container, .container-fluid { width: 100%; }
+
+/* Prevent iOS Safari auto-zoom on focus by keeping form text >=16px
+   on small screens, while preserving the smaller desktop sizing. */
+@media (max-width: 767px) {
+  .auth-input, .biomarker-input, .form-control, .form-select,
+  select, input[type="text"], input[type="email"], input[type="password"],
+  input[type="number"], input[type="search"], input[type="tel"], textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ── Large desktop / laptop refinement (1200–1440px) ─────────── */
+@media (min-width: 1200px) {
+  .container { max-width: 1140px; }
+}
+@media (min-width: 1400px) {
+  .container { max-width: 1280px; }
+}
+
+/* ── Tablet / small laptop (992–1199px) ──────────────────────── */
+@media (max-width: 1199px) {
+  .hero-title { font-size: clamp(2.4rem, 6.5vw, 5.4rem); }
+  .dashboard-content { padding: 24px 20px 48px; }
+}
+
+/* ── Sidebar breakpoint alignment (≤991px) ───────────────────── */
+@media (max-width: 991px) {
+  .sidebar-toggle-floating {
+    top: 12px;
+    left: 12px;
+  }
+  .dashboard-content { padding-top: 64px; }
+  .modal-split-container { flex-direction: column; height: auto; min-height: 0; }
+  .modal-right-chat {
+    border-left: none;
+    border-top: 1px solid var(--bg-border);
+    padding-left: 0;
+    padding-top: 15px;
+  }
+  .researcher-card { text-align: center; justify-content: center; }
+}
+
+/* ── Tablet portrait / large phones (≤767px) ─────────────────── */
+@media (max-width: 767px) {
+  body { font-size: 15px; }
+  .dashboard-content { padding: 64px 16px 40px; }
+  .portal-card { padding: 18px; }
+  .auth-container { max-width: 92vw; margin: 40px auto; padding: 28px 22px; }
+  .page-header { padding: 88px 0 28px; }
+  .predict-main, .results-main { padding: 24px 0 48px; }
+
+  /* Tables: shrink type + padding instead of relying only on
+     horizontal scroll, so short tables still read comfortably */
+  .perf-table th, .perf-table td,
+  .admin-table th, .admin-table td,
+  .model-predictions-table th, .model-predictions-table td {
+    padding: 10px 8px;
+    font-size: 0.78rem;
+  }
+
+  .researcher-card { flex-direction: column; text-align: center; padding: 22px 18px; }
+  .researcher-meta { justify-content: center; }
+  .register-chooser-card { flex-wrap: wrap; text-align: center; justify-content: center; }
+  .register-chooser-arrow { display: none; }
+  .biomarkers-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+
+  /* Any inline flex rows authored with a fixed pixel width (e.g.
+     register_doctor.html two-field rows) should wrap gracefully */
+  [style*="display: flex"][style*="width: 100%"] { flex-wrap: wrap; }
+}
+
+/* ── Small phones (≤480px) ───────────────────────────────────── */
+@media (max-width: 480px) {
+  .hero-title { font-size: clamp(2.1rem, 9vw, 3rem); line-height: 1.05; }
+  .hero-subtitle { font-size: 0.95rem; }
+  .section-title { font-size: clamp(1.5rem, 7vw, 2.2rem); }
+  .page-title { font-size: clamp(1.6rem, 8vw, 2.4rem); }
+  .auth-container { padding: 22px 16px; margin: 28px auto; }
+  .auth-title { font-size: 1.5rem; }
+  .dash-stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .dash-stat-value { font-size: 1.4rem; }
+  .biomarkers-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .biomarker-item { padding: 8px; }
+  .result-diagnosis { font-size: 1.4rem; }
+  .confidence-value-large { font-size: 1.7rem; }
+  .researcher-avatar { width: 48px; height: 48px; font-size: 0.85rem; }
+  .notifications-panel-popover { top: 64px; max-height: 280px; }
+  #toastNotificationsContainer { left: 12px; right: 12px; width: auto; bottom: 12px; }
+}
+
+/* ── Very small phones (≤360px) ──────────────────────────────── */
+@media (max-width: 360px) {
+  .container { padding-left: 12px; padding-right: 12px; }
+  .btn-primary, .btn-outline, .submit-btn { padding: 12px 16px; font-size: 0.82rem; }
+  .stat-value { font-size: 1.6rem; }
+  .dashboard-content { padding-left: 12px; padding-right: 12px; }
+}
+
+/* ── Landscape phones (short viewport height) ────────────────── */
+@media (max-height: 480px) and (orientation: landscape) {
+  .hero-section { min-height: auto; padding: 90px 0 40px; }
+  .auth-container { margin: 20px auto; }
+}
+
+/* ── Touch target comfort on coarse pointers (mobile/tablet) ──── */
+@media (hover: none) and (pointer: coarse) {
+  .nav-link, .sidebar-link, .btn-primary, .btn-outline, .auth-btn,
+  .preset-btn, .btn-action-verify, .print-result-btn {
+    min-height: 40px;
+  }
 }
