@@ -1304,11 +1304,12 @@ def generate_explanation(record_id):
             "We recommend immediate consultation with a cardiologist, limiting saturated fats and sodium in your meals, "
             "and regularly monitoring blood pressure levels."
         )
-    elif "thyroid" in diag_lower:
+    elif "thromboc" in diag_lower:
         explanation = (
-            "Your clinical biomarkers indicate thyroid gland function changes or hormone level variations. "
-            "We recommend consulting an endocrinologist for a full thyroid function panel (TSH, Free T4, Free T3), "
-            "monitoring symptoms like fatigue or temperature sensitivity, and following targeted medical advice."
+            "Your platelet count is significantly lower than the normal baseline. "
+            "This indicates Thrombocytopenia, which means your blood may have difficulty clotting. "
+            "We advise avoiding medications like aspirin/ibuprofen (which thin the blood), monitoring for abnormal bruising or bleeding, "
+            "and consulting a haematologist."
         )
     else:
         explanation = (
@@ -1991,15 +1992,15 @@ def run_pre_assessment(case_id):
                 "supported_by_biomarker_model": True
             })
 
-        # 4. Thyroid
-        thyroid_matches = [s for s in all_sym_strings if any(t in s for t in ["thyroid", "goiter", "neck", "tremor", "puffiness", "swelling", "intolerance", "cold", "sluggish", "slowness", "hair loss", "brittle", "speech", "thinking", "eye"])]
-        if thyroid_matches:
-            score = round(45.0 + len(thyroid_matches) * 20.0, 1)
-            score = min(90.0, score)
+        # 4. Thrombocytopenia
+        thromb_matches = [s for s in all_sym_strings if any(t in s for t in ["bruising", "bleeding", "petechiae", "purpura", "gums", "nosebleed"])]
+        if thromb_matches:
+            score = round(55.0 + len(thromb_matches) * 20.0, 1)
+            score = min(92.0, score)
             candidates_scores.append({
-                "condition_name": "Thyroid",
+                "condition_name": "Thrombocytopenia",
                 "score": score,
-                "rationale": f"Endocrine and glandular indicators ({', '.join(set(thyroid_matches))}) warrant thyroid gland function screening.",
+                "rationale": f"Hemorrhagic and mucosal bleeding signs ({', '.join(set(thromb_matches))}) suggest platelet depletion or clotting dysfunction.",
                 "supported_by_biomarker_model": True
             })
 

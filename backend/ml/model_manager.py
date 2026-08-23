@@ -32,7 +32,7 @@ FEATURE_ORDER = [
 
 CLASS_LABELS = [
     "Anemia", "Diabetes", "Healthy", "Heart Disease",
-    "Thalassemia", "Thyroid",
+    "Thalassemia", "Thrombocytopenia",
 ]
 
 CLASS_DESCRIPTIONS = {
@@ -41,7 +41,7 @@ CLASS_DESCRIPTIONS = {
     "Anemia":           "Red blood cell counts or haemoglobin concentration below physiological norms.",
     "Heart Disease":    "Cardiovascular enzyme and lipid markers indicate cardiac stress.",
     "Thalassemia":      "Hereditary blood disorder affecting haemoglobin production pathways.",
-    "Thyroid":          "Thyroid hormone imbalance or glandular dysfunction markers detected.",
+    "Thrombocytopenia": "Low platelet count indicating critical clotting risk factors.",
 }
 
 CLASS_RECOMMENDATIONS = {
@@ -66,10 +66,10 @@ CLASS_RECOMMENDATIONS = {
         "Regular haematology follow-up required.",
         "Avoid iron supplements without specialist advice.",
     ],
-    "Thyroid":          [
-        "Consult an endocrinologist for full thyroid panel evaluation.",
-        "Monitor TSH, Free T4, and Free T3 levels.",
-        "Follow up with thyroid ultrasound if nodular symptoms are present.",
+    "Thrombocytopenia": [
+        "Urgent haematology consultation advised.",
+        "Avoid aspirin and NSAIDs.",
+        "Monitor for bleeding symptoms.",
     ],
 }
 
@@ -460,18 +460,14 @@ class ModelManager:
             if not explanations:
                 explanations.append("Abnormal hemoglobin production pathways and low MCV/MCH markers detected.")
 
-        # 5. Thyroid
-        elif prediction == "Thyroid":
-            chol = float(features.get("Cholesterol", 0.5))
-            ldl = float(features.get("LDL Cholesterol", 0.5))
-            hr = float(features.get("Heart Rate", 0.5))
+        # 5. Thrombocytopenia
+        elif prediction == "Thrombocytopenia":
+            platelets = float(features.get("Platelets", 0.5))
             
-            if chol > 0.6 or ldl > 0.6:
-                explanations.append(f"Elevated cholesterol ({chol:.2f} score) and LDL levels match metabolic characteristics of thyroid dysfunction.")
-            if hr > 0.7 or hr < 0.3:
-                explanations.append(f"Heart rate variation ({hr:.2f} score) aligns with thyroid endocrine dysregulation.")
-            if not explanations:
-                explanations.append("Biomarker profile matches common Thyroid endocrine dysfunction patterns.")
+            if platelets < 0.3:
+                explanations.append(f"Platelet count ({platelets:.2f} score) is critically low, indicating clotting risk factors.")
+            else:
+                explanations.append(f"Platelet indices match common Thrombocytopenia patterns (platelets: {platelets:.2f} score).")
 
         # 6. Healthy
         else:

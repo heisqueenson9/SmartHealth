@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "trained_at": "2026-08-23T14:33:02.898556+00:00",
+    "trained_at": "2026-08-23T14:52:21.048749+00:00",
     "author": "Enock Queenson Eduafo & Christabel Araba Edumadze",
     "features": [
       "Glucose",
@@ -40,11 +40,11 @@
     {
       "name": "Random Forest",
       "key": "random_forest",
-      "accuracy": 0.7117,
-      "precision": 0.7958,
-      "recall": 0.7117,
-      "f1_score": 0.6527,
-      "cv_mean": 0.6636,
+      "accuracy": 0.7027,
+      "precision": 0.7198,
+      "recall": 0.7027,
+      "f1_score": 0.6338,
+      "cv_mean": 0.6568,
       "confusion_matrix": [
         [
           9,
@@ -72,9 +72,9 @@
         ],
         [
           0,
-          7,
+          8,
           0,
-          1,
+          0,
           0,
           0
         ],
@@ -99,168 +99,50 @@
     {
       "name": "Decision Tree",
       "key": "decision_tree",
-      "accuracy": 0.7297,
-      "precision": 0.745,
-      "recall": 0.7297,
-      "f1_score": 0.7288,
-      "cv_mean": 0.6659,
+      "accuracy": 0.6486,
+      "precision": 0.6675,
+      "recall": 0.6486,
+      "f1_score": 0.6537,
+      "cv_mean": 0.6432,
       "confusion_matrix": [
         [
-          12,
-          4,
-          0,
-          1,
-          3,
-          0
-        ],
-        [
-          5,
-          48,
-          0,
-          3,
-          4,
-          2
-        ],
-        [
-          1,
-          1,
-          2,
-          0,
-          0,
-          0
-        ],
-        [
-          1,
-          4,
-          0,
-          3,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          13,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          1,
-          0,
-          3
-        ]
-      ]
-    },
-    {
-      "name": "Svm",
-      "key": "svm",
-      "accuracy": 0.6577,
-      "precision": 0.6188,
-      "recall": 0.6577,
-      "f1_score": 0.6318,
-      "cv_mean": 0.6364,
-      "confusion_matrix": [
-        [
+          10,
           8,
-          11,
           0,
-          1,
           0,
+          2,
           0
         ],
         [
+          6,
+          47,
+          3,
+          3,
           2,
-          54,
-          0,
-          1,
-          4,
           1
         ],
         [
-          3,
-          1,
           0,
           0,
+          2,
+          2,
           0,
           0
         ],
         [
           2,
-          3,
-          0,
-          3,
-          0,
-          0
-        ],
-        [
-          3,
+          1,
+          1,
           4,
           0,
-          0,
-          6,
           0
-        ],
-        [
-          0,
-          1,
-          0,
-          0,
-          1,
-          2
-        ]
-      ]
-    },
-    {
-      "name": "Logistic Regression",
-      "key": "logistic_regression",
-      "accuracy": 0.5586,
-      "precision": 0.6827,
-      "recall": 0.5586,
-      "f1_score": 0.5744,
-      "cv_mean": 0.4523,
-      "confusion_matrix": [
-        [
-          13,
-          3,
-          0,
-          2,
-          2,
-          0
-        ],
-        [
-          8,
-          30,
-          5,
-          8,
-          5,
-          6
-        ],
-        [
-          2,
-          1,
-          1,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          6,
-          1,
-          1
         ],
         [
           4,
-          0,
-          0,
+          2,
           1,
-          8,
+          1,
+          5,
           0
         ],
         [
@@ -272,6 +154,124 @@
           4
         ]
       ]
+    },
+    {
+      "name": "Svm",
+      "key": "svm",
+      "accuracy": 0.6667,
+      "precision": 0.6227,
+      "recall": 0.6667,
+      "f1_score": 0.6377,
+      "cv_mean": 0.6409,
+      "confusion_matrix": [
+        [
+          7,
+          12,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          2,
+          55,
+          0,
+          1,
+          4,
+          0
+        ],
+        [
+          3,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          3,
+          0,
+          3,
+          0,
+          1
+        ],
+        [
+          3,
+          3,
+          0,
+          0,
+          6,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Logistic Regression",
+      "key": "logistic_regression",
+      "accuracy": 0.5766,
+      "precision": 0.6869,
+      "recall": 0.5766,
+      "f1_score": 0.596,
+      "cv_mean": 0.4545,
+      "confusion_matrix": [
+        [
+          13,
+          3,
+          0,
+          2,
+          2,
+          0
+        ],
+        [
+          9,
+          33,
+          5,
+          8,
+          5,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          6,
+          1,
+          1
+        ],
+        [
+          3,
+          0,
+          0,
+          1,
+          8,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          3
+        ]
+      ]
     }
   ],
   "classes": [
@@ -280,6 +280,6 @@
     "Healthy",
     "Heart Disease",
     "Thalassemia",
-    "Thyroid"
+    "Thrombocytopenia"
   ]
 }

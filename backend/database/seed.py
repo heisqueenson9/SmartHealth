@@ -205,10 +205,10 @@ DEFAULT_RULES = [
         "reason": "Red cell indices (MCV, MCH) on Full Blood Count evaluate microcytic hypochromic erythrocyte patterns."
     },
     {
-        "condition_name": "Thyroid",
-        "recommended_code": "INV_THYROID_PANEL",
+        "condition_name": "Thrombocytopenia",
+        "recommended_code": "INV_FBC",
         "priority": "High",
-        "reason": "Thyroid Function Panel (TSH, Free T4/T3) directly evaluates thyroid gland function."
+        "reason": "Platelet counts from Full Blood Count directly quantify clotting deficit and hemorrhage risk."
     }
 ]
 

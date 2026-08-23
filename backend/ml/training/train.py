@@ -58,7 +58,8 @@ DISEASE_LABELS = {
     'Anemia': 'Anemia',
     'Thalasse': 'Thalassemia',
     'Thalassemia': 'Thalassemia',
-    'Thyroid': 'Thyroid',
+    'Thromboc': 'Thrombocytopenia',
+    'Thrombocytopenia': 'Thrombocytopenia',
     'Heart Di': 'Heart Disease',
     'Heart Disease': 'Heart Disease'
 }
