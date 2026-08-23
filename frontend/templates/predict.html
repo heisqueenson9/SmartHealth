@@ -261,28 +261,28 @@
       </div>
 
       <!-- ML Prediction Verdict Panel: PREDICTED DIAGNOSIS -->
-      <div class="result-panel mb-3" id="resultsPanel" style="display:block; padding:18px 20px; margin-top:0;">
-        <div class="result-header mb-2">
+      <div class="result-panel mb-3" id="resultsPanel" style="display:block; padding:20px 24px; margin-top:0; border:1px solid rgba(197,231,16,0.3); background:rgba(197,231,16,0.02); border-radius:12px;">
+        <div class="result-header mb-3">
           <div>
-            <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">
-              <i class="fa-solid fa-square-poll-vertical" style="color:var(--cyan-primary); margin-right:4px;"></i> Predicted Disease
+            <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px;">
+              <i class="fa-solid fa-square-poll-vertical" style="color:var(--cyan-primary); margin-right:6px;"></i> PREDICTED DISEASE
             </div>
             <!-- Standardized ML Output Label: Predicted Diagnosis -->
-            <div class="result-diagnosis" id="diagnosisName" style="color:var(--cyan-primary); font-size:1.35rem; font-weight:700;">Pending</div>
+            <div class="result-diagnosis" id="diagnosisName" style="color:var(--cyan-primary); font-size:2.2rem; font-weight:900; text-transform:uppercase; letter-spacing:0.02em; text-shadow:0 0 12px rgba(197,231,16,0.2);">Pending</div>
           </div>
           <div style="text-align:right;">
-            <div class="confidence-value-large" id="confidenceLarge" style="font-size:1.35rem;">—</div>
-            <div class="confidence-label-small" style="font-size:0.7rem;">Confidence Score</div>
-            <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);margin-top:2px;" id="modelUsedLabel"></div>
+            <div class="confidence-value-large" id="confidenceLarge" style="font-size:2rem; font-weight:800; color:var(--text-primary);">—</div>
+            <div class="confidence-label-small" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted);">Confidence Score</div>
+            <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted); margin-top:4px;" id="modelUsedLabel"></div>
           </div>
         </div>
 
-        <div class="confidence-bar mb-2">
-          <div class="confidence-fill" id="confidenceBar" style="width:0%;"></div>
+        <div class="confidence-bar mb-3" style="height:8px; background:rgba(255,255,255,0.08); border-radius:4px;">
+          <div class="confidence-fill" id="confidenceBar" style="width:0%; height:100%; border-radius:4px; background:var(--cyan-primary);"></div>
         </div>
         <div id="dataCoverageNotice" class="auth-field-hint mb-2" style="display:none;"></div>
 
-        <p class="result-description mb-2" id="diagnosisDescription" style="color:var(--text-secondary); font-size:0.85rem;">
+        <p class="result-description mb-3" id="diagnosisDescription" style="color:var(--text-secondary); font-size:0.9rem; line-height:1.4;">
           Evaluating biomarker features...
         </p>
 
@@ -473,5 +473,5 @@
 {% endblock %}
 
 {% block portal_scripts %}
-<script src="{{ url_for('static', filename='js/predict.js') }}?v=20260822_step6_spacing_v10"></script>
+<script src="{{ url_for('static', filename='js/predict.js') }}?v=20260822_step6_bold_v11"></script>
 {% endblock %}
