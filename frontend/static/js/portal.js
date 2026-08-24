@@ -177,7 +177,7 @@ async function fetchNotifications(page) {
                     html += `
                         <div class="notif-item ${n.is_read ? 'read' : 'unread'}" onclick="markNotificationRead(${n.id})">
                             <div class="notif-msg">${n.message}</div>
-                            <div class="notif-time">${dateStr} · ${timeStr}</div>
+                            <div class="notif-time">${dateStr} · ${timeStr}${n.is_read ? ' · <span class="notif-read-tag"><i class="fa-solid fa-check"></i> Read</span>' : ''}</div>
                         </div>
                     `;
                 });

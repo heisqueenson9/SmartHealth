@@ -2107,6 +2107,16 @@ body.portal-page #cold-start-overlay {
     background: rgba(197, 231, 16, 0.08);
     border-left: 3px solid var(--cyan-primary);
 }
+.notif-item.read {
+    opacity: 0.7;
+}
+.notif-read-tag {
+    color: var(--cyan-dim);
+    font-weight: 600;
+}
+.notif-read-tag i {
+    font-size: 0.65rem;
+}
 
 .notif-msg {
     font-size: 0.8rem;
@@ -2227,7 +2237,14 @@ body.no-scroll {
 
 /* ── Universal safety net ─────────────────────────────────────── */
 img, svg, video, canvas { max-width: 100%; height: auto; }
-table { max-width: 100%; }
+/* NOTE: intentionally NOT capping `table { max-width: 100% }` here.
+   .admin-table / .perf-table / .model-predictions-table are meant to
+   exceed their wrapper's width and scroll horizontally inside
+   .admin-table-wrap / .perf-table-wrap (overflow-x: auto). Capping
+   the table's own max-width fights that wrapper and forces the
+   browser to compress 8 columns into too little space, which is
+   what caused the letter-by-letter word-wrapping on the mobile
+   Diagnosis History table. Do not re-add this rule. */
 h1, h2, h3, h4, h5, h6, p, span, a, li, td, th, label, input, textarea, select, button {
   overflow-wrap: break-word;
   word-break: break-word;
@@ -2284,13 +2301,15 @@ h1, h2, h3, h4, h5, h6, p, span, a, li, td, th, label, input, textarea, select, 
   .page-header { padding: 88px 0 28px; }
   .predict-main, .results-main { padding: 24px 0 48px; }
 
-  /* Tables: shrink type + padding instead of relying only on
-     horizontal scroll, so short tables still read comfortably */
+  /* Tables: shrink type + padding, and force nowrap so columns
+     keep their natural width and rely purely on the wrapper's
+     horizontal scroll — never on breaking words to fit. */
   .perf-table th, .perf-table td,
   .admin-table th, .admin-table td,
   .model-predictions-table th, .model-predictions-table td {
     padding: 10px 8px;
     font-size: 0.78rem;
+    white-space: nowrap;
   }
 
   .researcher-card { flex-direction: column; text-align: center; padding: 22px 18px; }
