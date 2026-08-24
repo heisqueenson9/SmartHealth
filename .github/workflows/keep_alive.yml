@@ -9,5 +9,15 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping health endpoint
-        run: curl -sf https://smarthealthsync.onrender.com/api/health || exit 1
+      - name: Ping health endpoint (with retries for Render cold starts)
+        run: |
+          for attempt in 1 2 3 4 5; do
+            if curl -sf --max-time 30 https://smarthealthsync.onrender.com/api/health; then
+              echo "Ping succeeded on attempt $attempt"
+              exit 0
+            fi
+            echo "Attempt $attempt failed, waiting 20s before retry..."
+            sleep 20
+          done
+          echo "All 5 attempts failed — app appears genuinely down."
+          exit 1
