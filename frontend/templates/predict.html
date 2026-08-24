@@ -307,20 +307,6 @@
         <p class="result-description mb-3" id="diagnosisDescription" style="color:var(--text-secondary); font-size:0.88rem; line-height:1.4;">
           Evaluating biomarker features...
         </p>
-
-        <!-- Preview Classifier Models -->
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <label class="auth-label mb-0" style="font-size:0.78rem;">Classifier Model:</label>
-          <select id="previewModelSelect" class="auth-input" style="width:auto; padding:3px 8px; font-size:0.8rem;" onchange="switchClassifierModel(this.value)">
-            <option value="random_forest" selected>Random Forest (Default)</option>
-            <option value="decision_tree">Decision Tree</option>
-            <option value="svm">Support Vector Machine (SVM)</option>
-            <option value="logistic_regression">Logistic Regression</option>
-          </select>
-        </div>
-
-        <!-- Weighted Probabilities -->
-        <table class="prob-table" id="probTable" style="margin-top:6px;"></table>
       </div>
 
       <!-- PATIENT PRESENTING SYMPTOMS CARD -->
