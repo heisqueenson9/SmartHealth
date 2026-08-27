@@ -13,8 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize notification polling if user is logged in
     const badge = document.getElementById("notifBadge");
-    if (badge) {
-        fetchNotifications();
+    const container = document.getElementById("notifListContainer");
+    const link = document.getElementById("notifSidebarLink");
+    if (badge || container || link) {
+        fetchNotifications(1);
         setInterval(() => fetchNotifications(), 15000); // Poll every 15s
     }
 
@@ -148,27 +150,40 @@ function saveShownNotifIds(set) {
 }
 
 async function fetchNotifications(page) {
-    let targetPage = (typeof page === "number" && page > 0) ? page : notifCurrentPage;
+    let targetPage = 1;
+    if (typeof page === "number" && !isNaN(page) && page > 0) {
+        targetPage = page;
+    } else if (typeof notifCurrentPage === "number" && !isNaN(notifCurrentPage) && notifCurrentPage > 0) {
+        targetPage = notifCurrentPage;
+    }
+
     try {
         const res = await fetch(`/api/notifications?page=${targetPage}&per_page=5`);
+        if (!res.ok) {
+            console.error("Failed to fetch notifications: HTTP", res.status);
+            return;
+        }
         const data = await res.json();
-        if (!res.ok) return;
+        if (data.status !== "success" || !Array.isArray(data.notifications)) {
+            console.error("Failed to fetch notifications:", data.error || "Malformed response");
+            return;
+        }
 
-        notifCurrentPage = data.page || 1;
+        notifCurrentPage = data.page || targetPage || 1;
 
-        const badge = document.getElementById("notifBadge");
-        if (badge) {
+        const badges = document.querySelectorAll("#notifBadge");
+        badges.forEach(badge => {
             if (data.unread_count > 0) {
                 badge.textContent = data.unread_count;
                 badge.style.display = "inline-block";
             } else {
                 badge.style.display = "none";
             }
-        }
+        });
 
         const container = document.getElementById("notifListContainer");
         if (container) {
-            if (data.notifications && data.notifications.length > 0) {
+            if (data.notifications.length > 0) {
                 let html = "";
                 data.notifications.forEach(n => {
                     const dateObj = new Date(n.created_at);
@@ -182,6 +197,8 @@ async function fetchNotifications(page) {
                     `;
                 });
                 container.innerHTML = html;
+            } else if (data.total_count > 0 && targetPage > 1) {
+                return fetchNotifications(1);
             } else {
                 container.innerHTML = `<p class="text-muted p-3 text-center">No notifications</p>`;
             }
