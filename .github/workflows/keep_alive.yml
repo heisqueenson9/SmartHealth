@@ -12,7 +12,7 @@ jobs:
       - name: Ping health endpoint (with retries for Render cold starts)
         run: |
           for attempt in 1 2 3 4 5; do
-            if curl -sf --max-time 30 https://smarthealthsync.onrender.com/api/health; then
+            if curl -sf --max-time 30 https://smarthealth-na6j.onrender.com/api/health; then
               echo "Ping succeeded on attempt $attempt"
               exit 0
             fi
