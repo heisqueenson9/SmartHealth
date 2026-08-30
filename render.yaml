@@ -30,4 +30,7 @@ services:
         fromDatabase:
           name: smart-health-sync-db
           property: connectionString
+      # Set your deployed URL here (e.g. https://smart-health-sync.onrender.com)
+      - key: SITE_URL
+        value: https://smarthealth-na6j.onrender.com
     healthCheckPath: /api/health
