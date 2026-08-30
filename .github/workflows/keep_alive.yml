@@ -2,7 +2,7 @@ name: Keep Render App Awake
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/12 * * * *"
   workflow_dispatch: {}
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
       - name: Ping health endpoint (with retries for Render cold starts)
         run: |
           for attempt in 1 2 3 4 5; do
-            if curl -sf --max-time 30 https://smarthealth-na6j.onrender.com/api/health; then
+            if curl -sSf --max-time 30 https://onrender.com > /dev/null; then
               echo "Ping succeeded on attempt $attempt"
               exit 0
             fi
