@@ -7,13 +7,13 @@ on:
 
 jobs:
   ping:
-    if: github.repository == 'theniitettey/dev-SmartHealth'
+    if: github.repository != 'theniitettey/dev-SmartHealth'
     runs-on: ubuntu-latest
     steps:
       - name: Ping health endpoint (with retries for Render cold starts)
         run: |
           for attempt in 1 2 3 4 5; do
-            if curl -sSf --max-time 30 https://onrender.com > /dev/null; then
+            if curl -sSf --max-time 30 https://smarthealth-na6j.onrender.com/api/health > /dev/null; then
               echo "Ping succeeded on attempt $attempt"
               exit 0
             fi
