@@ -93,6 +93,10 @@ class Config:
         "MAIL_DEFAULT_SENDER", "Smart Health Sync <onboarding@resend.dev>"
     )
 
+    # Site URL for absolute links in emails (e.g. login, password reset).
+    # Set in production to your deployed domain (e.g. https://app.example.com).
+    SITE_URL = os.environ.get("SITE_URL", "http://localhost:5000")
+
 
 
 class DevelopmentConfig(Config):

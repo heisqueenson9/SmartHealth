@@ -9,6 +9,8 @@ wiring real credentials.
 import logging
 import os
 
+from flask import current_app
+
 logger = logging.getLogger("smarthealth.mail")
 
 
@@ -23,12 +25,9 @@ def _sender() -> str:
 
 
 def _login_url() -> str:
-    """Best-effort absolute login URL; falls back to /login."""
-    try:
-        from flask import url_for
-        return url_for("views.login_page", _external=True)
-    except Exception:
-        return "/login"
+    """Absolute login URL using SITE_URL config (falls back to localhost)."""
+    site_url = current_app.config.get("SITE_URL", "http://localhost:5000").rstrip("/")
+    return f"{site_url}/login"
 
 
 def notify_doctor_status_change(doctor, action: str) -> None:
