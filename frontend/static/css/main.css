@@ -33,6 +33,19 @@
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+:root[data-theme="light"] {
+  --bg-void: #f7f9f4;
+  --bg-surface: #ffffff;
+  --bg-elevated: #eef2e6;
+  --bg-border: rgba(30, 60, 0, 0.14);
+  --cyan-primary: #5c7a00;
+  --cyan-glow: rgba(92, 122, 0, 0.15);
+  --cyan-dim: #5a6b2a;
+  --text-primary: #0c1a01;
+  --text-secondary: #4a4a4a;
+  --text-muted: #6b7a70;
+}
+
 /* ── Reset & Base ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }

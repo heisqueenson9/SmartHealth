@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    (function () {
+      const saved = localStorage.getItem('shs-theme');
+      if (saved === 'light') 
+        document.documentElement.setAttribute('data-theme', 'light');
+    })();
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart Health Sync - Intelligent Healthcare Diagnosis</title>
@@ -83,6 +90,11 @@
             <a href="/register" class="nav-cta-btn">Register</a>
           </li>
           {% endif %}
+          <li class="nav-item">
+            <button id="theme-toggle" class="nav-link btn btn-link p-0" type="button" aria-label="Toggle light/dark mode">
+              <i class="fa-solid fa-sun"></i>
+            </button>
+          </li>
         </ul>
       </div>
     </div>
@@ -176,6 +188,30 @@
       // Hard cap — dismiss after 90 s regardless
       setTimeout(dismissOverlay, 90000);
     })();
+  </script>
+
+  <script>
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+      function applyIcon() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        themeBtn.innerHTML = isLight
+          ? '<i class="fa-solid fa-moon"></i>'
+          : '<i class="fa-solid fa-sun"></i>';
+      }
+      applyIcon();
+      themeBtn.addEventListener('click', () => {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        if (isLight) {
+          document.documentElement.removeAttribute('data-theme');
+          localStorage.setItem('shs-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+          localStorage.setItem('shs-theme', 'light');
+        }
+        applyIcon();
+      });
+    }
   </script>
 </body>
 </html>
