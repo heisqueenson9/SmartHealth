@@ -153,7 +153,7 @@ async function proceedToStep2() {
         console.error("[SmartHealth] Case creation failed:", error);
         showToast(error.message || "Unable to save case.", "error");
     } finally {
-        if (btn) { btn.disabled = false; btn.textContent = "Next →"; }
+        if (btn) { btn.disabled = false; btn.textContent = "Next"; }
     }
 }
 
@@ -886,7 +886,7 @@ async function proceedToStep6() {
 
     if (Object.keys(enteredBiomarkers).length === 0) {
         showToast("Please enter at least one biomarker test result.", "warning");
-        if (btn) { btn.disabled = false; btn.textContent = "Run Diagnosis \u2192"; }
+        if (btn) { btn.disabled = false; btn.textContent = "Run Diagnosis"; }
         return;
     }
 
@@ -933,7 +933,7 @@ async function proceedToStep6() {
         console.error(error);
         showToast(error.message, "error");
     } finally {
-        if (btn) { btn.disabled = false; btn.textContent = "Run Diagnosis \u2192"; }
+        if (btn) { btn.disabled = false; btn.textContent = "Run Diagnosis"; }
     }
 }
 

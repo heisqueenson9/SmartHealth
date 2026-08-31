@@ -590,7 +590,7 @@ function downloadCustomReportPDF(id, patientRef) {
                         image:       { type: 'jpeg', quality: 0.98 },
                         html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
                         jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                        pagebreak:   { mode: ['avoid-all', 'css', 'legacy'] }
+                        pagebreak:   { mode: ['css', 'legacy'], avoid: ['tr', 'td', '.biomarker-item', '.printable-report-wrapper > div'] }
                     };
                     html2pdf().set(opt).from(content).save().then(function() {
                         status.textContent = 'Done! You can close this tab.';

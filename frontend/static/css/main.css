@@ -31,6 +31,10 @@
   --radius-md: 12px;
   --radius-lg: 20px;
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --navbar-bg:          rgba(1, 10, 0, 0.85);
+  --navbar-bg-scrolled: rgba(1, 10, 0, 0.98);
+  --toggler-stroke:     rgba(255,255,255,0.85);
 }
 
 :root[data-theme="light"] {
@@ -44,6 +48,10 @@
   --text-primary: #0c1a01;
   --text-secondary: #4a4a4a;
   --text-muted: #6b7a70;
+
+  --navbar-bg:          rgba(255, 255, 255, 0.85);
+  --navbar-bg-scrolled: rgba(255, 255, 255, 0.98);
+  --toggler-stroke:     rgba(12,26,1,0.85);
 }
 
 /* ── Reset & Base ─────────────────────────────────────────────── */
@@ -68,7 +76,7 @@ body {
 
 /* Navbar */
 .navbar {
-  background: rgba(1, 10, 0, 0.85) !important;
+  background: var(--navbar-bg) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--bg-border);
@@ -78,7 +86,7 @@ body {
   min-height: 64px;
 }
 .navbar.scrolled {
-  background: rgba(1, 10, 0, 0.98) !important;
+  background: var(--navbar-bg-scrolled) !important;
   border-bottom-color: var(--cyan-primary);
   box-shadow: 0 0 30px var(--cyan-glow);
 }
@@ -90,12 +98,15 @@ body {
 .navbar-toggler-icon {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255,255,255,0.85%29' stroke-linecap='round' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
+:root[data-theme="light"] .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2812,26,1,0.85%29' stroke-linecap='round' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
 .navbar-collapse {
   background: transparent;
 }
 @media (max-width: 767px) {
   .navbar-collapse {
-    background: rgba(1, 10, 0, 0.98);
+    background: var(--navbar-bg-scrolled);
     border-bottom: 1px solid var(--bg-border);
     padding: 0 8px 16px;
     margin: 0 -12px;
@@ -308,7 +319,7 @@ body {
   font-weight: 500;
   font-size: 0.95rem;
   text-decoration: none;
-  padding: 14px 22px;
+  padding: 10px 22px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--bg-border);
   background: var(--bg-surface);
@@ -1355,7 +1366,9 @@ body {
   color: var(--text-secondary);
 }
 .btn-action-verify {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 12px;
   font-family: var(--font-mono);
   font-size: 0.72rem;

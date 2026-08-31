@@ -258,7 +258,7 @@ def generate_case_report_pdf(record, sections, signature, output_path):
     # 6. PREDICTED DIAGNOSIS & MACHINE LEARNING INFERENCE
     if "Predicted Diagnosis" in sections:
         pred_elements = [
-            Paragraph("Predicted Diagnosis", SECTION_STYLE),
+            Paragraph("Predicted Condition", SECTION_STYLE),
             _kv_table([
                 ("Predicted Condition", record.prediction_label or "Pending"),
                 ("Model Confidence", f"{record.confidence_score:.1f}%" if record.confidence_score else "—"),

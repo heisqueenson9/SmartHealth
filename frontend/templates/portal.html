@@ -176,7 +176,7 @@
       </div>
       <div class="col-12 col-sm-6 col-md-4">
         <label class="d-flex align-items-center gap-2" style="cursor:pointer; color:var(--text-primary);">
-          <input type="checkbox" id="pdfSec_final_diag" class="pdf-section-toggle" checked> Predicted Diagnosis
+          <input type="checkbox" id="pdfSec_final_diag" class="pdf-section-toggle" checked> Predicted Condition
         </label>
       </div>
       <div class="col-12 col-sm-6 col-md-4">
@@ -353,7 +353,7 @@
     </div>
 
     <div id="reportSection_final_diag" class="mb-4">
-      <h5 style="color:var(--cyan-primary); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px; font-size:0.95rem; margin-bottom:10px;"><i class="fa-solid fa-signature"></i> Predicted Diagnosis</h5>
+      <h5 style="color:var(--cyan-primary); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px; font-size:0.95rem; margin-bottom:10px;"><i class="fa-solid fa-signature"></i> Predicted Condition</h5>
       <p style="font-size:1.1rem; font-weight:600; color:var(--text-primary); margin:5px 0 0 0;">{{ record.final_diagnosis or record.prediction_label }}</p>
     </div>
 
@@ -1704,10 +1704,10 @@
       let html = `
           <div style="background:#ffffff; color:#111111; padding:24px; font-family:'DM Sans', sans-serif;">
       `;
-      
-      if (selectedSections.includes('logo')) {
+
+      if (selectedSections.includes('header') || selectedSections.includes('logo')) {
           html += `
-              <div style="text-align:center; margin-bottom:20px;">
+              <div class="shs-pdf-section" style="text-align:center; margin-bottom:20px;">
                 <h4 style="margin:5px 0 0 0; color:#111111; font-weight: bold;">Smart Health Sync Clinic</h4>
                 <small style="color:#555555;">Clinical Decision Support System</small>
               </div>
@@ -1716,7 +1716,7 @@
       
       if (selectedSections.includes('patient')) {
           html += `
-              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+              <div class="shs-pdf-section" style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
                 <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:10px; font-weight: bold;">Patient Information</h5>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size:0.88rem;">
                   <div><strong>Name:</strong> ${record.patient_name || 'Standalone Case'}</div>
@@ -1732,7 +1732,7 @@
       
       if (selectedSections.includes('biomarkers')) {
           html += `
-              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+              <div class="shs-pdf-section" style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
                 <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:10px; font-weight: bold;">Biomarker Results</h5>
                 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size:0.85rem;">
           `;
@@ -1752,7 +1752,7 @@
       
       if (selectedSections.includes('symptoms') && record.result && record.result.symptoms && record.result.symptoms.length > 0) {
           html += `
-              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:12px;">
+              <div class="shs-pdf-section" style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:12px;">
                 <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:10px; font-weight: bold;">Clinical Symptoms</h5>
                 <div style="display:flex; flex-wrap:wrap; gap:8px;">
           `;
@@ -1769,8 +1769,8 @@
       
       if (selectedSections.includes('final_diag')) {
           html += `
-              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
-                <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:5px; font-weight: bold;">Predicted Diagnosis</h5>
+              <div class="shs-pdf-section" style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+                <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:5px; font-weight: bold;">Predicted Condition</h5>
                 <p style="font-size:1.1rem; font-weight:600; color:#111111; margin:0;">${record.final_diagnosis || record.prediction}</p>
               </div>
           `;
@@ -1778,7 +1778,7 @@
       
       if (selectedSections.includes('confidence') || selectedSections.includes('ml_pred')) {
           html += `
-              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+              <div class="shs-pdf-section" style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
                 <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:10px; font-weight: bold;">Machine Learning Inference</h5>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size:0.88rem;">
                   <div><strong>Prediction Confidence:</strong> ${record.confidence.toFixed(1)}%</div>
@@ -1789,7 +1789,7 @@
       
       if (selectedSections.includes('ai_exp')) {
           html += `
-              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+              <div class="shs-pdf-section" style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
                 <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:10px; font-weight: bold;">AI Simplified Explanation</h5>
                 <div style="font-size:0.88rem; color:#333333; line-height:1.6;">${record.ai_explanation || 'No explanation generated.'}</div>
               </div>
@@ -1798,7 +1798,7 @@
       
       if (selectedSections.includes('doctor_notes')) {
           html += `
-              <div style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
+              <div class="shs-pdf-section" style="margin-bottom:20px; border-bottom:1px solid #dddddd; padding-bottom:8px;">
                 <h5 style="color:#8E9630; font-size:0.95rem; margin-bottom:10px; font-weight: bold;">Doctor Notes & Recommendations</h5>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size:0.88rem;">
                   <div>
@@ -1816,7 +1816,7 @@
       
       if (selectedSections.includes('signature')) {
           html += `
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px; padding-top:12px; border-top:1px dashed #dddddd;">
+              <div class="shs-pdf-section" style="display:flex; justify-content:space-between; align-items:center; margin-top:24px; padding-top:12px; border-top:1px dashed #dddddd;">
                 <div>
                   <small style="color:#555555; display:block;">Diagnosis Verdict Status</small>
                   <span style="display:inline-block; padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold; background:#d4edda; color:#155724;">Approved & Finalized</span>
@@ -1847,6 +1847,8 @@
     *{box-sizing:border-box;}
     html,body{background:#ffffff!important;color:#111111!important;font-family:'DM Sans',Arial,sans-serif;margin:0;padding:0;width:800px;}
     *{font-family:'DM Sans',Arial,sans-serif;}
+    .shs-pdf-section { page-break-inside: avoid; break-inside: avoid; }
+    table, tr { page-break-inside: avoid; break-inside: avoid; }
   </style>
 </head>
 <body>${html}</body>
@@ -1857,9 +1859,9 @@
               margin:      10,
               filename:    `SmartHealth-Report-${record.patient_reference || record.id}.pdf`,
               image:       { type: 'jpeg', quality: 0.98 },
-              // scrollX/Y:0 locks capture at origin — prevents left-blank offset bug
               html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
-              jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
+              jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+              pagebreak:   { mode: ['css', 'legacy'], avoid: ['.shs-pdf-section', 'tr', 'td'] }
           };
 
           setTimeout(() => {
