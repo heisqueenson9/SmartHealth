@@ -1471,7 +1471,7 @@ body.portal-page .dashboard-sidebar {
 .dashboard-sidebar {
   width: 260px;
   flex-shrink: 0;
-  background: rgba(5, 14, 4, 0.92);
+  background: var(--bg-surface);
   border-right: 1px solid var(--bg-border);
   display: flex;
   flex-direction: column;
@@ -1489,7 +1489,7 @@ body.portal-page .dashboard-sidebar {
   border-bottom: 1px solid var(--bg-border);
 }
 .sidebar-brand .nav-logo { font-size: 0.95rem; }
-.sidebar-brand-text { font-family: var(--font-display); font-weight: 700; }
+.sidebar-brand-text { font-family: var(--font-display); font-weight: 700; color: var(--text-primary); }
 
 .sidebar-user {
   display: flex;
@@ -1501,8 +1501,8 @@ body.portal-page .dashboard-sidebar {
 .sidebar-avatar {
   width: 40px; height: 40px;
   border-radius: 50%;
-  background: rgba(197, 231, 16, 0.12);
-  border: 1px solid rgba(197, 231, 16, 0.25);
+  background: var(--cyan-glow);
+  border: 1px solid var(--bg-border);
   display: flex; align-items: center; justify-content: center;
   color: var(--cyan-primary);
   flex-shrink: 0;
