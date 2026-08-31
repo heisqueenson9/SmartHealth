@@ -153,7 +153,7 @@ async function proceedToStep2() {
         console.error("[SmartHealth] Case creation failed:", error);
         showToast(error.message || "Unable to save case.", "error");
     } finally {
-        if (btn) { btn.disabled = false; btn.textContent = "Save & Continue to Symptoms →"; }
+        if (btn) { btn.disabled = false; btn.textContent = "Next →"; }
     }
 }
 
@@ -746,69 +746,122 @@ function buildDynamicBiomarkerForm(activeInvestigations) {
         return;
     }
 
-    const requiredKeys = new Set();
-    activeInvestigations.forEach(inv => {
-        const keys = (inv.investigation && Array.isArray(inv.investigation.biomarker_keys)) 
-            ? inv.investigation.biomarker_keys 
-            : (Array.isArray(inv.biomarker_keys) ? inv.biomarker_keys : []);
-        keys.forEach(k => requiredKeys.add(k));
+    // Group active investigations by priority while preserving clinical order
+    const priorityGroups = { "High": [], "Medium": [], "Low": [], "Other": [] };
+    activeInvestigations.forEach(item => {
+        const prio = item.priority || (item.investigation && item.investigation.priority) || "High";
+        if (priorityGroups[prio]) {
+            priorityGroups[prio].push(item);
+        } else {
+            priorityGroups["Other"].push(item);
+        }
     });
 
-    if (requiredKeys.size === 0) {
+    const priorityColors = {
+        "High": "var(--red-critical)",
+        "Medium": "var(--amber-warn)",
+        "Low": "var(--cyan-primary)",
+        "Other": "var(--cyan-dim)"
+    };
+
+    let hasAnyBiomarkers = false;
+
+    ["High", "Medium", "Low", "Other"].forEach(prioKey => {
+        const invList = priorityGroups[prioKey];
+        if (!invList || invList.length === 0) return;
+
+        const prioColor = priorityColors[prioKey];
+
+        const prioHeader = document.createElement("div");
+        prioHeader.className = "d-flex align-items-center gap-2 mb-3 mt-4";
+        prioHeader.innerHTML = `
+            <span style="font-size:0.75rem; color:${prioColor}; border:1px solid ${prioColor}; padding:2px 10px; border-radius:12px; font-weight:700; text-transform:uppercase;">
+                ${escapeHtml(prioKey)} Priority Investigations
+            </span>
+            <hr style="flex-grow:1; border-color:rgba(255,255,255,0.1); margin:0;">
+        `;
+        container.appendChild(prioHeader);
+
+        invList.forEach(item => {
+            const invObj = item.investigation || item;
+            const invName = invObj.name || invObj.investigation_name || item.investigation_name || "Investigation Panel";
+            const invCategory = invObj.category || item.category || "Laboratory";
+            const keys = (invObj && Array.isArray(invObj.biomarker_keys)) 
+                ? invObj.biomarker_keys 
+                : (Array.isArray(item.biomarker_keys) ? item.biomarker_keys : []);
+
+            if (keys.length > 0) hasAnyBiomarkers = true;
+
+            const panelCard = document.createElement("div");
+            panelCard.className = "portal-card mb-4";
+            panelCard.style.cssText = "background:rgba(255,255,255,0.015); border:1px solid rgba(255,255,255,0.08);";
+
+            let cardHtml = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 style="color:var(--text-primary); font-size:0.95rem; margin:0; font-family:var(--font-display);">
+                            <i class="fa-solid fa-vial-virus" style="color:var(--cyan-primary); margin-right:8px;"></i>${escapeHtml(invName)}
+                        </h5>
+                        <span style="font-size:0.75rem; color:var(--text-muted);">Category: ${escapeHtml(invCategory)} &middot; ${keys.length} biomarkers</span>
+                    </div>
+                </div>
+                <div class="row g-3">
+            `;
+
+            keys.forEach(k => {
+                const meta = BIOMARKER_META[k] || { unit: "", min: 0, max: 1000, step: 0.1, placeholder: "" };
+                const currentVal = (biomarkerValues[k] !== undefined && biomarkerValues[k] !== null) ? biomarkerValues[k] : "";
+                
+                cardHtml += `
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div class="auth-form-group mb-0">
+                            <label class="auth-label" style="font-size:0.82rem; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+                                <span>${escapeHtml(k)}</span>
+                                <span style="color:var(--cyan-primary); font-size:0.75rem; font-weight:normal;">${escapeHtml(meta.unit)}</span>
+                            </label>
+                            <input type="number" 
+                                   class="auth-input biomarker-input" 
+                                   data-biomarker-key="${escapeHtml(k)}" 
+                                   step="${meta.step}" 
+                                   min="${meta.min}" 
+                                   max="${meta.max}" 
+                                   placeholder="${escapeHtml(meta.placeholder)}" 
+                                   value="${currentVal}"
+                                   onchange="updateBiomarkerValue('${escapeHtml(k)}', this.value)"
+                                   oninput="updateBiomarkerValue('${escapeHtml(k)}', this.value)">
+                        </div>
+                    </div>
+                `;
+            });
+
+            cardHtml += `</div>`;
+            panelCard.innerHTML = cardHtml;
+            container.appendChild(panelCard);
+        });
+    });
+
+    if (!hasAnyBiomarkers) {
         container.innerHTML = `
             <div class="col-12 p-4 text-center text-danger portal-card" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06);">
                 <i class="fa-solid fa-circle-exclamation mb-2" style="font-size:1.5rem;"></i>
-                <p style="margin:0;">The selected investigation panel has no biomarker configuration defined.</p>
+                <p style="margin:0;">The selected investigation panels have no biomarker configuration defined.</p>
             </div>
         `;
-        return;
     }
-    
-    const METABOLIC_KEYS = ["Glucose", "HbA1c", "Insulin", "BMI"];
-    const CARDIOPULMONARY_KEYS = ["Cholesterol", "LDL Cholesterol", "HDL Cholesterol", "Triglycerides", "Systolic Blood Pressure", "Diastolic Blood Pressure", "Heart Rate", "Troponin", "C-reactive Protein"];
-    const HEMATOLOGY_KEYS = ["Hemoglobin", "Platelets", "White Blood Cells", "Red Blood Cells", "Hematocrit", "Mean Corpuscular Volume", "Mean Corpuscular Hemoglobin", "Mean Corpuscular Hemoglobin Concentration"];
-    const LFT_KFT_KEYS = ["ALT", "AST", "Creatinine"];
-    const TYPHOID_KEYS = ["Widal O Titer", "Widal H Titer"];
+}
 
-    const categorised = new Set([
-        ...METABOLIC_KEYS, ...CARDIOPULMONARY_KEYS,
-        ...HEMATOLOGY_KEYS, ...LFT_KFT_KEYS, ...TYPHOID_KEYS
-    ]);
-    const OTHER_KEYS = Array.from(requiredKeys).filter(k => !categorised.has(k));
-
-    const groups = [
-        { title: "Metabolic & Glycemic Indices", keys: METABOLIC_KEYS.filter(k => requiredKeys.has(k)) },
-        { title: "Cardiovascular & Inflammatory Markers", keys: CARDIOPULMONARY_KEYS.filter(k => requiredKeys.has(k)) },
-        { title: "Full Blood Count (FBC / Hematology)", keys: HEMATOLOGY_KEYS.filter(k => requiredKeys.has(k)) },
-        { title: "Hepatic & Renal Markers", keys: LFT_KFT_KEYS.filter(k => requiredKeys.has(k)) },
-        { title: "Special Serology Titers", keys: TYPHOID_KEYS.filter(k => requiredKeys.has(k)) },
-        { title: "Additional Diagnostic Biomarkers", keys: OTHER_KEYS.filter(k => requiredKeys.has(k)) }
-    ];
-
-    groups.forEach(group => {
-        if (group.keys.length === 0) return;
-        
-        const grpCard = document.createElement("div");
-        grpCard.className = "portal-card mb-4";
-        grpCard.style.cssText = "background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.06);";
-        
-        let rowHtml = `<div class="biomarker-group-title mb-3" style="color:var(--cyan-primary); font-family:var(--font-display); font-size:1rem;">${group.title}</div><div class="row g-3">`;
-        
-        group.keys.forEach(k => {
-            const meta = BIOMARKER_META[k] || { unit: "", min: 0, max: 1000, step: 0.1, placeholder: "" };
-            const currentVal = biomarkerValues[k] !== undefined ? biomarkerValues[k] : "";
-            rowHtml += `
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                  <label class="input-label" style="font-size:0.85rem; color:var(--text-primary); display:block; margin-bottom:4px;">
-                    ${escapeHtml(k)}${meta.unit ? ` <span style="color:var(--text-secondary); font-size:0.75rem;">(${meta.unit})</span>` : ''}
-                  </label>
-                  <input type="number" step="${meta.step}" min="${meta.min}" max="${meta.max}" placeholder="${escapeHtml(meta.placeholder)}" class="biomarker-input auth-input" data-biomarker-key="${escapeHtml(k)}" value="${currentVal}">
-                </div>
-            `;
-        });
-        rowHtml += `</div>`;
-        grpCard.innerHTML = rowHtml;
-        container.appendChild(grpCard);
+function updateBiomarkerValue(key, value) {
+    const val = parseFloat(value);
+    if (!Number.isNaN(val)) {
+        biomarkerValues[key] = val;
+    } else {
+        delete biomarkerValues[key];
+    }
+    const inputs = document.querySelectorAll(`.biomarker-input[data-biomarker-key="${key}"]`);
+    inputs.forEach(inp => {
+        if (inp.value !== value) {
+            inp.value = value;
+        }
     });
 }
 

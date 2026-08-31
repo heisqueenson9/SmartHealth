@@ -2328,10 +2328,22 @@ def run_case_prediction(case_id):
             except (ValueError, TypeError):
                 pass
 
+        # Retrieve recorded symptoms and preliminary assessment candidates for case
+        from backend.database.models import PreliminaryAssessment
+        symptoms_list = [cs.display_name for cs in record.case_symptoms.all()]
+        
+        pa_record = PreliminaryAssessment.query.filter_by(case_id=case_id).order_by(PreliminaryAssessment.created_at.desc()).first()
+        preliminary_cand_list = [c.condition_name for c in pa_record.candidates.all()] if pa_record else []
+
         # ── CRITICAL PATH: the actual prediction. If this fails, we genuinely
         # have nothing to return, so this part alone stays inside the outer
         # try/except. Everything below this point is a side-effect. ──
-        res = model_manager.predict(full_features, model_key)
+        res = model_manager.predict(
+            full_features, 
+            model_key, 
+            symptoms=symptoms_list, 
+            preliminary_candidates=preliminary_cand_list
+        )
 
         features_actually_entered = sorted(entered_keys)
         features_defaulted = sorted(set(HEALTHY_BASELINE.keys()) - set(entered_keys))
@@ -2364,12 +2376,7 @@ def run_case_prediction(case_id):
             predicted_diagnosis=res["prediction"],
             probability=res["confidence"],
             probability_scores_json=json.dumps(res.get("probabilities", {})),
-            feature_importance_json=json.dumps(res.get("feature_importance", {})),
-            data_coverage_json=json.dumps({
-                "entered": features_actually_entered,
-                "defaulted": features_defaulted,
-                "coverage_pct": coverage_pct,
-            })
+            feature_importance_json=json.dumps(res.get("feature_importance", {}))
         )
         db.session.add(mp)
         db.session.commit()

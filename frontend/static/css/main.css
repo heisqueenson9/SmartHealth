@@ -631,8 +631,19 @@ body {
 }
 .submit-btn:hover    { transform: translateY(-2px); box-shadow: 0 0 60px var(--cyan-glow), 0 8px 30px rgba(0,0,0,0.4); }
 .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+.btn-nav-next {
+  width: auto !important;
+  min-width: 130px;
+  max-width: 220px;
+  padding: 10px 24px !important;
+  font-size: 0.88rem !important;
+  letter-spacing: 0.03em !important;
+  white-space: nowrap;
+  margin: 0;
+}
 @media (max-width: 576px) {
   .submit-btn { font-size: 0.8rem; padding: 13px 16px; letter-spacing: 0.02em; }
+  .btn-nav-next { padding: 9px 18px !important; font-size: 0.82rem !important; min-width: 100px; }
 }
 
 /* Spinner */
