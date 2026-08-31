@@ -558,6 +558,14 @@ function downloadCustomReportPDF(id, patientRef) {
                     -webkit-print-color-adjust: exact !important;
                     print-color-adjust: exact !important;
                 }
+                .portal-card, .printable-report-wrapper > div, table, tr, .biomarkers-grid, .biomarker-item {
+                    page-break-inside: avoid !important;
+                    break-inside: avoid !important;
+                }
+                h1, h2, h3, h4, h5, h6, .portal-section-title {
+                    page-break-after: avoid !important;
+                    break-after: avoid !important;
+                }
                 #pdf-status {
                     position: fixed; top: 10px; right: 10px;
                     background: #2a7a4b; color: #fff;
@@ -581,7 +589,8 @@ function downloadCustomReportPDF(id, patientRef) {
                         filename:    '${filename}',
                         image:       { type: 'jpeg', quality: 0.98 },
                         html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
-                        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak:   { mode: ['avoid-all', 'css', 'legacy'] }
                     };
                     html2pdf().set(opt).from(content).save().then(function() {
                         status.textContent = 'Done! You can close this tab.';

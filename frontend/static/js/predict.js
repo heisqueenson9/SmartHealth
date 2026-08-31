@@ -867,6 +867,9 @@ function updateBiomarkerValue(key, value) {
 
 // Fixed: Post results to actual selected investigation IDs instead of hardcoded /investigations/1/results
 async function proceedToStep6() {
+    const btn = document.getElementById("btnStep5Next");
+    if (btn) { btn.disabled = true; btn.textContent = "Running ML Prediction..."; }
+    
     const inputs = document.querySelectorAll(".biomarker-input");
     const enteredBiomarkers = {};
     
@@ -883,6 +886,7 @@ async function proceedToStep6() {
 
     if (Object.keys(enteredBiomarkers).length === 0) {
         showToast("Please enter at least one biomarker test result.", "warning");
+        if (btn) { btn.disabled = false; btn.textContent = "Run Diagnosis \u2192"; }
         return;
     }
 
@@ -928,6 +932,8 @@ async function proceedToStep6() {
     } catch (error) {
         console.error(error);
         showToast(error.message, "error");
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = "Run Diagnosis \u2192"; }
     }
 }
 
