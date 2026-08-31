@@ -587,7 +587,7 @@
               <span id="manage-status-{{ doc.id }}" class="status-badge status-{{ doc.status }}">{{ doc.status }}</span>
             </td>
             <td>
-              <div class="d-flex gap-2">
+              <div class="d-flex gap-2 admin-actions">
                 {% if doc.status == 'approved' %}
                 <button data-doc-id="{{ doc.id }}" onclick="toggleDoctorStatus(this.dataset.docId)" id="btn-toggle-{{ doc.id }}" class="btn-action-verify btn-reject" style="background:rgba(255,153,102,0.1); color:#ff9966; border-color:rgba(255,153,102,0.2);">Deactivate</button>
                 {% else %}

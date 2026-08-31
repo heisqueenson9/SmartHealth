@@ -2400,3 +2400,28 @@ h1, h2, h3, h4, h5, h6, p, span, a, li, td, th, label, input, textarea, select, 
     min-height: 40px;
   }
 }
+
+/* ── Doctor Account Management — Delete/Deactivate alignment ── */
+.admin-table td {
+  vertical-align: middle;
+}
+.admin-actions {
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+.admin-actions .btn-action-verify {
+  white-space: nowrap;
+  min-width: 92px;
+  justify-content: center;
+}
+
+/* ── Site-wide desktop button sizing parity (general fix) ───── */
+@media (hover: hover) and (pointer: fine) {
+  .nav-link, .sidebar-link, .btn-primary, .btn-outline, .auth-btn,
+  .preset-btn, .btn-action-verify, .print-result-btn {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
