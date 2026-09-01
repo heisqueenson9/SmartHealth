@@ -191,27 +191,42 @@
   </script>
 
   <script>
-    const themeBtn = document.getElementById('theme-toggle');
-    if (themeBtn) {
-      function applyIcon() {
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        themeBtn.innerHTML = isLight
+    function updateThemeUI() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const navbarBtn = document.getElementById('theme-toggle');
+      if (navbarBtn) {
+        navbarBtn.innerHTML = isLight
           ? '<i class="fa-solid fa-moon"></i>'
           : '<i class="fa-solid fa-sun"></i>';
       }
-      applyIcon();
-      themeBtn.addEventListener('click', () => {
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        if (isLight) {
-          document.documentElement.removeAttribute('data-theme');
-          localStorage.setItem('shs-theme', 'dark');
-        } else {
-          document.documentElement.setAttribute('data-theme', 'light');
-          localStorage.setItem('shs-theme', 'light');
-        }
-        applyIcon();
-      });
+      const portalBtn = document.getElementById('portal-theme-toggle');
+      if (portalBtn) {
+        portalBtn.innerHTML = isLight
+          ? '<i class="fa-solid fa-moon"></i><span>Dark Mode</span>'
+          : '<i class="fa-solid fa-sun"></i><span>Light Mode</span>';
+      }
     }
+
+    function toggleTheme() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('shs-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('shs-theme', 'light');
+      }
+      updateThemeUI();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateThemeUI();
+      const navbarBtn = document.getElementById('theme-toggle');
+      if (navbarBtn) navbarBtn.addEventListener('click', toggleTheme);
+      const portalBtn = document.getElementById('portal-theme-toggle');
+      if (portalBtn) portalBtn.addEventListener('click', toggleTheme);
+    });
+    updateThemeUI();
   </script>
 </body>
 </html>
