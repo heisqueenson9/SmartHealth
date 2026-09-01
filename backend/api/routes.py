@@ -2102,8 +2102,27 @@ def get_investigation_recommendations(case_id):
         return err_resp
 
     try:
-        from backend.database.models import PreliminaryAssessment, InvestigationRule, InvestigationCatalog
+        from backend.database.models import PreliminaryAssessment, InvestigationRule, InvestigationCatalog, CaseInvestigation
         
+        saved_ci = CaseInvestigation.query.filter_by(case_id=case_id).all()
+        if saved_ci:
+            recs = []
+            for ci in saved_ci:
+                inv_dict = ci.investigation.to_dict() if ci.investigation else None
+                recs.append({
+                    "id": ci.id,
+                    "investigation_id": ci.investigation_id,
+                    "investigation": inv_dict,
+                    "priority": ci.priority,
+                    "reason": ci.reason or "Selected for clinical evaluation",
+                    "doctor_selected": ci.doctor_selected,
+                    "required_for_model": ci.required_for_model
+                })
+            return jsonify({
+                "status": "success",
+                "recommendations": recs
+            }), 200
+
         pa = PreliminaryAssessment.query.filter_by(case_id=case_id).order_by(PreliminaryAssessment.created_at.desc()).first()
         if not pa:
             return jsonify({
@@ -2124,7 +2143,7 @@ def get_investigation_recommendations(case_id):
                 recs.append({
                     "investigation_id": r.recommended_investigation_id,
                     "investigation": r.recommended_investigation.to_dict(),
-                    "priority": r.priority,
+                    "priority": r.priority or "High",
                     "reason": r.reason,
                     "source_rule_id": r.id,
                     "doctor_selected": True,

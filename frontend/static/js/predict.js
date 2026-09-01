@@ -705,15 +705,15 @@ const BIOMARKER_META = {
     "Glucose": { unit: "mg/dL", min: 50, max: 300, step: 1, placeholder: "e.g. 95" },
     "Cholesterol": { unit: "mg/dL", min: 100, max: 400, step: 1, placeholder: "e.g. 180" },
     "Hemoglobin": { unit: "g/dL", min: 5, max: 25, step: 0.1, placeholder: "e.g. 14.5" },
-    "Platelets": { unit: "x10\u00b3/\u00b5L", min: 50, max: 600, step: 1, placeholder: "e.g. 250" },
-    "White Blood Cells": { unit: "x10\u00b3/\u00b5L", min: 1, max: 20, step: 0.1, placeholder: "e.g. 7.5" },
-    "Red Blood Cells": { unit: "x10\u2076/\u00b5L", min: 2, max: 8, step: 0.1, placeholder: "e.g. 4.8" },
+    "Platelets": { unit: "x10³/\u00b5L", min: 50, max: 600, step: 1, placeholder: "e.g. 250" },
+    "White Blood Cells": { unit: "x10³/\u00b5L", min: 1, max: 20, step: 0.1, placeholder: "e.g. 7.5" },
+    "Red Blood Cells": { unit: "x10⁶/\u00b5L", min: 2, max: 8, step: 0.1, placeholder: "e.g. 4.8" },
     "Hematocrit": { unit: "%", min: 20, max: 60, step: 0.1, placeholder: "e.g. 42" },
     "Mean Corpuscular Volume": { unit: "fL", min: 50, max: 120, step: 0.1, placeholder: "e.g. 88" },
     "Mean Corpuscular Hemoglobin": { unit: "pg", min: 15, max: 45, step: 0.1, placeholder: "e.g. 30" },
     "Mean Corpuscular Hemoglobin Concentration": { unit: "g/dL", min: 25, max: 40, step: 0.1, placeholder: "e.g. 34" },
-    "Insulin": { unit: "\u00b5IU/mL", min: 1, max: 100, step: 0.1, placeholder: "e.g. 10" },
-    "BMI": { unit: "kg/m\u00b2", min: 10, max: 50, step: 0.1, placeholder: "e.g. 23.5" },
+    "Insulin": { unit: "µIU/mL", min: 1, max: 100, step: 0.1, placeholder: "e.g. 10" },
+    "BMI": { unit: "kg/m²", min: 10, max: 50, step: 0.1, placeholder: "e.g. 23.5" },
     "Systolic Blood Pressure": { unit: "mmHg", min: 70, max: 220, step: 1, placeholder: "e.g. 120" },
     "Diastolic Blood Pressure": { unit: "mmHg", min: 40, max: 130, step: 1, placeholder: "e.g. 80" },
     "Triglycerides": { unit: "mg/dL", min: 30, max: 500, step: 1, placeholder: "e.g. 120" },
@@ -726,8 +726,30 @@ const BIOMARKER_META = {
     "Creatinine": { unit: "mg/dL", min: 0.1, max: 10, step: 0.1, placeholder: "e.g. 0.9" },
     "Troponin": { unit: "ng/mL", min: 0, max: 2, step: 0.01, placeholder: "e.g. 0.02" },
     "C-reactive Protein": { unit: "mg/L", min: 0, max: 100, step: 0.1, placeholder: "e.g. 3" },
+    "TSH": { unit: "µIU/mL", min: 0.1, max: 20, step: 0.01, placeholder: "e.g. 2.1" },
+    "Free T4": { unit: "ng/dL", min: 0.4, max: 4.0, step: 0.01, placeholder: "e.g. 1.2" },
+    "Free T3": { unit: "pg/mL", min: 1.0, max: 10.0, step: 0.01, placeholder: "e.g. 3.1" },
+    "RBC": { unit: "x10⁶/µL", min: 2, max: 8, step: 0.1, placeholder: "e.g. 4.8" },
+    "WBC": { unit: "x10³/µL", min: 1, max: 20, step: 0.1, placeholder: "e.g. 7.5" },
+    "MCV": { unit: "fL", min: 50, max: 120, step: 0.1, placeholder: "e.g. 88" },
+    "MCH": { unit: "pg", min: 15, max: 45, step: 0.1, placeholder: "e.g. 30" },
+    "MCHC": { unit: "g/dL", min: 25, max: 40, step: 0.1, placeholder: "e.g. 34" },
+    "LDL": { unit: "mg/dL", min: 30, max: 300, step: 1, placeholder: "e.g. 95" },
+    "HDL": { unit: "mg/dL", min: 10, max: 100, step: 1, placeholder: "e.g. 55" },
+    "CRP": { unit: "mg/L", min: 0, max: 100, step: 0.1, placeholder: "e.g. 3" },
+    "Systolic BP": { unit: "mmHg", min: 70, max: 220, step: 1, placeholder: "e.g. 120" },
+    "Diastolic BP": { unit: "mmHg", min: 40, max: 130, step: 1, placeholder: "e.g. 80" },
     "Widal O Titer": { unit: "titer ratio", min: 0, max: 640, step: 1, placeholder: "e.g. 160" },
     "Widal H Titer": { unit: "titer ratio", min: 0, max: 640, step: 1, placeholder: "e.g. 160" }
+};
+
+const PANEL_FALLBACK_KEYS = {
+    "INV_FBC": ["Hemoglobin", "Platelets", "White Blood Cells", "Red Blood Cells", "Hematocrit", "Mean Corpuscular Volume", "Mean Corpuscular Hemoglobin", "Mean Corpuscular Hemoglobin Concentration"],
+    "INV_GLUCOSE_HBA1C": ["Glucose", "HbA1c", "Insulin"],
+    "INV_LIPID_PROFILE": ["Cholesterol", "Triglycerides", "LDL Cholesterol", "HDL Cholesterol"],
+    "INV_CARDIAC_MARKERS": ["Troponin", "C-reactive Protein", "Heart Rate", "Systolic Blood Pressure", "Diastolic Blood Pressure"],
+    "INV_LFT_KFT": ["ALT", "AST", "Creatinine", "BMI"],
+    "INV_THYROID_PANEL": ["TSH", "Free T4", "Free T3"]
 };
 
 // ── 6. Dynamic Lab Results Entry Form ───────────────────────────────
@@ -786,9 +808,30 @@ function buildDynamicBiomarkerForm(activeInvestigations) {
             const invObj = item.investigation || item;
             const invName = invObj.name || invObj.investigation_name || item.investigation_name || "Investigation Panel";
             const invCategory = invObj.category || item.category || "Laboratory";
-            const keys = (invObj && Array.isArray(invObj.biomarker_keys)) 
-                ? invObj.biomarker_keys 
-                : (Array.isArray(item.biomarker_keys) ? item.biomarker_keys : []);
+            const invCode = invObj.code || item.recommended_code || item.code || "";
+
+            let keys = [];
+            if (invObj && Array.isArray(invObj.biomarker_keys) && invObj.biomarker_keys.length > 0) {
+                keys = invObj.biomarker_keys;
+            } else if (Array.isArray(item.biomarker_keys) && item.biomarker_keys.length > 0) {
+                keys = item.biomarker_keys;
+            } else if (invCode && PANEL_FALLBACK_KEYS[invCode]) {
+                keys = PANEL_FALLBACK_KEYS[invCode];
+            } else {
+                // Fallback by name match if code is missing
+                for (const [codeKey, fallbackList] of Object.entries(PANEL_FALLBACK_KEYS)) {
+                    if (invName.toLowerCase().includes(codeKey.toLowerCase()) || 
+                        (codeKey === "INV_FBC" && invName.toLowerCase().includes("blood count")) ||
+                        (codeKey === "INV_GLUCOSE_HBA1C" && invName.toLowerCase().includes("glucose")) ||
+                        (codeKey === "INV_LIPID_PROFILE" && invName.toLowerCase().includes("lipid")) ||
+                        (codeKey === "INV_CARDIAC_MARKERS" && invName.toLowerCase().includes("cardiac")) ||
+                        (codeKey === "INV_LFT_KFT" && invName.toLowerCase().includes("metabolic")) ||
+                        (codeKey === "INV_THYROID_PANEL" && invName.toLowerCase().includes("thyroid"))) {
+                        keys = fallbackList;
+                        break;
+                    }
+                }
+            }
 
             if (keys.length > 0) hasAnyBiomarkers = true;
 
