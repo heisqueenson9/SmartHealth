@@ -915,17 +915,28 @@ async function proceedToStep6() {
     
     const inputs = document.querySelectorAll(".biomarker-input");
     const enteredBiomarkers = {};
+    const missingKeys = [];
     
     inputs.forEach(inp => {
         const key = inp.dataset.biomarkerKey;
         if (key) {
-            const val = parseFloat(inp.value);
-            if (!Number.isNaN(val)) {
+            const rawVal = inp.value ? inp.value.trim() : "";
+            const val = parseFloat(rawVal);
+            if (rawVal === "" || Number.isNaN(val)) {
+                missingKeys.push(key);
+            } else {
                 enteredBiomarkers[key] = val;
                 biomarkerValues[key] = val;
             }
         }
     });
+
+    if (missingKeys.length > 0) {
+        const displayMissing = missingKeys.slice(0, 3).join(", ") + (missingKeys.length > 3 ? "..." : "");
+        showToast(`Please enter valid numeric values for all required biomarkers (${displayMissing}).`, "warning");
+        if (btn) { btn.disabled = false; btn.textContent = "Run Diagnosis"; }
+        return;
+    }
 
     if (Object.keys(enteredBiomarkers).length === 0) {
         showToast("Please enter at least one biomarker test result.", "warning");
