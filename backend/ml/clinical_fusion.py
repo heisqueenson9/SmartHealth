@@ -161,17 +161,9 @@ def fuse_clinical_evidence(
 
     raw_combined = {}
     for c in ALLOWED_CLASSES:
-        raw_combined[c] = (weight_sym * stage_a_symptom[c]) + (weight_bio * stage_b_biomarker[c])
+        raw_combined[c] = round((weight_sym * stage_a_symptom[c]) + (weight_bio * stage_b_biomarker[c]), 2)
 
-    # Softmax / Percentage normalization
-    total_score = sum(raw_combined.values())
-    if total_score <= 0:
-        combined_evidence = {c: 16.67 for c in ALLOWED_CLASSES}
-    else:
-        combined_evidence = {
-            c: round((raw_combined[c] / total_score) * 100.0, 2)
-            for c in ALLOWED_CLASSES
-        }
+    combined_evidence = {c: min(100.0, max(0.0, raw_combined[c])) for c in ALLOWED_CLASSES}
 
     # Find highest evidence class
     predicted_diagnosis = max(combined_evidence, key=combined_evidence.get)

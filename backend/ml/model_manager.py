@@ -313,23 +313,32 @@ class ModelManager:
                 f"Missing: {self.missing_models}, Corrupted: {self.corrupted_models}"
             )
 
-        # 1. Normalize raw clinical values to 0-1 range via central normalize_input
-        normalized_features = normalize_input(features_dict)
+        # Clinical reference normal midpoints for unselected/missing features so they remain neutral (z=0)
+        DEFAULT_CLINICAL_NORMALS = {
+            "Glucose": 90.0, "Cholesterol": 180.0, "Hemoglobin": 14.0, "Platelets": 250.0,
+            "White Blood Cells": 6.5, "Red Blood Cells": 4.8, "Hematocrit": 42.0,
+            "Mean Corpuscular Volume": 88.0, "Mean Corpuscular Hemoglobin": 30.0,
+            "Mean Corpuscular Hemoglobin Concentration": 34.0, "Insulin": 10.0, "BMI": 23.5,
+            "Systolic Blood Pressure": 120.0, "Diastolic Blood Pressure": 80.0, "Triglycerides": 120.0,
+            "HbA1c": 5.4, "LDL Cholesterol": 95.0, "HDL Cholesterol": 55.0, "ALT": 25.0,
+            "AST": 22.0, "Heart Rate": 72.0, "Creatinine": 0.9, "Troponin": 0.01,
+            "C-reactive Protein": 3.0
+        }
 
-        # 2. Validate all 24 required features are present
-        missing_features = [f for f in self.features if f not in normalized_features]
-        if missing_features:
-            raise ValueError(f"Missing biomarker inputs: {missing_features}")
+        feature_vector = []
+        for f in self.features:
+            if f in features_dict and features_dict[f] is not None and features_dict[f] != "":
+                try:
+                    val = float(features_dict[f])
+                except (TypeError, ValueError) as exc:
+                    raise ValueError(f"Invalid numeric value for {f}: {features_dict[f]}") from exc
+            else:
+                val = float(DEFAULT_CLINICAL_NORMALS.get(f, 0.0))
+            feature_vector.append(val)
 
-        try:
-            X_raw = np.array(
-                [float(normalized_features[f]) for f in self.features],
-                dtype=np.float64,
-            ).reshape(1, -1)
-        except (TypeError, ValueError) as exc:
-            raise ValueError(f"Invalid numeric value in features: {exc}") from exc
+        X_raw = np.array(feature_vector, dtype=np.float64).reshape(1, -1)
 
-        # 3. Apply StandardScaler
+        # 3. Apply StandardScaler (fitted on raw clinical values during training)
         X = X_raw
         if self.scaler is not None:
             X = self.scaler.transform(X_raw)
