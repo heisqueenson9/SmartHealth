@@ -174,7 +174,7 @@ SmartHealth/
 ├── instance/
 │   └── smarthealth.db                 # Local SQLite database instance file
 ├── models/
-│   ├── best_model.pkl                 # Active best trained classifier binary (Decision Tree)
+│   ├── best_model.pkl                 # Trained classifier binary artifact (labeled best model in metadata)
 │   ├── decision_tree.pkl              # Trained Decision Tree classifier binary
 │   ├── label_encoder.pkl              # Scikit-learn LabelEncoder for 6 disease target classes
 │   ├── logistic_regression.pkl        # Trained Logistic Regression classifier binary
@@ -260,12 +260,12 @@ The machine learning pipeline evaluates 4 classification algorithms trained on 2
 
 | Classifier | Test Accuracy | Precision | Recall | Test F1-Score | CV Mean | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Decision Tree** ⭐️ | **64.86%** | **0.6675** | **0.6486** | **0.6537** | **0.6432** | **Active Best (`best_model.pkl`)** |
-| **Random Forest** | 70.27% | 0.7198 | 0.7027 | 0.6338 | 0.6568 | Valid (`random_forest.pkl`) |
+| **Random Forest** ⚡️ | **70.27%** | **0.7198** | **0.7027** | **0.6338** | **0.6568** | **Active Default (`random_forest.pkl` used at inference)** |
+| **Decision Tree** | 64.86% | 0.6675 | 0.6486 | 0.6537 | 0.6432 | Highest F1 in training, but not used at inference (`decision_tree.pkl`) |
 | **SVM (RBF Kernel)** | 66.67% | 0.6227 | 0.6667 | 0.6377 | 0.6409 | Valid (`support_vector_machine.pkl`) |
 | **Logistic Regression** | 57.66% | 0.6869 | 0.5766 | 0.5960 | 0.4545 | Baseline (`logistic_regression.pkl`) |
 
-*Note: In `metadata.json`, Decision Tree is designated as the active default best model (`best_model_key: decision_tree`, F1: 0.6537).*
+*Note on Model Selection Mismatch: Although `models/metadata.json` and `results_summary.json` designate Decision Tree as the top-performing model (`best_model_key: decision_tree`), live prediction endpoints across the codebase (such as `backend/api/routes.py` and `frontend/static/js/predict.js`) hardcode `random_forest` as the default classifier for inference. Consequently, Random Forest is the model actually used for live predictions in production.*
 
 ### Training Methodology
 - **Biomarker Features (24 total)**: Glucose, Cholesterol, Hemoglobin, Platelets, White Blood Cells, Red Blood Cells, Hematocrit, MCV, MCH, MCHC, Insulin, BMI, Systolic BP, Diastolic BP, Triglycerides, HbA1c, LDL Cholesterol, HDL Cholesterol, ALT, AST, Heart Rate, Creatinine, Troponin, C-reactive Protein.
