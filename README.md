@@ -256,14 +256,12 @@ erDiagram
 
 The machine learning pipeline evaluates 4 classification algorithms trained on 24 blood biomarkers across 6 target classes (*Anemia*, *Diabetes*, *Healthy*, *Heart Disease*, *Thalassemia*, *Thrombocytopenia*).
 
-### Benchmark Metrics Summary (from `results_summary.json` & `metadata.json`)
-
-| Classifier | Test Accuracy | Precision | Recall | Test F1-Score | CV Mean | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Random Forest** ⚡️ | **70.27%** | **0.7198** | **0.7027** | **0.6338** | **0.6568** | **Active Default (`random_forest.pkl` used at inference)** |
-| **Decision Tree** | 64.86% | 0.6675 | 0.6486 | 0.6537 | 0.6432 | Highest F1 in training, but not used at inference (`decision_tree.pkl`) |
-| **SVM (RBF Kernel)** | 66.67% | 0.6227 | 0.6667 | 0.6377 | 0.6409 | Valid (`support_vector_machine.pkl`) |
-| **Logistic Regression** | 57.66% | 0.6869 | 0.5766 | 0.5960 | 0.4545 | Baseline (`logistic_regression.pkl`) |
+| Model | Test Accuracy | Test F1-Score | CV Mean | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Random Forest** ⚡️ | **73.0%** | **0.6941** | **64.6%** | **Active Default (`random_forest.pkl` used at inference)** |
+| **Decision Tree** | 76.6% | 0.7704 | 62.1% | Highest scored in training, but not the one currently used at inference |
+| **SVM (RBF Kernel)** | 65.8% | 0.6325 | 63.0% | Valid (`support_vector_machine.pkl`) |
+| **Logistic Regression** | 55.9% | 0.5808 | 45.0% | Baseline (`logistic_regression.pkl`) |
 
 *Note on Model Selection Mismatch: Although `models/metadata.json` and `results_summary.json` designate Decision Tree as the top-performing model (`best_model_key: decision_tree`), live prediction endpoints across the codebase (such as `backend/api/routes.py` and `frontend/static/js/predict.js`) hardcode `random_forest` as the default classifier for inference. Consequently, Random Forest is the model actually used for live predictions in production.*
 
