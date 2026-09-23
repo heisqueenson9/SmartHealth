@@ -52,6 +52,23 @@
   --navbar-bg:          rgba(255, 255, 255, 0.85);
   --navbar-bg-scrolled: rgba(255, 255, 255, 0.98);
   --toggler-stroke:     rgba(12,26,1,0.85);
+
+  /* FIX: these 3 were never redefined for light mode, so they kept their
+     dark-mode values and became unreadable on a white background. */
+  --amber-warn: #8A6D00;     /* was #F4DF6B — contrast on white: 1.3:1 -> 4.9:1 */
+  --purple-neural: #7C3AED;  /* was #a855f7 — contrast on white: 4.0:1 -> 5.7:1 */
+  --red-critical: #D62839;   /* was #ff4757 — contrast on white: 3.3:1 -> 5.0:1 */
+}
+
+/* FIX: .btn-primary / .nav-cta-btn / .auth-btn all hardcode
+   background:#fff on hover while their text stays var(--bg-void),
+   which in light mode is almost white too — making the label vanish
+   on hover. This keeps dark mode untouched and fixes light mode only. */
+:root[data-theme="light"] .btn-primary:hover,
+:root[data-theme="light"] .nav-cta-btn:hover,
+:root[data-theme="light"] .auth-btn:hover {
+    background: var(--cyan-primary) !important;
+    color: #ffffff !important;
 }
 
 /* ── Reset & Base ─────────────────────────────────────────────── */
@@ -2080,11 +2097,50 @@ body.portal-page #cold-start-overlay {
 }
 
 
+/* ── Topbar Notification Button ── */
+.topbar-notif-btn {
+    position: fixed;
+    top: 16px;
+    right: 20px;
+    z-index: 1500;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--bg-border);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    transition: var(--transition);
+}
+.topbar-notif-btn:hover {
+    border-color: var(--cyan-primary);
+    color: var(--cyan-primary);
+}
+.topbar-notif-btn .sidebar-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    margin-left: 0;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    line-height: 16px;
+    text-align: center;
+}
+
 /* ── Notifications Panel Popover ── */
 .notifications-panel-popover {
     position: fixed;
-    top: 80px;
-    left: 270px;
+    top: 68px;
+    right: 20px;
+    left: auto;
     width: 320px;
     max-width: calc(100vw - 32px);
     max-height: 400px;

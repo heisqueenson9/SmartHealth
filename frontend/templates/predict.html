@@ -222,9 +222,14 @@
     <!-- STEP 5: LAB RESULTS ENTRY & BIOMARKER REFLOW                              -->
     <!-- ========================================================================= -->
     <div class="workflow-step-card" id="stepContainer5" style="display:none;">
-      <div class="form-section-header">
-        <span class="form-section-number">05</span>
-        <h3 class="form-section-title">Laboratory Results &amp; Biomarker Entry</h3>
+      <div class="form-section-header" style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span class="form-section-number">05</span>
+          <h3 class="form-section-title" style="margin:0;">Laboratory Results &amp; Biomarker Entry</h3>
+        </div>
+        <button type="button" class="btn-outline btn-sm" id="btnFillSampleBiomarkers" onclick="fillSampleBiomarkers()">
+          <i class="fa-solid fa-vial-circle-check"></i> Fill Sample Biomarkers (Demo)
+        </button>
       </div>
       <p style="color:var(--text-secondary); font-size:0.88rem; margin-bottom:20px;">
         Enter clinical test results using standard lab units (e.g. mg/dL, g/dL, %) for the selected investigations.

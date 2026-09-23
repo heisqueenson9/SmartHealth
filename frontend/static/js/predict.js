@@ -743,6 +743,46 @@ const BIOMARKER_META = {
     "Widal H Titer": { unit: "titer ratio", min: 0, max: 640, step: 1, placeholder: "e.g. 160" }
 };
 
+// ── Demo Helper: Fill Sample Biomarkers ─────────────────────────────
+// Populates every biomarker input currently on screen with a realistic
+// "normal range" demo value, so the workflow can be shown without typing
+// real lab numbers. Uses BIOMARKER_META's own example values.
+const SAMPLE_BIOMARKER_VALUES = {
+    "Glucose": 95, "Cholesterol": 180, "Hemoglobin": 14.5, "Platelets": 250,
+    "White Blood Cells": 7.5, "Red Blood Cells": 4.8, "Hematocrit": 42,
+    "Mean Corpuscular Volume": 88, "Mean Corpuscular Hemoglobin": 30,
+    "Mean Corpuscular Hemoglobin Concentration": 34, "Insulin": 10, "BMI": 23.5,
+    "Systolic Blood Pressure": 120, "Diastolic Blood Pressure": 80,
+    "Triglycerides": 120, "HbA1c": 5.4, "LDL Cholesterol": 95, "HDL Cholesterol": 55,
+    "ALT": 25, "AST": 22, "Heart Rate": 72, "Creatinine": 0.9, "Troponin": 0.02,
+    "C-reactive Protein": 3, "TSH": 2.1, "Free T4": 1.2, "Free T3": 3.1,
+    "RBC": 4.8, "WBC": 7.5, "MCV": 88, "MCH": 30, "MCHC": 34, "LDL": 95, "HDL": 55,
+    "CRP": 3, "Systolic BP": 120, "Diastolic BP": 80, "Widal O Titer": 80, "Widal H Titer": 80
+};
+
+function fillSampleBiomarkers() {
+    const inputs = document.querySelectorAll(".biomarker-input");
+    if (!inputs.length) {
+        showToast("No biomarker fields to fill yet. Select an investigation panel first.", "warning");
+        return;
+    }
+    inputs.forEach(inp => {
+        const key = inp.dataset.biomarkerKey;
+        const meta = BIOMARKER_META[key];
+        let sample = SAMPLE_BIOMARKER_VALUES[key];
+        if (sample === undefined && meta) {
+            sample = Math.round(((meta.min + meta.max) / 2) * 100) / 100; // fallback: range midpoint
+        }
+        if (sample !== undefined) {
+            inp.value = sample;
+            updateBiomarkerValue(key, String(sample));
+        }
+    });
+    showToast("Sample biomarker values populated for demo purposes.", "success");
+}
+
+window.fillSampleBiomarkers = fillSampleBiomarkers;
+
 const PANEL_FALLBACK_KEYS = {
     "INV_FBC": ["Hemoglobin", "Platelets", "White Blood Cells", "Red Blood Cells", "Hematocrit", "Mean Corpuscular Volume", "Mean Corpuscular Hemoglobin", "Mean Corpuscular Hemoglobin Concentration"],
     "INV_GLUCOSE_HBA1C": ["Glucose", "HbA1c", "Insulin"],

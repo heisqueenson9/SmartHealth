@@ -2513,52 +2513,20 @@ def generate_case_ai_summary(case_id):
 
 def execute_llm_chat_completion(messages):
     """
-    Executes chat completion prioritizing local Ollama (qwen3:8b) at OLLAMA_BASE_URL (http://localhost:11434).
-    Falls back to secondary cloud provider (Groq API) if Ollama is not running.
+    Executes chat completion using Groq's free-tier hosted models.
+    Tries a fast, currently-supported primary model first, then one
+    backup model, before falling back to the canned answer engine below.
     Returns (answer, status_code, err_json_dict).
     """
-    import urllib.request
     import json as py_json
+    import urllib.request
 
-    ollama_url = current_app.config.get("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
-    ollama_model = current_app.config.get("OLLAMA_MODEL", "qwen3:8b")
-
-    # 1. Attempt Local Ollama Execution
-    try:
-        req_payload = py_json.dumps({
-            "model": ollama_model,
-            "messages": messages,
-            "stream": False
-        }).encode("utf-8")
-
-        req = urllib.request.Request(
-            f"{ollama_url}/api/chat",
-            data=req_payload,
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
-
-        with urllib.request.urlopen(req, timeout=15) as response:
-            res_body = py_json.loads(response.read().decode("utf-8"))
-            if res_body.get("message") and res_body["message"].get("content"):
-                return res_body["message"]["content"].strip(), None, None
-    except urllib.error.HTTPError as http_err:
-        if http_err.code == 404:
-            logger.warning(f"[Ollama] Model '{ollama_model}' not installed on {ollama_url}.")
-            return None, 503, {"error": f"Qwen3-8B is not installed in Ollama. Please run: ollama pull {ollama_model}"}
-        else:
-            logger.warning(f"[Ollama] HTTP Error {http_err.code} from {ollama_url}: {http_err}.")
-    except Exception as ollama_err:
-        logger.info(f"[Ollama] Local Ollama service at {ollama_url} not reachable: {ollama_err}. Trying secondary provider...")
-
-    # 2. Secondary Cloud Provider Execution (Groq API)
     groq_api_key = current_app.config.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
     if groq_api_key:
-        groq_models = [
-            "openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.6-27b",
-            "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "deepseek-r1-distill-llama-70b",
-            "llama3-70b-8192", "llama3-8b-8192", "mixtral-8x7b-32768", "gemma2-9b-it"
-        ]
+        # Both models are on Groq's free tier and currently supported (2026).
+        # llama-3.1-8b-instant is fast and reliable; llama-3.3-70b-versatile
+        # is the backup if the primary is ever rate-limited or unavailable.
+        groq_models = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
         for groq_model in groq_models:
             try:
                 req_payload = py_json.dumps({

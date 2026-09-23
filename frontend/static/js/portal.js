@@ -1278,3 +1278,68 @@ function filterAdminActivityTable() {
         }
     });
 }
+
+// ── Patient "AI Explainer" chat (Diagnosis Report page) ─────────────
+// FIX: the Ask button / Enter key already called sendChatMessageInline(),
+// but that function did not exist anywhere in the codebase, so nothing
+// happened when a question was typed. This defines it, using the
+// existing POST /api/history/<record_id>/explain endpoint (routes.py).
+function _escapeHtmlForChat(str) {
+    const div = document.createElement("div");
+    div.textContent = String(str == null ? "" : str);
+    return div.innerHTML;
+}
+
+async function sendChatMessageInline(recordId) {
+    const input = document.getElementById("aiChatInput");
+    const history = document.getElementById("aiChatHistory");
+    if (!input || !history) return;
+
+    const message = input.value.trim();
+    if (!message) return;
+
+    history.insertAdjacentHTML("beforeend", `
+        <div style="margin-top:8px;"><span style="color:var(--text-primary); font-weight:600;">You:</span> ${_escapeHtmlForChat(message)}</div>
+    `);
+
+    input.value = "";
+    input.disabled = true;
+
+    const thinkingId = "ai-thinking-" + Date.now();
+    history.insertAdjacentHTML("beforeend", `
+        <div id="${thinkingId}" style="margin-top:8px; color:var(--text-secondary);">
+            <span style="color:var(--cyan-primary); font-weight:600;">AI:</span> Thinking...
+        </div>
+    `);
+    history.scrollTop = history.scrollHeight;
+
+    try {
+        const res = await fetch(`/api/history/${recordId}/explain`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message })
+        });
+        const data = await res.json();
+
+        const thinkingEl = document.getElementById(thinkingId);
+        if (thinkingEl) thinkingEl.remove();
+
+        const reply = (data && data.reply) ? data.reply : "Sorry, I couldn't generate a response. Please try again.";
+        history.insertAdjacentHTML("beforeend", `
+            <div style="margin-top:8px;"><span style="color:var(--cyan-primary); font-weight:600;">AI:</span> ${_escapeHtmlForChat(reply)}</div>
+        `);
+    } catch (err) {
+        console.error("[AI Explainer] Error:", err);
+        const thinkingEl = document.getElementById(thinkingId);
+        if (thinkingEl) thinkingEl.remove();
+
+        history.insertAdjacentHTML("beforeend", `
+            <div style="margin-top:8px; color:var(--red-critical);"><span style="font-weight:600;">AI:</span> Unable to reach the AI assistant right now. Please try again.</div>
+        `);
+    } finally {
+        input.disabled = false;
+        history.scrollTop = history.scrollHeight;
+    }
+}
+
+window.sendChatMessageInline = sendChatMessageInline;

@@ -10,6 +10,15 @@
   <i class="fa-solid fa-bars"></i>
 </button>
 
+<!-- FIX: notification bell moved to a fixed top-right icon. Reuses
+     id="notifBadge" so the existing fetchNotifications() badge-update
+     code in portal.js keeps working without any JS changes. -->
+<button type="button" class="topbar-notif-btn" id="topbarNotifBtn"
+        onclick="toggleNotificationsPanel(event)" aria-label="Notifications">
+  <i class="fa-solid fa-bell"></i>
+  <span class="sidebar-badge" id="notifBadge" style="display:none; background:var(--red-critical);">0</span>
+</button>
+
 <div class="dashboard-layout">
   <aside class="dashboard-sidebar" id="dashboardSidebar">
     <div class="sidebar-brand">
