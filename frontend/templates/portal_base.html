@@ -61,12 +61,6 @@
 
     <nav class="sidebar-nav">
       {% if session.get('role') == 'admin' %}
-        <!-- Shared Alert/Notification item for admin -->
-        <a href="#" class="sidebar-link" id="notifSidebarLink" onclick="toggleNotificationsPanel(event)">
-          <i class="fa-solid fa-bell"></i><span>Notifications</span>
-          <span class="sidebar-badge" id="notifBadge" style="display:none;background:var(--red-critical);">0</span>
-        </a>
-
         <a href="/portal?section=dashboard" class="sidebar-link {% if section == 'dashboard' %}active{% endif %}">
           <i class="fa-solid fa-gauge-high"></i><span>Dashboard</span>
         </a>
@@ -116,12 +110,7 @@
         <a href="/portal?section=history" class="sidebar-link {% if section == 'history' %}active{% endif %}">
           <i class="fa-solid fa-clock-rotate-left"></i><span>Diagnosis History</span>
         </a>
-        <!-- 5. Notifications -->
-        <a href="#" class="sidebar-link" id="notifSidebarLink" onclick="toggleNotificationsPanel(event)">
-          <i class="fa-solid fa-bell"></i><span>Notifications</span>
-          <span class="sidebar-badge" id="notifBadge" style="display:none;background:var(--red-critical);">0</span>
-        </a>
-        <!-- 6. Profile Settings -->
+        <!-- 5. Profile Settings -->
         <a href="/portal?section=profile" class="sidebar-link {% if section == 'profile' %}active{% endif %}">
           <i class="fa-solid fa-id-card"></i><span>Profile Settings</span>
         </a>

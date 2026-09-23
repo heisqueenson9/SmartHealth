@@ -353,9 +353,10 @@ function closeNotificationsPanel(event) {
 
 document.addEventListener("click", (e) => {
     const panel = document.getElementById("notificationsPanel");
+    const topbarBtn = document.getElementById("topbarNotifBtn");
     const link = document.getElementById("notifSidebarLink");
     if (panel && panel.style.display === "block") {
-        if (!panel.contains(e.target) && (!link || !link.contains(e.target))) {
+        if (!panel.contains(e.target) && (!topbarBtn || !topbarBtn.contains(e.target)) && (!link || !link.contains(e.target))) {
             panel.style.display = "none";
             document.body.classList.remove("no-scroll");
         }
