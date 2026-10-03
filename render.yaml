@@ -33,4 +33,9 @@ services:
       # Set your deployed URL here (e.g. https://smart-health-sync.onrender.com)
       - key: SITE_URL
         value: https://smarthealth-na6j.onrender.com
+      # Resend API Key set securely via Render Dashboard
+      - key: MAIL_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        value: Smart Health Sync <onboarding@resend.dev>
     healthCheckPath: /api/health
