@@ -86,9 +86,11 @@ class Config:
     ADMIN_USERNAME   = os.environ.get("ADMIN_USERNAME", "admin@smarthealth.com")
     ADMIN_PASSWORD   = os.environ.get("ADMIN_PASSWORD", "AdminPassword2026")
 
-    # Mail — Resend HTTP API. RESEND_API_KEY is optional; status emails are
+    # Mail — Resend HTTP API. MAIL_API_KEY or RESEND_API_KEY is optional; status emails are
     # skipped with an info log if not set. MAIL_DEFAULT_SENDER overrides the
     # From address (must use a Resend-verified domain).
+    MAIL_API_KEY        = os.environ.get("MAIL_API_KEY", "") or os.environ.get("RESEND_API_KEY", "")
+    RESEND_API_KEY      = MAIL_API_KEY
     MAIL_DEFAULT_SENDER = os.environ.get(
         "MAIL_DEFAULT_SENDER", "Smart Health Sync <onboarding@resend.dev>"
     )

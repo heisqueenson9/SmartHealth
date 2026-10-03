@@ -235,6 +235,7 @@ class TestEmailNotifications:
         self, app, client, pending_doctor
     ):
         with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("MAIL_API_KEY", None)
             os.environ.pop("RESEND_API_KEY", None)
             resp = _approve_as_admin(client, pending_doctor, "approve")
             assert resp.status_code == 200
@@ -243,27 +244,30 @@ class TestEmailNotifications:
         self, app, client, pending_doctor
     ):
         with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("MAIL_API_KEY", None)
             os.environ.pop("RESEND_API_KEY", None)
             resp = _approve_as_admin(client, pending_doctor, "reject")
             assert resp.status_code == 200
 
-    def test_approve_calls_resend_when_api_key_is_set(
+    def test_approve_calls_resend_when_mail_api_key_is_set(
         self, app, client, pending_doctor
     ):
         mock_resend = MagicMock()
         with patch.dict(sys.modules, {"resend": mock_resend}):
-            with patch.dict(os.environ, {"RESEND_API_KEY": "test_key_abc"}, clear=False):
+            with patch.dict(os.environ, {"MAIL_API_KEY": "test_key_abc"}, clear=False):
                 resp = _approve_as_admin(client, pending_doctor, "approve")
                 assert resp.status_code == 200
+                assert mock_resend.api_key == "test_key_abc"
 
     def test_reject_calls_resend_when_api_key_is_set(
         self, app, client, pending_doctor
     ):
         mock_resend = MagicMock()
         with patch.dict(sys.modules, {"resend": mock_resend}):
-            with patch.dict(os.environ, {"RESEND_API_KEY": "test_key_abc"}, clear=False):
+            with patch.dict(os.environ, {"RESEND_API_KEY": "test_key_xyz"}, clear=False):
                 resp = _approve_as_admin(client, pending_doctor, "reject")
                 assert resp.status_code == 200
+                assert mock_resend.api_key == "test_key_xyz"
 
 
 # ── Case State & Restoration Tests ─────────────────────────

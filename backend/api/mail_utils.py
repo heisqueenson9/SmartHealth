@@ -15,8 +15,13 @@ logger = logging.getLogger("smarthealth.mail")
 
 
 def _is_mail_configured() -> bool:
-    """Return True only when RESEND_API_KEY is set in the environment."""
-    return bool(os.environ.get("RESEND_API_KEY", "").strip())
+    """Return True when MAIL_API_KEY or RESEND_API_KEY is set in the environment."""
+    return bool(os.environ.get("MAIL_API_KEY", "").strip() or os.environ.get("RESEND_API_KEY", "").strip())
+
+
+def _get_api_key() -> str:
+    """Return the Resend API key (checking MAIL_API_KEY first, then RESEND_API_KEY)."""
+    return os.environ.get("MAIL_API_KEY", "").strip() or os.environ.get("RESEND_API_KEY", "").strip()
 
 
 def _sender() -> str:
@@ -34,7 +39,7 @@ def notify_doctor_status_change(doctor, action: str) -> None:
     """
     Send an automated email to a doctor on account approval or rejection.
 
-    Silently no-ops when RESEND_API_KEY is not set, logging a single info
+    Silently no-ops when MAIL_API_KEY / RESEND_API_KEY is not set, logging a single info
     line so the admin can see the skip happened.
     """
     if action not in ("approve", "reject", "reupload"):
@@ -43,7 +48,7 @@ def notify_doctor_status_change(doctor, action: str) -> None:
 
     if not _is_mail_configured():
         logger.info(
-            "[Mail] RESEND_API_KEY not configured — skipping status email to %s",
+            "[Mail] MAIL_API_KEY / RESEND_API_KEY not configured — skipping status email to %s",
             getattr(doctor, "email", "unknown"),
         )
         return
@@ -79,7 +84,7 @@ def notify_doctor_status_change(doctor, action: str) -> None:
         )
 
     try:
-        resend.api_key = os.environ["RESEND_API_KEY"]
+        resend.api_key = _get_api_key()
         resend.Emails.send(
             {
                 "from": _sender(),
@@ -104,10 +109,12 @@ def notify_doctor_status_change(doctor, action: str) -> None:
 def notify_prediction_ready(doctor, record, result: dict) -> None:
     """Email a doctor that a case's ML prediction has completed."""
     if not _is_mail_configured():
-        logger.info(f"[Mail] RESEND_API_KEY not configured — skipping prediction-ready email to {getattr(doctor, 'email', 'unknown')}")
+        logger.info(
+            f"[Mail] MAIL_API_KEY / RESEND_API_KEY not configured — skipping prediction-ready email to {getattr(doctor, 'email', 'unknown')}"
+        )
         return
     subject = "Smart Health Sync — Prediction Ready for Review"
-    case_ref = record.patient_reference or f"Case #{record.id}"
+    case_ref = getattr(record, "patient_reference", None) or f"Case #{getattr(record, 'id', 'N/A')}"
     doc_email = getattr(doctor, "email", "unknown")
     doc_name = getattr(doctor, "full_name", doc_email) or doc_email
     html_body = f"""
@@ -125,13 +132,16 @@ def notify_prediction_ready(doctor, record, result: dict) -> None:
     """
     try:
         import resend
-        resend.api_key = os.environ.get("RESEND_API_KEY")
-        resend.Emails.send({
-            "from": _sender(),
-            "to": [doc_email],
-            "subject": subject,
-            "html": html_body,
-        })
+
+        resend.api_key = _get_api_key()
+        resend.Emails.send(
+            {
+                "from": _sender(),
+                "to": [doc_email],
+                "subject": subject,
+                "html": html_body,
+            }
+        )
         logger.info(f"[Mail] Prediction-ready email sent to {doc_email}")
     except Exception as exc:
         logger.warning(f"[Mail] Failed to send prediction-ready email to {doc_email}: {exc}")
