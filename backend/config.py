@@ -63,7 +63,9 @@ class Config:
         instance_dir.mkdir(exist_ok=True)
         _db_url = f"sqlite:///{instance_dir / 'smarthealth.db'}"
     elif _db_url.startswith("postgres://"):
-        _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+        _db_url = _db_url.replace("postgres://", "postgresql+psycopg://", 1)
+    elif _db_url.startswith("postgresql://") and "+psycopg" not in _db_url and "+psycopg2" not in _db_url:
+        _db_url = _db_url.replace("postgresql://", "postgresql+psycopg://", 1)
     SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
