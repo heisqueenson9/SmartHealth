@@ -85,6 +85,13 @@ def health():
         "version": "2.0.0",
         "checks": checks,
     }
+    try:
+        from backend.factory import log_memory_usage
+        mem_rss = log_memory_usage("Health Check")
+        if mem_rss > 0:
+            result["memory_rss_mb"] = round(mem_rss, 2)
+    except Exception:
+        pass
     if errors:
         result["errors"] = errors
 
@@ -1479,12 +1486,13 @@ def admin_verify_doctor(doctor_id):
 
     # Send email notification after commit (no-op if SMTP not configured)
     from backend.api.mail_utils import notify_doctor_status_change
-    notify_doctor_status_change(doctor, action)
+    email_res = notify_doctor_status_change(doctor, action)
         
     return jsonify({
         "status": "success",
         "message": f"Doctor status updated to {doctor.status}.",
-        "doctor_status": doctor.status
+        "doctor_status": doctor.status,
+        "email_delivery": email_res.to_dict() if hasattr(email_res, "to_dict") else {"success": bool(email_res)},
     }), 200
 
 

@@ -210,6 +210,11 @@ class ModelManager:
         logger.info(f"[SmartHealth] ✓ Loaded models : {list(self.loaded_models.keys())}")
         logger.info(f"[SmartHealth] ✗ Missing models: {self.missing_models}")
         logger.info(f"[SmartHealth] ✗ Corrupt models: {self.corrupted_models}")
+        try:
+            from backend.factory import log_memory_usage
+            log_memory_usage("Post-ML Model Load")
+        except Exception:
+            pass
         logger.info("=" * 60)
 
     def _load_artefact(self, attr_name: str, filename: str, kind: str):

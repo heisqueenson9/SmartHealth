@@ -5,6 +5,7 @@ Authors: Enock Queenson Eduafo & Christabel Araba Edumadze | University of Ghana
 Handles sending all application emails (account verification/approval/rejection,
 prediction notifications, welcome emails, password reset, admin alerts).
 Reads MAIL_API_KEY securely from environment without hardcoding or logging secrets.
+Captures safe Resend Message IDs and returns structured delivery status.
 Silently and safely fails gracefully if MAIL_API_KEY is missing or invalid.
 """
 
@@ -14,6 +15,39 @@ from typing import List, Optional, Union
 from flask import current_app
 
 logger = logging.getLogger("smarthealth.mail")
+
+
+class EmailResult:
+    """Structured result wrapper for email operations."""
+
+    def __init__(
+        self,
+        success: bool,
+        status: str,
+        message_id: Optional[str] = None,
+        message: str = "",
+        error: Optional[str] = None,
+    ):
+        self.success = success
+        self.status = status  # "accepted", "failed", "unconfigured", "invalid_recipient"
+        self.message_id = message_id
+        self.message = message
+        self.error = error
+
+    def __bool__(self) -> bool:
+        return self.success
+
+    def __repr__(self) -> str:
+        return f"<EmailResult success={self.success} status='{self.status}' message_id='{self.message_id}'>"
+
+    def to_dict(self) -> dict:
+        return {
+            "success": self.success,
+            "status": self.status,
+            "message_id": self.message_id,
+            "message": self.message,
+            "error": self.error,
+        }
 
 
 def is_mail_configured() -> bool:
@@ -48,39 +82,72 @@ def _get_site_url() -> str:
     return site_url.rstrip("/")
 
 
+def _clean_recipient(to: Union[str, List[str]]) -> List[str]:
+    """Clean, strip whitespace, and validate recipient email addresses."""
+    recipients = []
+    items = [to] if isinstance(to, str) else list(to)
+    for item in items:
+        if isinstance(item, str):
+            clean = item.strip()
+            if clean and "@" in clean and len(clean) >= 5:
+                recipients.append(clean)
+    return recipients
+
+
 def send_email(
     to: Union[str, List[str]],
     subject: str,
     text: Optional[str] = None,
     html: Optional[str] = None,
     sender: Optional[str] = None,
-) -> bool:
+) -> EmailResult:
     """
     Centralized email sender service using official Resend Python SDK.
 
-    Returns True if sent successfully, False otherwise.
+    Returns EmailResult object (evaluates to True/False for backward compatibility).
+    Captures safe Resend Message ID (e.g. msg_12345).
     Guarantees no application/Gunicorn crash on email failure or missing key.
     Logs safely without exposing API keys or secrets.
     """
     if not is_mail_configured():
         logger.info("[Mail] MAIL_API_KEY configured: false — skipping email send.")
-        return False
+        return EmailResult(
+            success=False,
+            status="unconfigured",
+            message="MAIL_API_KEY is not configured in environment.",
+            error="MAIL_API_KEY missing",
+        )
 
     api_key = _get_api_key()
     if not api_key:
         logger.info("[Mail] MAIL_API_KEY configured: false — empty key string.")
-        return False
+        return EmailResult(
+            success=False,
+            status="unconfigured",
+            message="MAIL_API_KEY is empty.",
+            error="MAIL_API_KEY empty",
+        )
+
+    recipients = _clean_recipient(to)
+    if not recipients:
+        logger.warning("[Mail] Invalid or empty recipient provided.")
+        return EmailResult(
+            success=False,
+            status="invalid_recipient",
+            message="Recipient email address is invalid or empty.",
+            error="Invalid recipient",
+        )
 
     try:
         import resend
     except ImportError:
         logger.warning("[Mail] resend Python package is not installed; skipping email.")
-        return False
-
-    recipients = [to] if isinstance(to, str) else list(to)
-    if not recipients or not any(recipients):
-        logger.warning("[Mail] Invalid recipient provided.")
-        return False
+        return EmailResult(
+            success=False,
+            status="failed",
+            message="resend package not installed.",
+            error="ImportError: resend",
+        )
 
     from_addr = sender or _get_sender()
 
@@ -99,27 +166,65 @@ def send_email(
     try:
         resend.api_key = api_key
         logger.info("[Mail] MAIL_API_KEY configured: true — attempting email send via Resend.")
-        resend.Emails.send(payload)
-        logger.info("[Mail] Email successfully sent with subject: '%s'", subject)
-        return True
+        raw_res = resend.Emails.send(payload)
+
+        # Extract Resend Message ID (e.g. msg_123456789 or UUID)
+        msg_id = None
+        if isinstance(raw_res, dict):
+            msg_id = raw_res.get("id")
+        elif hasattr(raw_res, "id"):
+            msg_id = getattr(raw_res, "id", None)
+        elif hasattr(raw_res, "get") and callable(raw_res.get):
+            msg_id = raw_res.get("id")
+
+        if msg_id:
+            logger.info("[Mail] Email accepted by Resend. Message ID: %s", msg_id)
+            return EmailResult(
+                success=True,
+                status="accepted",
+                message_id=str(msg_id),
+                message=f"Email request accepted by Resend (Message ID: {msg_id}).",
+            )
+        else:
+            logger.warning("[Mail] Resend API call completed but returned no message ID: %s", type(raw_res).__name__)
+            return EmailResult(
+                success=False,
+                status="failed",
+                message_id=None,
+                message="Resend request did not yield a valid message ID.",
+                error="No message ID returned from Resend.",
+            )
+
     except getattr(resend, "ResendError", Exception) as resend_err:
-        logger.warning("[Mail] Resend API error sending email: %s", type(resend_err).__name__)
-        return False
+        err_type = type(resend_err).__name__
+        logger.warning("[Mail] Resend API error sending email: %s", err_type)
+        return EmailResult(
+            success=False,
+            status="failed",
+            error=err_type,
+            message=f"Resend API error: {err_type}",
+        )
     except Exception as exc:
-        logger.warning("[Mail] Network or unexpected error sending email: %s", type(exc).__name__)
-        return False
+        err_type = type(exc).__name__
+        logger.warning("[Mail] Network or unexpected error sending email: %s", err_type)
+        return EmailResult(
+            success=False,
+            status="failed",
+            error=err_type,
+            message=f"Network error sending email: {err_type}",
+        )
 
 
-def notify_doctor_status_change(doctor, action: str) -> bool:
+def notify_doctor_status_change(doctor, action: str) -> EmailResult:
     """Send approval or rejection status email to a doctor."""
     if action not in ("approve", "reject", "reupload"):
         logger.warning("[Mail] Unknown status action: %s", action)
-        return False
+        return EmailResult(success=False, status="invalid_action", message="Unknown status action.")
 
     doc_email = getattr(doctor, "email", None)
     if not doc_email:
         logger.warning("[Mail] Cannot send doctor status email — doctor has no email address.")
-        return False
+        return EmailResult(success=False, status="invalid_recipient", message="Doctor has no email address.")
 
     doc_name = getattr(doctor, "full_name", "Doctor") or "Doctor"
     login_url = f"{_get_site_url()}/login"
@@ -171,12 +276,12 @@ def notify_doctor_status_change(doctor, action: str) -> bool:
     return send_email(to=doc_email, subject=subject, text=text, html=html)
 
 
-def notify_prediction_ready(doctor, record, result: dict) -> bool:
+def notify_prediction_ready(doctor, record, result: dict) -> EmailResult:
     """Email a doctor that a case's ML prediction has completed."""
     doc_email = getattr(doctor, "email", None)
     if not doc_email:
         logger.warning("[Mail] Cannot send prediction email — doctor has no email address.")
-        return False
+        return EmailResult(success=False, status="invalid_recipient", message="Doctor has no email address.")
 
     case_ref = getattr(record, "patient_reference", None) or f"Case #{getattr(record, 'id', 'N/A')}"
     doc_name = getattr(doctor, "full_name", doc_email) or doc_email
@@ -205,11 +310,11 @@ def notify_prediction_ready(doctor, record, result: dict) -> bool:
     return send_email(to=doc_email, subject=subject, text=text, html=html)
 
 
-def send_welcome_email(user) -> bool:
+def send_welcome_email(user) -> EmailResult:
     """Send a welcome email to a newly registered patient or doctor."""
     user_email = getattr(user, "email", None)
     if not user_email:
-        return False
+        return EmailResult(success=False, status="invalid_recipient", message="User has no email address.")
     user_name = getattr(user, "full_name", "User") or "User"
     subject = "Welcome to Smart Health Sync"
     text = (
@@ -228,11 +333,11 @@ def send_welcome_email(user) -> bool:
     return send_email(to=user_email, subject=subject, text=text, html=html)
 
 
-def send_password_reset_email(user, reset_url: str) -> bool:
+def send_password_reset_email(user, reset_url: str) -> EmailResult:
     """Send a password reset instructions email."""
     user_email = getattr(user, "email", None)
     if not user_email:
-        return False
+        return EmailResult(success=False, status="invalid_recipient", message="User has no email address.")
     user_name = getattr(user, "full_name", "User") or "User"
     subject = "Smart Health Sync — Password Reset Request"
     text = (

@@ -205,11 +205,25 @@ def configure_logging(level: str = "INFO"):
     )
 
 
+def log_memory_usage(label: str = "checkpoint") -> float:
+    """Lightweight server-side memory diagnostic helper."""
+    try:
+        import psutil
+        process = psutil.Process(os.getpid())
+        mem_mb = process.memory_info().rss / (1024 * 1024)
+        log = logging.getLogger("smarthealth.memory")
+        log.info(f"[MemoryDiagnostics] {label} — RSS: {mem_mb:.2f} MB")
+        return mem_mb
+    except Exception:
+        return 0.0
+
+
 def create_app() -> Flask:
     """Application factory — returns a fully configured Flask instance."""
     cfg = get_config()
     configure_logging(cfg.LOG_LEVEL)
     log = logging.getLogger("smarthealth.factory")
+    log_memory_usage("App Startup")
 
     # ── Path Resolution ──
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -343,4 +357,5 @@ def create_app() -> Flask:
         # Still don't crash — at minimum the 500 handler will work
 
     log.info(f"[SmartHealth] App created — ENV={cfg.FLASK_ENV}, DEBUG={cfg.DEBUG}, DB_OK={app.config['_STARTUP_DB_OK']}")
+    log_memory_usage("App Ready")
     return app

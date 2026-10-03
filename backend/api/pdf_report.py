@@ -326,4 +326,12 @@ def generate_case_report_pdf(record, sections, signature, output_path):
         story.append(KeepTogether(sig_elements))
 
     doc.build(story, canvasmaker=NumberedCanvas)
+    del story
+    import gc
+    gc.collect()
+    try:
+        from backend.factory import log_memory_usage
+        log_memory_usage("Post-PDF Generation")
+    except Exception:
+        pass
     return output_path
