@@ -2519,3 +2519,33 @@ h1, h2, h3, h4, h5, h6, p, span, a, li, td, th, label, input, textarea, select, 
   outline: none;
 }
 
+/* ── Patient Cases Table Actions Column (Desktop Display) ── */
+@media (min-width: 1024px) {
+  #patientsTable th:last-child,
+  #patientsTable td:last-child {
+    min-width: 260px;
+    width: auto;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  #patientsTable td:last-child > .d-flex {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+  }
+
+  #patientsTable .btn-action-verify {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 8px 14px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+
