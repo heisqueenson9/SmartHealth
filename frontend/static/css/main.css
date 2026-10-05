@@ -2481,3 +2481,41 @@ h1, h2, h3, h4, h5, h6, p, span, a, li, td, th, label, input, textarea, select, 
     align-items: center;
   }
 }
+
+/* ── Password Input & Toggle Button ── */
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+.password-input-wrapper input {
+  padding-right: 44px !important;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #8899a6);
+  cursor: pointer;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  z-index: 5;
+  transition: color 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+  color: var(--cyan-glow, #00f2fe);
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+}
+

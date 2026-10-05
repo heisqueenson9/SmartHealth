@@ -15,4 +15,27 @@ document.addEventListener('DOMContentLoaded', () => {
             link.classList.add('active');
         }
     });
+
+    // Password visibility toggle
+    document.querySelectorAll('.password-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const wrapper = btn.closest('.password-input-wrapper');
+            const input = wrapper ? wrapper.querySelector('input') : null;
+            if (input) {
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    if (isPassword) {
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                }
+            }
+        });
+    });
 });
