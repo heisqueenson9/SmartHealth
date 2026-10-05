@@ -1334,28 +1334,93 @@ body {
 
 /* Badge statuses */
 .status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 100px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  border-radius: 9999px;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1.25;
+  letter-spacing: 0.03em;
+  text-align: center;
+  box-sizing: border-box;
 }
+
+.status-badge-stacked {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1.15;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
 .status-approved {
-  background: rgba(197, 231, 16, 0.1);
+  background: rgba(197, 231, 16, 0.12);
   color: var(--green-ok);
   border: 1px solid rgba(197, 231, 16, 0.3);
 }
 .status-pending {
-  background: rgba(244, 223, 107, 0.1);
+  background: rgba(244, 223, 107, 0.15);
   color: var(--amber-warn);
   border: 1px solid rgba(244, 223, 107, 0.3);
 }
 .status-rejected {
-  background: rgba(255, 71, 87, 0.1);
+  background: rgba(255, 71, 87, 0.12);
   color: var(--red-critical);
   border: 1px solid rgba(255, 71, 87, 0.3);
+}
+.status-archived,
+.status-reported {
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+/* Password Visibility Toggle */
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+.password-input-wrapper .auth-input,
+.password-input-wrapper input[type="password"],
+.password-input-wrapper input[type="text"] {
+  padding-right: 44px !important;
+}
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: color 0.2s ease, opacity 0.2s ease;
+  font-size: 0.95rem;
+}
+.password-toggle-btn:hover {
+  color: var(--cyan-primary);
+}
+.password-toggle-btn:focus {
+  outline: none;
 }
 
 /* Verification list table */
