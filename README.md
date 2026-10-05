@@ -5,7 +5,7 @@
 
 ---
 
-## 1. Explain It Like I'm 10 🎈
+## 1. Explain It Like I'm 10
 
 Imagine when you feel sick and visit a doctor. A good doctor doesn't just guess what's wrong! First, they listen to what hurts (**symptoms** like a fever or headache). Next, they figure out which blood tests you need (**investigations**). Then, they send you to a lab to measure your blood numbers (**lab results**). Finally, they look at all the test numbers together to identify the exact illness (**diagnosis**) and tell you how to get better (**treatment**).
 
@@ -49,15 +49,15 @@ The application enforces a staged 6-step case workflow:
 
 ## 5. Key Features
 
-- 🏥 **Staged 6-Step Clinical Case Management**: Prevents premature diagnosis by requiring symptom intake and lab investigation selection prior to ML inference.
-- 🔬 **AI-Powered 6-Class Disease Prediction**: Supervised machine learning algorithms classifying *Anemia*, *Diabetes*, *Healthy*, *Heart Disease*, *Thalassemia*, and *Thrombocytopenia*.
-- 🧬 **Two-Stage Clinical Evidence Fusion**: Combines Stage A symptom evidence with Stage B biomarker predictions to output unified confidence scores, supporting indicators, and conflicting evidence warnings.
-- 💬 **Groq LLM AI Assistant & Explainer**: Conversational Q&A powered by Groq's `llama-3.1-8b-instant` (with fallback to local Ollama `qwen3:8b` or graceful degradation messages when unconfigured).
-- 📚 **Standardized 560-Symptom Vocabulary**: Comprehensive medical symptom catalog supporting fuzzy search, category filtering, and synonym resolution.
-- 🧪 **Targeted Investigation Rules Engine**: Maps candidate conditions to specific clinical panels (Full Blood Count, Lipid Profile, Cardiac Markers, Liver/Renal Function, Glycemic Panel).
-- 🔐 **Doctor Verification Gatekeeper**: Multi-factor onboarding requiring license numbers and proof file uploads (stored in DB binary format to survive ephemeral cloud disk redeploys).
-- 📄 **Dynamic ReportLab PDF Generation**: Generates official, sectioned PDF diagnostic reports featuring doctor signatures, patient details, biomarker tables, and clinical recommendations.
-- 🔄 **Multi-Database Support & Auto Schema Migration**: Transparently supports SQLite for local dev and PostgreSQL for production with auto schema synchronization on startup.
+- **Staged 6-Step Clinical Case Management**: Prevents premature diagnosis by requiring symptom intake and lab investigation selection prior to ML inference.
+- **AI-Powered 6-Class Disease Prediction**: Supervised machine learning algorithms classifying *Anemia*, *Diabetes*, *Healthy*, *Heart Disease*, *Thalassemia*, and *Thrombocytopenia*.
+- **Two-Stage Clinical Evidence Fusion**: Combines Stage A symptom evidence with Stage B biomarker predictions to output unified confidence scores, supporting indicators, and conflicting evidence warnings.
+- **Groq LLM AI Assistant & Explainer**: Conversational Q&A powered by Groq's `llama-3.1-8b-instant` (with fallback to local Ollama `qwen3:8b` or graceful degradation messages when unconfigured).
+- **Standardized 560-Symptom Vocabulary**: Comprehensive medical symptom catalog supporting fuzzy search, category filtering, and synonym resolution.
+- **Targeted Investigation Rules Engine**: Maps candidate conditions to specific clinical panels (Full Blood Count, Lipid Profile, Cardiac Markers, Liver/Renal Function, Glycemic Panel).
+- **Doctor Verification Gatekeeper**: Multi-factor onboarding requiring license numbers and proof file uploads (stored in DB binary format to survive ephemeral cloud disk redeploys).
+- **Dynamic ReportLab PDF Generation**: Generates official, sectioned PDF diagnostic reports featuring doctor signatures, patient details, biomarker tables, and clinical recommendations.
+- **Multi-Database Support & Auto Schema Migration**: Transparently supports SQLite for local dev and PostgreSQL for production with auto schema synchronization on startup.
 
 ---
 
@@ -258,7 +258,7 @@ The machine learning pipeline evaluates 4 classification algorithms trained on 2
 
 | Model | Test Accuracy | Test F1-Score | CV Mean | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Random Forest** ⚡️ | **73.0%** | **0.6941** | **64.6%** | **Active Default (`random_forest.pkl` used at inference)** |
+| **Random Forest** | **73.0%** | **0.6941** | **64.6%** | **Active Default (`random_forest.pkl` used at inference)** |
 | **Decision Tree** | 76.6% | 0.7704 | 62.1% | Highest scored in training, but not the one currently used at inference |
 | **SVM (RBF Kernel)** | 65.8% | 0.6325 | 63.0% | Valid (`support_vector_machine.pkl`) |
 | **Logistic Regression** | 55.9% | 0.5808 | 45.0% | Baseline (`logistic_regression.pkl`) |
@@ -506,13 +506,13 @@ pytest backend/tests/ --cov=backend --cov-report=term-missing
 
 Security mechanisms enforced in code decorators and middleware:
 
-- 🛡️ **Session-Based RBAC**: Handlers enforce role checks (`session.get("role") in ("admin", "doctor")`) on sensitive API routes.
-- 🩺 **Doctor Status Verification Gatekeeper**: Doctors with `status != "approved"` are blocked from invoking diagnostic prediction endpoints (`/predict`, `/cases/<id>/predictions`) and managing patient cases.
-- 💾 **Database-Stored Credential Proofs**: Doctor verification proof documents are stored as binary data directly in PostgreSQL/SQLite columns (`proof_data`, `proof_mimetype`) to prevent loss on ephemeral container filesystems (e.g. Render deployments).
-- 🔄 **Blueprint Error Handler & DB Transaction Rollbacks**: Global exception error handlers `@api_bp.errorhandler(Exception)` and `@auth_bp.errorhandler(Exception)` catch unhandled errors, perform `db.session.rollback()` to prevent DB connection poisoning, and return clean JSON responses without exposing internal tracebacks in production (`DEBUG=False`).
-- 🔐 **Password Hashing**: User passwords are securely hashed using Werkzeug's `generate_password_hash` (PBKDF2 with SHA-256) and validated via `check_password_hash`.
-- 📁 **Secure File Upload Sanitization**: Uploaded files are validated against allowed extension lists (`pdf`, `png`, `jpg`, `jpeg`, `doc`, `docx`) and sanitized with `werkzeug.utils.secure_filename`.
-- ⏱️ **Rate Limiting**: Configured via Flask-Limiter (`RATELIMIT_DEFAULT = "200 per day;50 per hour;10 per minute"`).
+- **Session-Based RBAC**: Handlers enforce role checks (`session.get("role") in ("admin", "doctor")`) on sensitive API routes.
+- **Doctor Status Verification Gatekeeper**: Doctors with `status != "approved"` are blocked from invoking diagnostic prediction endpoints (`/predict`, `/cases/<id>/predictions`) and managing patient cases.
+- **Database-Stored Credential Proofs**: Doctor verification proof documents are stored as binary data directly in PostgreSQL/SQLite columns (`proof_data`, `proof_mimetype`) to prevent loss on ephemeral container filesystems (e.g. Render deployments).
+- **Blueprint Error Handler & DB Transaction Rollbacks**: Global exception error handlers `@api_bp.errorhandler(Exception)` and `@auth_bp.errorhandler(Exception)` catch unhandled errors, perform `db.session.rollback()` to prevent DB connection poisoning, and return clean JSON responses without exposing internal tracebacks in production (`DEBUG=False`).
+- **Password Hashing**: User passwords are securely hashed using Werkzeug's `generate_password_hash` (PBKDF2 with SHA-256) and validated via `check_password_hash`.
+- **Secure File Upload Sanitization**: Uploaded files are validated against allowed extension lists (`pdf`, `png`, `jpg`, `jpeg`, `doc`, `docx`) and sanitized with `werkzeug.utils.secure_filename`.
+- **Rate Limiting**: Configured via Flask-Limiter (`RATELIMIT_DEFAULT = "200 per day;50 per hour;10 per minute"`).
 
 ---
 
