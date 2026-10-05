@@ -974,13 +974,13 @@ async function proceedToStep6() {
     if (missingKeys.length > 0) {
         const displayMissing = missingKeys.slice(0, 3).join(", ") + (missingKeys.length > 3 ? "..." : "");
         showToast(`Please enter valid numeric values for all required biomarkers (${displayMissing}).`, "warning");
-        if (btn) { btn.disabled = false; btn.textContent = "RUN DIAGNOSIS"; }
+        if (btn) { btn.disabled = false; btn.textContent = "Run Diagnosis"; }
         return;
     }
 
     if (Object.keys(enteredBiomarkers).length === 0) {
         showToast("Please enter at least one biomarker test result.", "warning");
-        if (btn) { btn.disabled = false; btn.textContent = "RUN DIAGNOSIS"; }
+        if (btn) { btn.disabled = false; btn.textContent = "Run Diagnosis"; }
         return;
     }
 
@@ -1027,7 +1027,7 @@ async function proceedToStep6() {
         console.error(error);
         showToast(error.message, "error");
     } finally {
-        if (btn) { btn.disabled = false; btn.textContent = "RUN DIAGNOSIS"; }
+        if (btn) { btn.disabled = false; btn.textContent = "Run Diagnosis"; }
     }
 }
 
