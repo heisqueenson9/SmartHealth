@@ -1423,15 +1423,19 @@ body {
   outline: none;
 }
 
-/* Verification list table */
+/* Verification list & Diagnosis History table wrapper */
 .admin-table-wrap {
+  width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--bg-border);
   border-radius: var(--radius-md);
   margin-top: 20px;
+  background: var(--bg-surface);
 }
 .admin-table {
   width: 100%;
+  min-width: 700px;
   border-collapse: collapse;
 }
 .admin-table th, .admin-table td {
