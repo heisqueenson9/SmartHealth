@@ -1451,19 +1451,23 @@ body {
   color: var(--text-secondary);
 }
 .btn-action-verify {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  border-radius: 4px;
+  font-size: 0.75rem !important;
+  border-radius: var(--radius-sm, 6px) !important;
   cursor: pointer;
   transition: var(--transition);
   text-decoration: none;
   border: 1px solid transparent;
-  font-weight: 600;
+  font-weight: 600 !important;
   text-align: center;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+  box-sizing: border-box;
 }
 .btn-approve {
   background: rgba(197, 231, 16, 0.15);
