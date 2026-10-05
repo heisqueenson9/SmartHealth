@@ -981,8 +981,79 @@
             <i class="fa-solid fa-circle-check text-success" title="Verified Physician" style="color: var(--cyan-primary) !important; margin-left: 5px;"></i>
           {% endif %}
           </span></div>
-      <div class="portal-meta-item"><span class="portal-meta-label">Email</span><span class="portal-meta-value">{{
-          doctor.email }}</span></div>
+      <div class="portal-meta-item">
+        <span class="portal-meta-label">Email</span>
+        <span class="portal-meta-value d-flex align-items-center gap-2">
+          <span id="displayDoctorEmail">{{ doctor.email }}</span>
+          <button type="button" class="btn btn-sm p-0 ms-1" style="background:none; border:none; color:var(--cyan-primary); font-size:0.8rem; cursor:pointer;" onclick="toggleEmailEditMode(true)" title="Edit Email Address">
+            <i class="fa-solid fa-pen-to-square"></i> Edit
+          </button>
+        </span>
+      </div>
+      <div id="emailEditBox" class="mt-2 p-3 d-none" style="background:rgba(255,255,255,0.03); border:1px solid var(--bg-border); border-radius:var(--radius-sm);">
+        <div id="emailEditAlert" class="alert d-none py-1 px-2 mb-2" style="font-size:0.8rem;" role="alert"></div>
+        <form id="editEmailForm" onsubmit="submitEmailUpdate(event)">
+          <div class="mb-2">
+            <label for="editEmailInput" class="auth-label" style="font-size:0.75rem; color:var(--text-secondary);">New Email Address</label>
+            <input type="email" id="editEmailInput" class="auth-input mt-1" value="{{ doctor.email }}" required style="font-size:0.85rem; padding:6px 10px;">
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="auth-btn py-1 px-3" id="saveEmailBtn" style="font-size:0.8rem; min-height:32px; width:auto;">Save Email</button>
+            <button type="button" class="auth-btn-outline py-1 px-3" onclick="toggleEmailEditMode(false)" style="font-size:0.8rem; min-height:32px; width:auto;">Cancel</button>
+          </div>
+        </form>
+      </div>
+      <script>
+        function toggleEmailEditMode(show) {
+          const box = document.getElementById('emailEditBox');
+          const alertEl = document.getElementById('emailEditAlert');
+          if (alertEl) alertEl.classList.add('d-none');
+          if (box) box.classList.toggle('d-none', !show);
+        }
+        async function submitEmailUpdate(e) {
+          e.preventDefault();
+          const input = document.getElementById('editEmailInput');
+          const alertEl = document.getElementById('emailEditAlert');
+          const saveBtn = document.getElementById('saveEmailBtn');
+          const displayEmail = document.getElementById('displayDoctorEmail');
+          if (!input || !input.value.trim()) return;
+          const newEmail = input.value.trim();
+          saveBtn.disabled = true;
+          if (alertEl) alertEl.classList.add('d-none');
+          try {
+            const res = await fetch('/api/auth/update-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: newEmail })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              if (alertEl) {
+                alertEl.textContent = data.error || 'Failed to update email.';
+                alertEl.className = 'alert alert-danger py-1 px-2 mb-2';
+                alertEl.classList.remove('d-none');
+              }
+              saveBtn.disabled = false;
+              return;
+            }
+            if (displayEmail) displayEmail.textContent = data.email || newEmail;
+            if (alertEl) {
+              alertEl.textContent = data.message || 'Email updated successfully.';
+              alertEl.className = 'alert alert-success py-1 px-2 mb-2';
+              alertEl.classList.remove('d-none');
+            }
+            setTimeout(() => { toggleEmailEditMode(false); }, 1200);
+          } catch (err) {
+            if (alertEl) {
+              alertEl.textContent = 'Network error while updating email.';
+              alertEl.className = 'alert alert-danger py-1 px-2 mb-2';
+              alertEl.classList.remove('d-none');
+            }
+          } finally {
+            saveBtn.disabled = false;
+          }
+        }
+      </script>
       <div class="portal-meta-item"><span class="portal-meta-label">Facility</span><span class="portal-meta-value">{{
           doctor.hospital or "—" }}</span></div>
       <div class="portal-meta-item"><span class="portal-meta-label">Specialization</span><span

@@ -366,6 +366,53 @@ def reupload_proof():
     }), 200
 
 
+# ── POST /update-email ──────────────────────────────────────
+@auth_bp.route("/update-email", methods=["POST"])
+def update_email():
+    """Allow the logged-in user to update their email address."""
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Authentication required."}), 401
+
+    data = request.get_json(force=True, silent=True) or {}
+    new_email = data.get("email", "").strip().lower()
+
+    if not new_email:
+        return jsonify({"error": "Email address is required."}), 400
+
+    if not EMAIL_REGEX.match(new_email):
+        return jsonify({"error": "Please enter a valid email address."}), 400
+
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User account not found."}), 404
+
+    if user.email == new_email:
+        return jsonify({
+            "status": "success",
+            "message": "Email address is unchanged.",
+            "email": user.email,
+        }), 200
+
+    existing_user = User.query.filter(User.email == new_email, User.id != user_id).first()
+    if existing_user:
+        return jsonify({"error": "An account with this email address already exists."}), 400
+
+    user.email = new_email
+    if user.username and EMAIL_REGEX.match(user.username):
+        user.username = new_email
+
+    session["email"] = new_email
+    db.session.commit()
+
+    logger.info(f"[Auth] User {user_id} updated email to: {new_email}")
+    return jsonify({
+        "status": "success",
+        "message": "Email address updated successfully.",
+        "email": user.email,
+    }), 200
+
+
 # ── POST /users/manage ───────────────────────────────────────
 @auth_bp.route("/users/manage", methods=["POST"])
 def manage_user():
