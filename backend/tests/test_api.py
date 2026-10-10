@@ -191,18 +191,6 @@ class TestEmailValidation:
         payload = json.loads(resp.data)
         assert "valid email" in payload["error"].lower()
 
-    def test_update_email_success(self, client):
-        with client.session_transaction() as sess:
-            sess["user_id"] = 1
-            sess["role"] = "doctor"
-            sess["email"] = "old.email@smarthealth.com"
-        resp = client.post(
-            "/api/auth/update-email",
-            data=json.dumps({"email": "new.email@smarthealth.com"}),
-            content_type="application/json",
-        )
-        assert resp.status_code in (200, 404)  # 200 if user exists, 404 if test DB doesn't have user 1
-
 
 # ── Email notifications (Resend) ────────────────────────────
 @pytest.fixture

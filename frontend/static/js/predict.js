@@ -1447,9 +1447,9 @@ function logger(msg) {
 
 function showToast(message, type = "info") {
     const toast = document.createElement("div");
-    toast.className = `alert alert-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'success'} alert-dismissible fade show position-fixed bottom-0 end-0 m-3 z-index-toast`;
-    toast.style.cssText = "z-index: 9999; box-shadow: 0 0 20px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-right: 40px;";
-    toast.innerHTML = `<span>${escapeHtml(message)}</span><button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close" onclick="if(this.parentElement) this.parentElement.remove()"></button>`;
+    toast.className = `alert alert-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'success'} position-fixed bottom-0 end-0 m-3 z-index-toast`;
+    toast.style.cssText = "z-index: 9999; box-shadow: 0 0 20px rgba(0,0,0,0.5);";
+    toast.textContent = message;
     document.body.appendChild(toast);
-    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3500);
+    setTimeout(() => toast.remove(), 3500);
 }

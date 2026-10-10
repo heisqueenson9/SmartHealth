@@ -33,7 +33,6 @@
 
   <!-- Cold start overlay (A1) — shows immediately, hides once page is interactive -->
   <div id="cold-start-overlay">
-    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" aria-label="Close" onclick="dismissColdStartOverlay()" style="cursor:pointer; z-index:10001;"></button>
     <div class="cold-start-logo"><i class="fa-solid fa-heart-pulse"></i> Smart Health <span>Sync</span></div>
     <div class="cold-start-spinner"></div>
     <div class="cold-start-msg">System initialising, please wait…<br>This may take 30–60 s on first load.</div>
@@ -178,9 +177,6 @@
         setTimeout(function () { overlay.style.display = 'none'; }, 650);
       }
 
-      // Expose dismiss function globally for X button
-      window.dismissColdStartOverlay = dismissOverlay;
-
       // Poll /api/health until server responds, then dismiss
       function ping() {
         fetch('/api/health')
@@ -193,27 +189,6 @@
       setTimeout(dismissOverlay, 90000);
     })();
   </script>
-
-  <!-- LOGOUT CONFIRMATION MODAL -->
-  <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px; width: 90%;">
-      <div class="modal-content" style="border:1px solid var(--bg-border) !important; background:var(--bg-surface) !important; color:var(--text-primary) !important; box-shadow:0 10px 30px rgba(0,0,0,0.6); padding: 20px; border-radius: var(--radius-lg); position: relative; z-index: 1055;">
-        <div class="modal-header border-0 pb-1 d-flex justify-content-between align-items-center">
-          <h5 class="modal-title m-0" id="logoutConfirmModalLabel" style="color:var(--text-primary) !important; font-family: var(--font-display); font-weight: 700; font-size: 1.25rem;">
-            Logout Confirmation
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body py-3">
-          <p style="color:var(--text-secondary); font-size: 1rem; margin: 0;">Do you want to logout?</p>
-        </div>
-        <div class="modal-footer border-0 pt-2 d-flex justify-content-end gap-2">
-          <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:var(--text-primary); font-weight:600; border-radius:8px;">No</button>
-          <a href="/api/auth/logout" id="btnConfirmLogoutYes" class="btn btn-danger px-4" style="background:#ef4444; border:none; color:#ffffff; font-weight:600; border-radius:8px;">Yes</a>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <script>
     function updateThemeUI() {
@@ -250,21 +225,6 @@
       if (navbarBtn) navbarBtn.addEventListener('click', toggleTheme);
       const portalBtn = document.getElementById('portal-theme-toggle');
       if (portalBtn) portalBtn.addEventListener('click', toggleTheme);
-
-      // Intercept Logout clicks to show Logout Confirmation dialog
-      document.addEventListener('click', function (e) {
-        const logoutBtn = e.target.closest('a[href*="/api/auth/logout"]');
-        if (logoutBtn && logoutBtn.id !== 'btnConfirmLogoutYes') {
-          e.preventDefault();
-          const modalEl = document.getElementById('logoutConfirmModal');
-          if (modalEl && typeof bootstrap !== 'undefined') {
-            const bsModal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-            bsModal.show();
-          } else {
-            window.location.href = logoutBtn.href;
-          }
-        }
-      });
     });
     updateThemeUI();
   </script>
